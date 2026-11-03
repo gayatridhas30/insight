@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "dashboard": "Dashboard",
+    "login": "Sign In",
+    "register": "Get Started",
+    "logout": "Sign Out",
+    "admin": "Admin Console"
+  },
+  "landing": {
+    "badge": "AI-Powered Universal Event Intelligence",
+    "headline": "Transform Participant Feedback into High-Impact Event Intelligence",
+    "subheadline": "Collect multilingual text and voice feedback seamlessly via instant QR codes. Empower colleges, clubs, enterprises, and conferences with deep AI sentiment analysis and actionable recommendations.",
+    "ctaStart": "Start Free Organizer Trial",
+    "ctaDemo": "Explore Live Demo",
+    "statsEvents": "Events Hosted",
+    "statsResponses": "Responses Analyzed",
+    "statsSatisfaction": "Avg. Satisfaction Score",
+    "statsLanguages": "Indian Languages Supported"
+  },
+  "feedback": {
+    "title": "Event Experience Feedback",
+    "anonymousNotice": "Your responses can be submitted anonymously. Help organizers build better future sessions!",
+    "languageSelect": "Select Language",
+    "recordVoice": "Record Voice Feedback",
+    "recording": "Recording...",
+    "stopRecord": "Stop Recording",
+    "transcribing": "Transcribing speech via Bhashini...",
+    "reviewTranscription": "Review & Edit Transcription:",
+    "submit": "Submit Feedback",
+    "submitting": "Submitting Response...",
+    "thankYou": "Thank You for Your Feedback!",
+    "confirmationMessage": "Your thoughts have been securely captured and forwarded to the event organizers.",
+    "anonymous": "Submit Anonymously",
+    "identified": "Submit with Name & Email",
+    "namePlaceholder": "Your Name (Optional)",
+    "emailPlaceholder": "Your Email (Optional)"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "activeEvents": "Active Events",
+    "totalResponses": "Total Responses",
+    "avgSentiment": "Average Sentiment",
+    "pendingTasks": "Pending Tasks",
+    "recentEvents": "Recent Events",
+    "createEvent": "Create New Event"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back"
+  }
+}
