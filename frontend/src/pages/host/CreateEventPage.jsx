@@ -43,7 +43,7 @@ export const CreateEventPage = () => {
         .filter(Boolean);
 
       const res = await eventService.createEvent({
-        organizationId: activeOrganization.id,
+        organizationId: activeOrganization.id || activeOrganization._id,
         title: formData.title,
         category: formData.category,
         description: formData.description,

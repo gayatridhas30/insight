@@ -72,7 +72,6 @@ export const EventComparisonPage = () => {
   const toggleEventSelection = (id) => {
     let updated;
     if (selectedEventIds.includes(id)) {
-      if (selectedEventIds.length <= 2) return; // keep at least 2
       updated = selectedEventIds.filter((item) => item !== id);
     } else {
       if (selectedEventIds.length >= 3) {
@@ -82,7 +81,11 @@ export const EventComparisonPage = () => {
       }
     }
     setSelectedEventIds(updated);
-    runComparison(updated);
+    if (updated.length >= 2) {
+      runComparison(updated);
+    } else {
+      setComparison(null);
+    }
   };
 
   if (loading) {
@@ -200,12 +203,12 @@ export const EventComparisonPage = () => {
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#17243A' }} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#0F172A' }} />
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="Rating" fill="#FF7058" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="Sentiment Index" fill="#A9B9A0" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="Rating" fill="#4F46E5" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="Sentiment Index" fill="#10B981" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

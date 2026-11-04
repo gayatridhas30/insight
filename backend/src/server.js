@@ -7,10 +7,10 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`====================================================`);
       console.log(` InsightLoop Backend API Server Running on port ${PORT}`);
-      console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(` Listening on: 0.0.0.0:${PORT} (Localhost & Wi-Fi LAN)`);
       console.log(` Health Check: http://localhost:${PORT}/api/health`);
       console.log(`====================================================`);
     });

@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import {
   Sparkles,
   Calendar,
   MapPin,
-  Clock,
   Send,
   CheckCircle2,
   AlertCircle,
-  HelpCircle,
   User,
   Mail,
   ShieldCheck,
   RefreshCw,
+  Wand2,
+  Check,
+  ArrowRight,
+  Home,
 } from 'lucide-react';
 import { eventService, feedbackService } from '../../api/services';
 import { StarRating } from '../../components/feedback/StarRating';
@@ -34,30 +36,35 @@ export const PublicFeedbackPage = () => {
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [participantName, setParticipantName] = useState('');
   const [participantEmail, setParticipantEmail] = useState('');
-  const [answers, setAnswers] = useState({}); // questionId -> { rating, selectedOptions, textResponse, audioUrl }
+  const [answers, setAnswers] = useState({}); // questionId -> { ratingValue, selectedOptions, textResponse, audioUrl }
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [sentimentLabel, setSentimentLabel] = useState('positive');
+  const [missingQuestionId, setMissingQuestionId] = useState(null);
+
+  const questionRefs = useRef({});
 
   useEffect(() => {
-    const fetchEventData = async () => {
-      try {
-        setLoading(true);
-        const res = await eventService.getEventByCode(code || 'HACK-2026');
-        if (res.data?.success) {
-          setEvent(res.data.event);
-          setForm(res.data.form);
-          setQuestions(res.data.questions || []);
-        }
-      } catch (err) {
-        setError(err.response?.data?.message || 'Event not found or feedback is not available.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEventData();
   }, [code]);
+
+  const fetchEventData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const eventCode = (code || 'HACK-2026').toUpperCase();
+      const res = await eventService.getEventByCode(eventCode);
+      if (res.data?.success) {
+        setEvent(res.data.event);
+        setForm(res.data.form);
+        setQuestions(res.data.questions || []);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || `Event code '${code}' could not be loaded. Please ensure the code is correct.`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAnswerChange = (questionId, field, value) => {
     setAnswers((prev) => ({
@@ -67,6 +74,10 @@ export const PublicFeedbackPage = () => {
         [field]: value,
       },
     }));
+    if (missingQuestionId === questionId) {
+      setMissingQuestionId(null);
+      setError('');
+    }
   };
 
   const handleMultiChoiceToggle = (questionId, optionId) => {
@@ -77,33 +88,79 @@ export const PublicFeedbackPage = () => {
     handleAnswerChange(questionId, 'selectedOptions', updated);
   };
 
+  // Helper: Count answered questions
+  const requiredQuestions = questions.filter((q) => q.isRequired);
+  const answeredRequiredCount = requiredQuestions.filter((q) => {
+    const a = answers[q._id];
+    if (q.type === 'star_rating' || q.type === 'nps') return a?.ratingValue !== undefined && a?.ratingValue !== null;
+    if (q.type === 'single_choice' || q.type === 'multi_choice' || q.type === 'yes_no') return a?.selectedOptions?.length > 0;
+    if (q.type === 'short_text' || q.type === 'long_text') return Boolean(a?.textResponse?.trim());
+    return false;
+  }).length;
+
+  // 1-Click Quick Fill Demo Button for Evaluators
+  const handleQuickFill = () => {
+    const sample = {};
+    questions.forEach((q) => {
+      if (q.type === 'star_rating') {
+        sample[q._id] = { ratingValue: 5 };
+      } else if (q.type === 'nps') {
+        sample[q._id] = { ratingValue: 9 };
+      } else if (q.type === 'single_choice') {
+        sample[q._id] = { selectedOptions: [q.options?.[0]?.id || 'opt_1'] };
+      } else if (q.type === 'multi_choice') {
+        sample[q._id] = { selectedOptions: [q.options?.[0]?.id || 'opt_1'] };
+      } else if (q.type === 'yes_no') {
+        sample[q._id] = { selectedOptions: ['yes'] };
+      } else if (q.type === 'short_text') {
+        sample[q._id] = { textResponse: 'Great session!' };
+      } else if (q.type === 'long_text') {
+        sample[q._id] = {
+          textResponse:
+            selectedLanguage === 'mr'
+              ? 'सत्र अतिशय माहितीपूर्ण आणि उपयुक्त होते. प्रात्यक्षिके उत्तम झाली.'
+              : selectedLanguage === 'hi'
+              ? 'सत्र बहुत अच्छा और व्यावहारिक था। आयोजन सराहनीय था।'
+              : 'The session was well-structured, insightful, and practical hands-on examples were very clear.',
+        };
+      }
+    });
+    setAnswers(sample);
+    setError('');
+    setMissingQuestionId(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError('');
+    setMissingQuestionId(null);
 
     // Validate required questions
     for (const q of questions) {
       if (q.isRequired) {
         const ans = answers[q._id];
+        let isAnswered = false;
+
         if (q.type === 'star_rating' || q.type === 'nps') {
-          if (!ans?.ratingValue && ans?.ratingValue !== 0) {
-            setError(`Please answer the required question: "${getLocalized(q.prompt)}"`);
-            setSubmitting(false);
-            return;
-          }
-        } else if (q.type === 'single_choice' || q.type === 'multi_choice') {
-          if (!ans?.selectedOptions || ans.selectedOptions.length === 0) {
-            setError(`Please select an option for: "${getLocalized(q.prompt)}"`);
-            setSubmitting(false);
-            return;
-          }
+          isAnswered = ans?.ratingValue !== undefined && ans?.ratingValue !== null;
+        } else if (q.type === 'single_choice' || q.type === 'multi_choice' || q.type === 'yes_no') {
+          isAnswered = ans?.selectedOptions && ans.selectedOptions.length > 0;
         } else if (q.type === 'long_text' || q.type === 'short_text') {
-          if (!ans?.textResponse || ans.textResponse.trim() === '') {
-            setError(`Please provide feedback for: "${getLocalized(q.prompt)}"`);
-            setSubmitting(false);
-            return;
+          isAnswered = Boolean(ans?.textResponse && ans.textResponse.trim().length > 0);
+        }
+
+        if (!isAnswered) {
+          const promptText = getLocalized(q.prompt);
+          setError(`Please complete required question: "${promptText}"`);
+          setMissingQuestionId(q._id);
+          setSubmitting(false);
+
+          // Scroll to the missing question
+          if (questionRefs.current[q._id]) {
+            questionRefs.current[q._id].scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
+          return;
         }
       }
     }
@@ -114,6 +171,7 @@ export const PublicFeedbackPage = () => {
         return {
           questionId: q._id,
           questionType: q.type,
+          questionPrompt: getLocalized(q.prompt),
           ratingValue: userAns.ratingValue,
           selectedOptions: userAns.selectedOptions || [],
           textResponse: userAns.textResponse || '',
@@ -157,9 +215,9 @@ export const PublicFeedbackPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-ivory flex items-center justify-center p-4">
-        <div className="flex items-center gap-3 text-sm font-semibold text-navy">
+        <div className="flex items-center gap-3 text-sm font-semibold text-navy bg-white p-6 rounded-2xl shadow-card">
           <RefreshCw size={20} className="animate-spin text-coral" />
-          <span>Loading event feedback form...</span>
+          <span>Loading feedback form for event '{code || 'HACK-2026'}'...</span>
         </div>
       </div>
     );
@@ -172,14 +230,22 @@ export const PublicFeedbackPage = () => {
           <div className="w-12 h-12 rounded-2xl bg-coral/10 text-coral flex items-center justify-center mx-auto">
             <AlertCircle size={24} />
           </div>
-          <h2 className="text-xl font-heading font-extrabold text-navy">Form Unavailable</h2>
+          <h2 className="text-xl font-heading font-extrabold text-navy">Event Not Found</h2>
           <p className="text-xs text-charcoal/70">{error}</p>
-          <Link
-            to="/"
-            className="inline-block px-5 py-2.5 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navy-700 transition-colors"
-          >
-            Back to Homepage
-          </Link>
+          <div className="pt-2 flex flex-col gap-2">
+            <Link
+              to="/feedback/HACK-2026"
+              className="w-full py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold transition-all"
+            >
+              Open Default Demo Event (HACK-2026)
+            </Link>
+            <Link
+              to="/"
+              className="w-full py-2.5 rounded-xl bg-ivory text-navy text-xs font-bold hover:bg-charcoal/10 transition-colors"
+            >
+              Back to Homepage
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -224,6 +290,7 @@ export const PublicFeedbackPage = () => {
 
           <div className="pt-2 flex flex-col sm:flex-row gap-3">
             <button
+              type="button"
               onClick={() => {
                 setSubmitted(false);
                 setAnswers({});
@@ -234,9 +301,10 @@ export const PublicFeedbackPage = () => {
             </button>
             <Link
               to="/"
-              className="flex-1 py-3 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navy-700 transition-colors flex items-center justify-center"
+              className="flex-1 py-3 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navy-700 transition-colors flex items-center justify-center gap-1.5"
             >
-              Back to Home
+              <Home size={14} />
+              <span>Back to Home</span>
             </Link>
           </div>
         </div>
@@ -257,7 +325,7 @@ export const PublicFeedbackPage = () => {
           </span>
         </Link>
 
-        {/* Language Switcher */}
+        {/* Quick Language Switcher */}
         <LanguageSelector
           currentLanguage={selectedLanguage}
           onSelectLanguage={setSelectedLanguage}
@@ -266,14 +334,14 @@ export const PublicFeedbackPage = () => {
       </header>
 
       {/* Main Feedback Form Body */}
-      <main className="max-w-2xl w-full mx-auto px-4 py-8 sm:py-12 space-y-6">
+      <main className="max-w-2xl w-full mx-auto px-4 py-6 sm:py-10 space-y-6">
         {/* Event Header Banner */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-charcoal/10 shadow-card space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-coral/10 text-coral">
               {event?.category || 'Event'}
             </span>
-            <span className="text-xs font-mono font-bold text-charcoal/60 bg-ivory px-2.5 py-1 rounded-lg border border-charcoal/10">
+            <span className="text-xs font-mono font-bold text-navy bg-ivory px-2.5 py-1 rounded-lg border border-charcoal/10">
               Code: {event?.code}
             </span>
           </div>
@@ -287,19 +355,24 @@ export const PublicFeedbackPage = () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-charcoal/60 border-t border-charcoal/10">
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-charcoal/10 text-xs text-charcoal/60">
             {event?.location && (
               <div className="flex items-center gap-1.5">
-                <MapPin size={14} className="text-coral" />
+                <MapPin size={14} className="text-coral shrink-0" />
                 <span>{event.location}</span>
               </div>
             )}
-            {event?.organization?.name && (
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck size={14} className="text-sage-dark" />
-                <span>{event.organization.name}</span>
-              </div>
-            )}
+
+            {/* Quick Fill Button for testing/evaluation ease */}
+            <button
+              type="button"
+              onClick={handleQuickFill}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-ivory hover:bg-coral/10 text-charcoal/80 hover:text-coral border border-charcoal/15 text-xs font-bold transition-all ml-auto"
+              title="Pre-fills sample ratings and comments for instant testing"
+            >
+              <Wand2 size={13} className="text-coral" />
+              <span>1-Click Auto Fill (Demo)</span>
+            </button>
           </div>
         </div>
 
@@ -310,7 +383,7 @@ export const PublicFeedbackPage = () => {
               <span className="text-xs font-bold text-navy block">Submission Privacy</span>
               <span className="text-[11px] text-charcoal/60">
                 {isAnonymous
-                  ? 'Your identity is fully concealed. No name or email is recorded.'
+                  ? 'Your identity is fully anonymous. No personal info will be recorded.'
                   : 'Your contact details will be shared with the event organizer.'}
               </span>
             </div>
@@ -319,7 +392,7 @@ export const PublicFeedbackPage = () => {
               <button
                 type="button"
                 onClick={() => setIsAnonymous(true)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   isAnonymous
                     ? 'bg-navy text-white shadow-sm'
                     : 'bg-ivory text-charcoal/70 hover:bg-charcoal/10'
@@ -330,7 +403,7 @@ export const PublicFeedbackPage = () => {
               <button
                 type="button"
                 onClick={() => setIsAnonymous(false)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   !isAnonymous
                     ? 'bg-coral text-white shadow-sm'
                     : 'bg-ivory text-charcoal/70 hover:bg-charcoal/10'
@@ -355,7 +428,7 @@ export const PublicFeedbackPage = () => {
                   type="text"
                   value={participantName}
                   onChange={(e) => setParticipantName(e.target.value)}
-                  placeholder="Aarav Mehta"
+                  placeholder="e.g. Aarav Mehta"
                   className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
                 />
               </div>
@@ -371,7 +444,7 @@ export const PublicFeedbackPage = () => {
                   type="email"
                   value={participantEmail}
                   onChange={(e) => setParticipantEmail(e.target.value)}
-                  placeholder="aarav@college.edu"
+                  placeholder="e.g. aarav@college.edu"
                   className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
                 />
               </div>
@@ -379,10 +452,10 @@ export const PublicFeedbackPage = () => {
           </div>
         )}
 
-        {/* Error notification banner */}
+        {/* Error notification banner (Top) */}
         {error && (
-          <div className="p-4 rounded-2xl bg-coral/10 border border-coral/30 text-coral text-xs font-semibold flex items-center gap-2">
-            <AlertCircle size={16} className="shrink-0" />
+          <div className="p-4 rounded-2xl bg-coral/10 border border-coral/30 text-coral text-xs font-bold flex items-center gap-2 animate-shake">
+            <AlertCircle size={18} className="shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -393,24 +466,34 @@ export const PublicFeedbackPage = () => {
             const promptText = getLocalized(q.prompt);
             const descText = getLocalized(q.description);
             const ans = answers[q._id] || {};
+            const isMissing = missingQuestionId === q._id;
 
             return (
               <div
                 key={q._id}
-                className="bg-white rounded-3xl p-6 sm:p-7 border border-charcoal/10 shadow-subtle space-y-4 hover:border-charcoal/20 transition-all"
+                ref={(el) => (questionRefs.current[q._id] = el)}
+                className={`bg-white rounded-3xl p-6 sm:p-7 border shadow-subtle space-y-4 transition-all ${
+                  isMissing
+                    ? 'border-coral ring-2 ring-coral/20 bg-coral/5'
+                    : 'border-charcoal/10 hover:border-charcoal/20'
+                }`}
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-coral font-heading">
+                    <span className="text-xs font-bold text-coral font-mono">
                       Q{idx + 1}
                     </span>
-                    {q.isRequired && (
-                      <span className="text-[10px] uppercase font-bold text-coral/80 bg-coral/10 px-1.5 py-0.2 rounded">
+                    {q.isRequired ? (
+                      <span className="text-[10px] uppercase font-bold text-coral bg-coral/10 px-2 py-0.5 rounded-full">
                         Required
+                      </span>
+                    ) : (
+                      <span className="text-[10px] uppercase font-bold text-charcoal/50 bg-ivory px-2 py-0.5 rounded-full">
+                        Optional
                       </span>
                     )}
                   </div>
-                  <h3 className="text-base sm:text-lg font-heading font-bold text-navy mt-1">
+                  <h3 className="text-base sm:text-lg font-heading font-bold text-navy mt-1.5">
                     {promptText}
                   </h3>
                   {descText && (
@@ -484,7 +567,7 @@ export const PublicFeedbackPage = () => {
                               isSelected ? 'border-coral bg-coral text-white' : 'border-charcoal/30'
                             }`}
                           >
-                            {isSelected && <CheckCircle2 size={12} />}
+                            {isSelected && <Check size={12} />}
                           </span>
                         </button>
                       );
@@ -520,13 +603,28 @@ export const PublicFeedbackPage = () => {
                 )}
 
                 {q.type === 'short_text' && (
-                  <input
-                    type="text"
-                    value={ans.textResponse || ''}
-                    onChange={(e) => handleAnswerChange(q._id, 'textResponse', e.target.value)}
-                    placeholder="Type your response here..."
-                    className="w-full p-3 rounded-2xl border border-charcoal/15 bg-ivory-50 text-sm focus:outline-none focus:border-coral"
-                  />
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={ans.textResponse || ''}
+                      onChange={(e) => handleAnswerChange(q._id, 'textResponse', e.target.value)}
+                      placeholder="Type your response here..."
+                      className="w-full p-3 rounded-2xl border border-charcoal/15 bg-white text-sm focus:outline-none focus:border-coral"
+                    />
+
+                    {form?.allowVoiceFeedback && (
+                      <VoiceRecorder
+                        language={selectedLanguage}
+                        currentText={ans.textResponse || ''}
+                        onTranscriptionChange={(text, audioUrl) => {
+                          handleAnswerChange(q._id, 'textResponse', text);
+                          if (audioUrl) {
+                            handleAnswerChange(q._id, 'audioUrl', audioUrl);
+                          }
+                        }}
+                      />
+                    )}
+                  </div>
                 )}
 
                 {q.type === 'long_text' && (
@@ -535,7 +633,7 @@ export const PublicFeedbackPage = () => {
                       rows={3}
                       value={ans.textResponse || ''}
                       onChange={(e) => handleAnswerChange(q._id, 'textResponse', e.target.value)}
-                      placeholder="Type your feedback here, or use the voice recording button below..."
+                      placeholder="Type your thoughts, praise, or suggestions here..."
                       className="w-full p-3.5 rounded-2xl border border-charcoal/15 bg-ivory-50 text-sm focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral/20 resize-none"
                     />
 
@@ -557,30 +655,52 @@ export const PublicFeedbackPage = () => {
             );
           })}
 
-          {/* Submit Action */}
-          <div className="pt-2">
+          {/* Error Banner right above submit if present */}
+          {error && (
+            <div className="p-4 rounded-2xl bg-coral/10 border border-coral/30 text-coral text-xs font-bold flex items-center gap-2">
+              <AlertCircle size={18} className="shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Submit Action Block */}
+          <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-card space-y-4">
+            <div className="flex items-center justify-between text-xs font-bold text-navy">
+              <span>Required Questions Completed:</span>
+              <span className={answeredRequiredCount >= requiredQuestions.length ? 'text-sage-dark' : 'text-coral'}>
+                {answeredRequiredCount} of {requiredQuestions.length}
+              </span>
+            </div>
+
             <button
               type="submit"
               disabled={submitting}
               className="w-full py-4 rounded-2xl bg-coral hover:bg-coral-hover text-white text-base font-bold shadow-coral-glow hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
             >
               {submitting ? (
-                <span>Submitting Response...</span>
+                <>
+                  <RefreshCw size={18} className="animate-spin" />
+                  <span>Submitting Response...</span>
+                </>
               ) : (
                 <>
                   <Send size={18} />
-                  <span>Submit Feedback</span>
+                  <span>Submit Event Feedback</span>
                 </>
               )}
             </button>
-            <p className="text-[11px] text-charcoal/50 text-center mt-2.5">
+
+            <p className="text-[11px] text-charcoal/50 text-center">
               Responses are securely captured and analyzed using the InsightLoop intelligence engine.
             </p>
           </div>
         </form>
       </main>
 
-      <Footer />
+      {/* Simplified Mobile-Optimized Footer */}
+      <footer className="py-6 border-t border-charcoal/10 bg-white text-center text-xs text-charcoal/50">
+        InsightLoop Universal Event Feedback Platform
+      </footer>
     </div>
   );
 };

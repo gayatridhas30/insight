@@ -5,14 +5,15 @@ const answerItemSchema = new mongoose.Schema(
     questionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Question',
-      required: true,
+      required: false,
     },
     questionType: {
       type: String,
-      required: true,
+      default: 'short_text',
     },
     questionPrompt: {
       type: String,
+      default: 'Feedback Question',
     },
     ratingValue: {
       type: Number,

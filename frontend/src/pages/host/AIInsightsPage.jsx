@@ -29,6 +29,8 @@ import { aiIntelligenceService, eventService, improvementTaskService } from '../
 
 export const AIInsightsPage = () => {
   const { id } = useParams();
+  const [eventsList, setEventsList] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState(id || '');
   const [event, setEvent] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
@@ -37,15 +39,39 @@ export const AIInsightsPage = () => {
   const [convertingId, setConvertingId] = useState(null);
 
   useEffect(() => {
-    fetchIntelligence();
+    fetchEventsAndInit();
   }, [id]);
 
-  const fetchIntelligence = async () => {
+  const fetchEventsAndInit = async () => {
     try {
       setLoading(true);
+      const evtsRes = await eventService.getEvents({ limit: 50 });
+      let currentId = id;
+
+      if (evtsRes.data?.success) {
+        const evts = evtsRes.data.events || [];
+        setEventsList(evts);
+        if (!currentId && evts.length > 0) {
+          currentId = evts[0]._id || evts[0].id;
+        }
+      }
+
+      setSelectedEventId(currentId || '');
+      if (currentId) {
+        await loadEventIntelligence(currentId);
+      }
+    } catch (err) {
+      console.warn('Init error:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadEventIntelligence = async (eventId) => {
+    try {
       const [evtRes, aiRes] = await Promise.all([
-        eventService.getEventById(id),
-        aiIntelligenceService.getAnalysis(id),
+        eventService.getEventById(eventId),
+        aiIntelligenceService.getAnalysis(eventId),
       ]);
 
       if (evtRes.data?.success) setEvent(evtRes.data.event);
@@ -55,15 +81,22 @@ export const AIInsightsPage = () => {
       }
     } catch (err) {
       console.warn('AI intelligence fetch error:', err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
+  const handleSelectEvent = async (e) => {
+    const newId = e.target.value;
+    setSelectedEventId(newId);
+    setLoading(true);
+    await loadEventIntelligence(newId);
+    setLoading(false);
+  };
+
   const handleRunAnalysis = async () => {
+    if (!selectedEventId) return;
     try {
       setAnalyzing(true);
-      const res = await aiIntelligenceService.runAnalysis(id);
+      const res = await aiIntelligenceService.runAnalysis(selectedEventId);
       if (res.data?.success) {
         setAnalysis(res.data.analysis);
         setRecommendations(res.data.recommendations || []);
@@ -78,9 +111,10 @@ export const AIInsightsPage = () => {
   const handleConvertToTask = async (rec) => {
     try {
       setConvertingId(rec._id);
+      const orgId = typeof event?.organizationId === 'object' ? (event.organizationId._id || event.organizationId.id) : event?.organizationId;
       await improvementTaskService.createTask({
-        organizationId: event.organizationId,
-        relatedEventId: event._id,
+        organizationId: orgId,
+        relatedEventId: event?._id || event?.id || selectedEventId,
         recommendationId: rec._id,
         issue: rec.title,
         recommendedAction: rec.suggestedAction,
@@ -89,7 +123,9 @@ export const AIInsightsPage = () => {
         notes: `Impact: ${rec.impact}`,
       });
       // Refresh recommendations
-      fetchIntelligence();
+      if (selectedEventId) {
+        loadEventIntelligence(selectedEventId);
+      }
     } catch (err) {
       alert('Failed to convert to task: ' + err.message);
     } finally {
@@ -107,9 +143,9 @@ export const AIInsightsPage = () => {
   }
 
   const sentimentData = [
-    { name: 'Positive', count: analysis?.sentimentSummary?.positive || 0, color: '#A9B9A0' },
-    { name: 'Neutral', count: analysis?.sentimentSummary?.neutral || 0, color: '#DCD7F5' },
-    { name: 'Negative', count: analysis?.sentimentSummary?.negative || 0, color: '#FF7058' },
+    { name: 'Positive', count: analysis?.sentimentSummary?.positive || 0, color: '#10B981' },
+    { name: 'Neutral', count: analysis?.sentimentSummary?.neutral || 0, color: '#6366F1' },
+    { name: 'Negative', count: analysis?.sentimentSummary?.negative || 0, color: '#F43F5E' },
   ];
 
   return (
@@ -117,13 +153,23 @@ export const AIInsightsPage = () => {
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <Link
-            to={`/events/${id}`}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal/60 hover:text-navy transition-colors mb-1"
-          >
-            <ArrowLeft size={14} />
-            <span>Back to Event Details</span>
-          </Link>
+          {id ? (
+            <Link
+              to={`/events/${id}`}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal/60 hover:text-navy transition-colors mb-1"
+            >
+              <ArrowLeft size={14} />
+              <span>Back to Event Details</span>
+            </Link>
+          ) : (
+            <Link
+              to="/events"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal/60 hover:text-navy transition-colors mb-1"
+            >
+              <ArrowLeft size={14} />
+              <span>All Events Directory</span>
+            </Link>
+          )}
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-heading font-extrabold text-navy">
               AI Feedback Intelligence
@@ -133,19 +179,56 @@ export const AIInsightsPage = () => {
             </span>
           </div>
           <p className="text-xs text-charcoal/60 mt-0.5">
-            {event?.title} ({analysis?.totalResponsesAnalyzed || 0} responses analyzed)
+            {event?.title || 'Selected Event'} ({analysis?.totalResponsesAnalyzed || 0} responses analyzed)
           </p>
         </div>
 
-        <button
-          onClick={handleRunAnalysis}
-          disabled={analyzing}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95 disabled:opacity-50"
-        >
-          <RefreshCw size={14} className={analyzing ? 'animate-spin' : ''} />
-          <span>{analyzing ? 'Processing NLP Pipeline...' : 'Re-run AI Analysis'}</span>
-        </button>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          {eventsList.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-charcoal/60">Select Event:</label>
+              <select
+                value={selectedEventId}
+                onChange={handleSelectEvent}
+                className="bg-white border border-charcoal/15 rounded-xl px-3 py-2 text-xs font-semibold text-navy shadow-subtle focus:outline-none focus:border-coral"
+              >
+                {eventsList.map((e) => (
+                  <option key={e._id || e.id} value={e._id || e.id}>
+                    {e.title} ({e.code})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <button
+            onClick={handleRunAnalysis}
+            disabled={analyzing || !selectedEventId}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95 disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={analyzing ? 'animate-spin' : ''} />
+            <span>{analyzing ? 'Processing NLP Pipeline...' : (analysis ? 'Re-run AI Analysis' : 'Run AI Analysis Now')}</span>
+          </button>
+        </div>
       </div>
+
+      {!analysis && (
+        <div className="bg-indigo-50 border border-indigo-100 rounded-3xl p-6 text-center space-y-3">
+          <Brain size={36} className="text-indigo-600 mx-auto" />
+          <h3 className="text-base font-bold text-slate-900">AI Intelligence Pipeline Ready</h3>
+          <p className="text-xs text-slate-600 max-w-md mx-auto">
+            Run our multi-model NLP pipeline to synthesize attendee feedback, cluster recurring complaints, identify positive highlights, and generate priority improvements.
+          </p>
+          <button
+            onClick={handleRunAnalysis}
+            disabled={analyzing}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md transition-all"
+          >
+            <Sparkles size={14} />
+            <span>{analyzing ? 'Analyzing Responses...' : 'Generate AI Insights Now'}</span>
+          </button>
+        </div>
+      )}
 
       {/* Overview Metric Row */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">

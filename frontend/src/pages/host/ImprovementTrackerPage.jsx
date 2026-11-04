@@ -87,7 +87,7 @@ export const ImprovementTrackerPage = () => {
 
     try {
       await improvementTaskService.createTask({
-        organizationId: activeOrganization.id,
+        organizationId: activeOrganization?.id || activeOrganization?._id,
         ...taskForm,
       });
       setIsModalOpen(false);

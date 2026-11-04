@@ -1,4 +1,4 @@
-import { ImprovementTask, Recommendation } from '../models/index.js';
+import { ImprovementTask, Recommendation, Event } from '../models/index.js';
 import { logAudit } from '../middleware/audit.js';
 
 export const getTasks = async (req, res, next) => {
@@ -6,7 +6,8 @@ export const getTasks = async (req, res, next) => {
     const { organizationId, relatedEventId, status, priority } = req.query;
 
     const query = {};
-    if (organizationId) query.organizationId = organizationId;
+    const orgId = organizationId || req.headers['x-organization-id'] || req.organizationId;
+    if (orgId) query.organizationId = orgId;
     if (relatedEventId) query.relatedEventId = relatedEventId;
     if (status) query.status = status;
     if (priority) query.priority = priority;
@@ -38,15 +39,21 @@ export const createTask = async (req, res, next) => {
       notes,
     } = req.body;
 
-    if (!organizationId || !relatedEventId || !issue || !recommendedAction) {
+    let targetOrgId = organizationId || req.headers['x-organization-id'] || req.organizationId;
+    if (!targetOrgId && relatedEventId) {
+      const evt = await Event.findById(relatedEventId);
+      if (evt) targetOrgId = evt.organizationId;
+    }
+
+    if (!targetOrgId || !relatedEventId || !issue || !recommendedAction) {
       return res.status(400).json({
         success: false,
-        message: 'organizationId, relatedEventId, issue, and recommendedAction are required.',
+        message: 'relatedEventId, issue, and recommendedAction are required.',
       });
     }
 
     const task = await ImprovementTask.create({
-      organizationId,
+      organizationId: targetOrgId,
       relatedEventId,
       recommendationId,
       issue,

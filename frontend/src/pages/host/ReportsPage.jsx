@@ -48,11 +48,13 @@ export const ReportsPage = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `InsightLoop-Report-${selectedEventId}.pdf`;
+      a.download = `InsightLoop-Report-${currentEvent?.code || selectedEventId}.pdf`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert('Failed to generate PDF report');
+      alert('Failed to generate PDF report: ' + (err.response?.data?.message || err.message));
     } finally {
       setDownloadingPdf(false);
     }
@@ -69,11 +71,13 @@ export const ReportsPage = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `InsightLoop-Data-${selectedEventId}.xlsx`;
+      a.download = `InsightLoop-Data-${currentEvent?.code || selectedEventId}.xlsx`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert('Failed to generate Excel report');
+      alert('Failed to generate Excel report: ' + (err.response?.data?.message || err.message));
     } finally {
       setDownloadingExcel(false);
     }

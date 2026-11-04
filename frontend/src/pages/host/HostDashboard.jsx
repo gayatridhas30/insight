@@ -63,9 +63,9 @@ export const HostDashboard = () => {
   const pendingTasksCount = tasks.length;
 
   const sentimentData = [
-    { name: 'Positive', value: 65, color: '#A9B9A0' }, // Sage
-    { name: 'Neutral', value: 25, color: '#DCD7F5' },  // Lavender
-    { name: 'Negative', value: 10, color: '#FF7058' }, // Coral
+    { name: 'Positive', value: 65, color: '#10B981' }, // Vibrant Emerald
+    { name: 'Neutral', value: 25, color: '#6366F1' },  // Tech Indigo
+    { name: 'Negative', value: 10, color: '#F43F5E' }, // Rose Red
   ];
 
   if (loading) {

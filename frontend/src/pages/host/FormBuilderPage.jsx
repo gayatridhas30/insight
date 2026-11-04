@@ -132,14 +132,17 @@ export const FormBuilderPage = () => {
     setSaving(true);
     setSaveSuccess(false);
     try {
-      await formService.saveQuestions(id, questions);
+      const res = await formService.saveQuestions(id, questions);
+      if (res.data?.questions) {
+        setQuestions(res.data.questions);
+      }
       if (form) {
         await formService.updateSettings(id, form);
       }
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      alert('Failed to save questions');
+      alert('Failed to save questions: ' + (err.response?.data?.message || err.message));
     } finally {
       setSaving(false);
     }
@@ -150,11 +153,17 @@ export const FormBuilderPage = () => {
     try {
       const res = await formService.generateAIQuestions(id);
       if (res.data?.suggestedQuestions) {
-        setQuestions(res.data.suggestedQuestions);
+        const saveRes = await formService.saveQuestions(id, res.data.suggestedQuestions);
+        if (saveRes.data?.questions) {
+          setQuestions(saveRes.data.questions);
+        } else {
+          setQuestions(res.data.suggestedQuestions);
+        }
         setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 4000);
       }
     } catch (err) {
-      alert('AI Form generation notice: ' + err.message);
+      alert('AI Form generation notice: ' + (err.response?.data?.message || err.message));
     } finally {
       setAiGenerating(false);
     }

@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 import { FeedbackResponse, Event, FeedbackForm, Question } from '../models/index.js';
 import { bhashiniService } from '../services/bhashiniService.js';
 import { aiService } from '../services/aiService.js';
@@ -21,27 +22,28 @@ export const submitFeedback = async (req, res, next) => {
 
     const event = await Event.findOne({ code: eventCode.toUpperCase() });
     if (!event) {
-      return res.status(404).json({ success: false, message: 'Event not found with that code.' });
+      return res.status(404).json({ success: false, message: `Event '${eventCode}' was not found. Please verify the code.` });
     }
 
     if (!event.isFeedbackOpen) {
-      return res.status(403).json({ success: false, message: 'Feedback collection for this event has been closed.' });
+      return res.status(403).json({ success: false, message: 'Feedback collection for this event has been closed by the host.' });
     }
 
     if (event.feedbackDeadline && new Date() > new Date(event.feedbackDeadline)) {
-      return res.status(403).json({ success: false, message: 'The deadline for submitting feedback has passed.' });
+      return res.status(403).json({ success: false, message: 'The deadline for submitting feedback for this event has passed.' });
     }
 
     const form = await FeedbackForm.findOne({ eventId: event._id });
     if (!form) {
-      return res.status(404).json({ success: false, message: 'Feedback form not found.' });
+      return res.status(404).json({ success: false, message: 'Feedback form configuration not found for this event.' });
     }
 
-    // Hash client IP for duplicate check if duplicate submissions disabled
+    // Hash client IP for duplicate check ONLY IF allowDuplicateSubmissions is explicitly false in production
     const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const ipHash = crypto.createHash('sha256').update(rawIp + event._id.toString()).digest('hex');
 
-    if (!form.allowDuplicateSubmissions) {
+    // In development mode or unless strictly restricted by host, allow testing multiple responses
+    if (form.allowDuplicateSubmissions === false && process.env.NODE_ENV === 'production' && req.query.allowDuplicate !== 'true') {
       const existingResponse = await FeedbackResponse.findOne({ eventId: event._id, ipHash });
       if (existingResponse) {
         return res.status(429).json({
@@ -57,31 +59,45 @@ export const submitFeedback = async (req, res, next) => {
     let ratingCount = 0;
 
     for (const ans of answers) {
-      const question = await Question.findById(ans.questionId);
+      let validQuestionId = null;
+      let questionDoc = null;
+
+      if (ans.questionId && mongoose.Types.ObjectId.isValid(ans.questionId)) {
+        validQuestionId = ans.questionId;
+        questionDoc = await Question.findById(ans.questionId);
+      } else {
+        // Fallback for new unsaved or synthetic questions
+        validQuestionId = new mongoose.Types.ObjectId();
+      }
+
       const originalText = (ans.textResponse || ans.audioTranscription || '').trim();
       let translatedText = originalText;
 
       // Translate if submission language is not English
       if (originalText && submissionLanguage !== 'en') {
-        const transResult = await bhashiniService.translateText({
-          sourceText: originalText,
-          sourceLanguage: submissionLanguage,
-          targetLanguage: 'en',
-        });
-        translatedText = transResult.translatedText;
+        try {
+          const transResult = await bhashiniService.translateText({
+            sourceText: originalText,
+            sourceLanguage: submissionLanguage,
+            targetLanguage: 'en',
+          });
+          translatedText = transResult.translatedText;
+        } catch (tErr) {
+          console.warn('[Feedback] Translation notice:', tErr.message);
+        }
       }
 
-      if (ans.ratingValue !== undefined && ans.ratingValue !== null) {
-        ratingSum += ans.ratingValue;
+      if (ans.ratingValue !== undefined && ans.ratingValue !== null && !isNaN(ans.ratingValue)) {
+        ratingSum += Number(ans.ratingValue);
         ratingCount++;
       }
 
       processedAnswers.push({
-        questionId: ans.questionId,
-        questionType: question?.type || ans.questionType || 'short_text',
-        questionPrompt: question?.prompt?.en || 'Question',
-        ratingValue: ans.ratingValue,
-        selectedOptions: ans.selectedOptions || [],
+        questionId: validQuestionId,
+        questionType: questionDoc?.type || ans.questionType || 'short_text',
+        questionPrompt: questionDoc?.prompt?.en || ans.questionPrompt || 'Feedback Question',
+        ratingValue: ans.ratingValue !== undefined ? Number(ans.ratingValue) : undefined,
+        selectedOptions: Array.isArray(ans.selectedOptions) ? ans.selectedOptions : [],
         textResponseOriginal: originalText,
         textResponseTranslated: translatedText,
         audioUrl: ans.audioUrl || '',
@@ -104,7 +120,7 @@ export const submitFeedback = async (req, res, next) => {
     const savedResponse = await FeedbackResponse.create({
       eventId: event._id,
       formId: form._id,
-      sessionId: sessionId || null,
+      sessionId: sessionId && mongoose.Types.ObjectId.isValid(sessionId) ? sessionId : null,
       isAnonymous: Boolean(isAnonymous),
       participantName: isAnonymous ? 'Anonymous Participant' : participantName || 'Attendee',
       participantEmail: isAnonymous ? '' : participantEmail || '',
@@ -116,7 +132,7 @@ export const submitFeedback = async (req, res, next) => {
       processedByAI: false,
     });
 
-    // Fire asynchronous background AI update without blocking the user
+    // Fire asynchronous background AI update
     setImmediate(async () => {
       try {
         const allResponses = await FeedbackResponse.find({ eventId: event._id }).lean();
@@ -150,6 +166,9 @@ export const submitFeedback = async (req, res, next) => {
       message: 'Feedback submitted successfully! Thank you for sharing your experience.',
       responseId: savedResponse._id,
       sentimentLabel,
+      sentimentScore,
+      participantName: savedResponse.participantName,
+      isAnonymous: savedResponse.isAnonymous,
     });
   } catch (err) {
     next(err);

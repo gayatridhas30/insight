@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Sparkles,
@@ -15,12 +15,22 @@ import {
   Layers,
   FileCheck,
   TrendingUp,
+  Search,
 } from 'lucide-react';
 import { Navbar } from '../../components/layout/Navbar';
 import { Footer } from '../../components/layout/Footer';
 
 export const LandingPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [eventCodeInput, setEventCodeInput] = useState('');
+
+  const handleCodeSubmit = (e) => {
+    e.preventDefault();
+    if (eventCodeInput.trim()) {
+      navigate(`/feedback/${eventCodeInput.trim().toUpperCase()}`);
+    }
+  };
 
   const workflowSteps = [
     {
@@ -99,7 +109,7 @@ export const LandingPage = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
+      <section className="relative overflow-hidden pt-12 pb-16 lg:pt-16 lg:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             {/* Pill Badge */}
@@ -118,29 +128,84 @@ export const LandingPage = () => {
               {t('landing.subheadline')}
             </p>
 
-            {/* Primary Call to Actions */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            {/* QUICK ATTENDEE ACCESS BOX (Solve "How to submit response" immediately) */}
+            <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-card max-w-xl mx-auto space-y-4">
+              <div className="flex items-center justify-between text-xs font-bold text-navy">
+                <span className="flex items-center gap-1.5 text-coral">
+                  <QrCode size={16} />
+                  <span>Attending an Event? Submit Feedback Now</span>
+                </span>
+                <span className="text-[10px] text-charcoal/50 uppercase">No Login Required</span>
+              </div>
+
+              <form onSubmit={handleCodeSubmit} className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
+                  <input
+                    type="text"
+                    value={eventCodeInput}
+                    onChange={(e) => setEventCodeInput(e.target.value)}
+                    placeholder="Enter 4-letter Code e.g. HACK-2026"
+                    className="w-full pl-10 pr-3 py-3 text-xs sm:text-sm font-mono font-bold uppercase rounded-xl border border-charcoal/15 bg-ivory focus:outline-none focus:border-coral"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="px-5 py-3 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs sm:text-sm font-bold shadow-coral-glow transition-all active:scale-95 shrink-0"
+                >
+                  Open Form
+                </button>
+              </form>
+
+              {/* Quick sample pills */}
+              <div className="flex items-center justify-center gap-2 pt-1 text-xs">
+                <span className="text-charcoal/50 text-[11px]">Quick Demo Events:</span>
+                <button
+                  type="button"
+                  onClick={() => navigate('/feedback/HACK-2026')}
+                  className="px-2.5 py-1 rounded-lg bg-ivory hover:bg-coral/10 hover:text-coral border border-charcoal/10 font-mono text-[11px] font-bold text-navy transition-colors"
+                >
+                  HACK-2026
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/feedback/WORK-2026')}
+                  className="px-2.5 py-1 rounded-lg bg-ivory hover:bg-coral/10 hover:text-coral border border-charcoal/10 font-mono text-[11px] font-bold text-navy transition-colors"
+                >
+                  WORK-2026
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/feedback/LEAD-2026')}
+                  className="px-2.5 py-1 rounded-lg bg-ivory hover:bg-coral/10 hover:text-coral border border-charcoal/10 font-mono text-[11px] font-bold text-navy transition-colors"
+                >
+                  LEAD-2026
+                </button>
+              </div>
+            </div>
+
+            {/* Organizer Calls to Action */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               <Link
                 to="/register"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-coral hover:bg-coral-hover text-white text-base font-bold shadow-coral-glow hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-navy hover:bg-navy-700 text-white text-sm font-bold shadow-card transition-all flex items-center justify-center gap-2"
               >
                 <span>{t('landing.ctaStart')}</span>
-                <ArrowRight size={18} />
+                <ArrowRight size={16} />
               </Link>
               <Link
-                to="/feedback/HACK-2026"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white border border-charcoal/15 text-navy hover:border-coral hover:text-coral text-base font-bold shadow-subtle transition-all flex items-center justify-center gap-2"
+                to="/login"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-white border border-charcoal/15 text-navy hover:border-coral hover:text-coral text-sm font-bold shadow-subtle transition-all flex items-center justify-center gap-2"
               >
-                <QrCode size={18} className="text-coral" />
-                <span>{t('landing.ctaDemo')}</span>
+                <span>Organizer Sign In</span>
               </Link>
             </div>
 
             {/* Trust Markers */}
-            <div className="pt-6 flex flex-wrap items-center justify-center gap-6 text-xs text-charcoal/60 font-medium">
+            <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-charcoal/60 font-medium">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 size={16} className="text-sage-dark" />
-                <span>No Participant Sign-in Required</span>
+                <span>No Attendee Sign-in Required</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 size={16} className="text-sage-dark" />
@@ -148,52 +213,7 @@ export const LandingPage = () => {
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 size={16} className="text-sage-dark" />
-                <span>Role-Based Multi-tenant Isolation</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Interactive Live Demo Preview Card */}
-          <div className="mt-14 max-w-4xl mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-card border border-charcoal/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-coral text-white text-[11px] font-bold uppercase tracking-wider px-4 py-1 rounded-bl-2xl">
-              Live Demo Preview
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-charcoal/10">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-sage-dark">Seeded Event Code: HACK-2026</span>
-                <h3 className="text-xl font-heading font-extrabold text-navy">National AI Hackathon & Sprint 2026</h3>
-                <p className="text-xs text-charcoal/60">Hosted by MIT Pune Tech & Innovation Council</p>
-              </div>
-              <Link
-                to="/feedback/HACK-2026"
-                className="px-4 py-2 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navy-700 transition-colors flex items-center gap-1.5"
-              >
-                <span>Open Participant Form</span>
-                <ArrowRight size={14} />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6">
-              <div className="p-4 rounded-2xl bg-ivory border border-charcoal/5">
-                <span className="text-xs font-semibold text-charcoal/60">Responses</span>
-                <p className="text-2xl font-extrabold text-navy mt-1">38 / 40</p>
-                <span className="text-[10px] text-sage-dark font-bold">95% Response Rate</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-ivory border border-charcoal/5">
-                <span className="text-xs font-semibold text-charcoal/60">Avg. Rating</span>
-                <p className="text-2xl font-extrabold text-navy mt-1">4.25 / 5</p>
-                <span className="text-[10px] text-coral font-bold">★ 88% Promoters</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-ivory border border-charcoal/5">
-                <span className="text-xs font-semibold text-charcoal/60">Sentiment Index</span>
-                <p className="text-2xl font-extrabold text-sage-dark mt-1">+0.47</p>
-                <span className="text-[10px] text-charcoal/50">Positive Dominant</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-ivory border border-charcoal/5">
-                <span className="text-xs font-semibold text-charcoal/60">Languages</span>
-                <p className="text-2xl font-extrabold text-navy mt-1">3</p>
-                <span className="text-[10px] text-lavender-dark font-bold">EN • HI • MR</span>
+                <span>Multi-tenant Organization Isolation</span>
               </div>
             </div>
           </div>
