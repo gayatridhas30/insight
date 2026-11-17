@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Smile,
   AlertTriangle,
+  Tag,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -29,6 +30,7 @@ import {
 } from 'recharts';
 import { eventService, improvementTaskService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
+import { getCategoryBadge } from '../../config/eventCategories';
 
 export const HostDashboard = () => {
   const { user, activeOrganization } = useAuth();
@@ -41,7 +43,7 @@ export const HostDashboard = () => {
       try {
         setLoading(true);
         const [eventsRes, tasksRes] = await Promise.all([
-          eventService.getEvents({ limit: 5 }),
+          eventService.getEvents({ limit: 6 }),
           improvementTaskService.getTasks({ status: 'todo' }),
         ]);
 
@@ -86,7 +88,7 @@ export const HostDashboard = () => {
             Welcome back, {user?.name?.split(' ')[0] || 'Organizer'}!
           </h1>
           <p className="text-xs sm:text-sm text-charcoal/60 mt-1">
-            {activeOrganization?.name || 'MIT Pune Tech & Innovation Council'} — Event Intelligence Hub
+            {activeOrganization?.name || 'InsightLoop Event Intelligence'} — Universal Feedback Hub
           </p>
         </div>
 
@@ -114,7 +116,7 @@ export const HostDashboard = () => {
           <div className="space-y-1">
             <span className="text-xs font-bold text-charcoal/60">Managed Events</span>
             <p className="text-3xl font-heading font-extrabold text-navy">{totalEvents}</p>
-            <span className="text-[10px] text-sage-dark font-bold">Active in organization</span>
+            <span className="text-[10px] text-sage-dark font-bold">Universal active events</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-ivory flex items-center justify-center text-navy shadow-sm">
             <Calendar size={22} className="text-coral" />
@@ -125,7 +127,7 @@ export const HostDashboard = () => {
           <div className="space-y-1">
             <span className="text-xs font-bold text-charcoal/60">Total Responses</span>
             <p className="text-3xl font-heading font-extrabold text-navy">{totalResponses}</p>
-            <span className="text-[10px] text-sage-dark font-bold">Across all events</span>
+            <span className="text-[10px] text-sage-dark font-bold">Across all categories</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-ivory flex items-center justify-center text-navy shadow-sm">
             <MessageSquare size={22} className="text-sage-dark" />
@@ -147,7 +149,7 @@ export const HostDashboard = () => {
           <div className="space-y-1">
             <span className="text-xs font-bold text-charcoal/60">Pending Improvements</span>
             <p className="text-3xl font-heading font-extrabold text-coral">{pendingTasksCount}</p>
-            <span className="text-[10px] text-charcoal/50">Converted from AI recs</span>
+            <span className="text-[10px] text-charcoal/50">Actionable tasks flagged</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-ivory flex items-center justify-center text-navy shadow-sm">
             <CheckSquare size={22} className="text-coral" />
@@ -162,7 +164,7 @@ export const HostDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-heading font-bold text-navy">Recent Events & Responses</h3>
-              <p className="text-xs text-charcoal/60">Real-time feedback collection status</p>
+              <p className="text-xs text-charcoal/60">Real-time category-wise feedback status</p>
             </div>
             <Link to="/events" className="text-xs font-bold text-coral hover:underline flex items-center gap-1">
               <span>View All</span>
@@ -171,66 +173,77 @@ export const HostDashboard = () => {
           </div>
 
           <div className="divide-y divide-charcoal/5">
-            {events.map((evt) => (
-              <div key={evt.id || evt._id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-coral font-mono">
-                      {evt.code}
-                    </span>
-                    <span
-                      className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                        evt.status === 'completed'
-                          ? 'bg-sage/30 text-sage-dark'
-                          : evt.status === 'ongoing'
-                          ? 'bg-coral/20 text-coral'
-                          : 'bg-lavender/50 text-navy'
-                      }`}
-                    >
-                      {evt.status}
-                    </span>
+            {events.map((evt) => {
+              const catBadge = getCategoryBadge(evt.category);
+              return (
+                <div key={evt.id || evt._id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold uppercase tracking-wider text-coral font-mono">
+                        {evt.code}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                          evt.status === 'completed'
+                            ? 'bg-sage/30 text-sage-dark'
+                            : evt.status === 'ongoing'
+                            ? 'bg-coral/20 text-coral'
+                            : 'bg-lavender/50 text-navy'
+                        }`}
+                      >
+                        {evt.status}
+                      </span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${catBadge.bg} ${catBadge.text}`}>
+                        {catBadge.label}
+                      </span>
+                      {evt.subcategory && (
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-ivory border border-charcoal/10 text-charcoal/70">
+                          {evt.subcategory}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-sm font-bold text-navy hover:text-coral transition-colors">
+                      <Link to={`/events/${evt.id || evt._id}`}>{evt.title}</Link>
+                    </h4>
+                    <p className="text-xs text-charcoal/50">
+                      {evt.location || 'Online'}
+                    </p>
                   </div>
-                  <h4 className="text-sm font-bold text-navy hover:text-coral transition-colors">
-                    <Link to={`/events/${evt.id || evt._id}`}>{evt.title}</Link>
-                  </h4>
-                  <p className="text-xs text-charcoal/50">
-                    {evt.category} • {evt.location || 'Online'}
-                  </p>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <span className="text-xs font-bold text-navy">
-                      {evt.responsesCount || 0} / {evt.targetResponses || 50}
-                    </span>
-                    <div className="w-24 bg-ivory rounded-full h-2 mt-1 overflow-hidden border border-charcoal/10">
-                      <div
-                        className="bg-coral h-full rounded-full"
-                        style={{ width: `${Math.min(evt.responseRate || 0, 100)}%` }}
-                      />
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-navy">
+                        {evt.responsesCount || 0} / {evt.targetResponses || 50}
+                      </span>
+                      <div className="w-24 bg-ivory rounded-full h-2 mt-1 overflow-hidden border border-charcoal/10">
+                        <div
+                          className="bg-coral h-full rounded-full"
+                          style={{ width: `${Math.min(evt.responseRate || 0, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <Link
+                        to={`/events/${evt.id || evt._id}/qr`}
+                        className="p-2 rounded-xl bg-ivory text-charcoal/70 hover:text-coral hover:bg-coral/10 transition-colors"
+                        title="View QR Code"
+                      >
+                        <QrCode size={16} />
+                      </Link>
+                      <Link
+                        to={`/feedback/${evt.code}`}
+                        target="_blank"
+                        className="p-2 rounded-xl bg-ivory text-charcoal/70 hover:text-navy hover:bg-navy/10 transition-colors"
+                        title="Public Link"
+                      >
+                        <ExternalLink size={16} />
+                      </Link>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <Link
-                      to={`/events/${evt.id || evt._id}/qr`}
-                      className="p-2 rounded-xl bg-ivory text-charcoal/70 hover:text-coral hover:bg-coral/10 transition-colors"
-                      title="View QR Code"
-                    >
-                      <QrCode size={16} />
-                    </Link>
-                    <Link
-                      to={`/feedback/${evt.code}`}
-                      target="_blank"
-                      className="p-2 rounded-xl bg-ivory text-charcoal/70 hover:text-navy hover:bg-navy/10 transition-colors"
-                      title="Public Link"
-                    >
-                      <ExternalLink size={16} />
-                    </Link>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

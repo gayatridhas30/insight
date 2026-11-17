@@ -13,10 +13,10 @@ Register a new host or organizer account and initialize an organization.
 - **Body**:
   ```json
   {
-    "name": "Prof. Ananya Sharma",
+    "name": "Yash Dhawale",
     "email": "organizer@college.edu",
     "password": "Password123!",
-    "organizationName": "MIT Pune Tech Council",
+    "organizationName": "VIT Pune Tech Council",
     "category": "college"
   }
   ```
@@ -27,7 +27,7 @@ Authenticate user with email and password.
 - **Body**:
   ```json
   {
-    "email": "organizer@mitpune.edu",
+    "email": "organizer@vitpune.edu",
     "password": "Password123!"
   }
   ```

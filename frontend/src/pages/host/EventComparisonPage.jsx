@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   RefreshCw,
   Layers,
+  Tag,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -19,6 +20,7 @@ import {
   Legend,
 } from 'recharts';
 import { eventService } from '../../api/services';
+import { getCategoryBadge } from '../../config/eventCategories';
 
 export const EventComparisonPage = () => {
   const [events, setEvents] = useState([]);
@@ -117,7 +119,7 @@ export const EventComparisonPage = () => {
           </span>
         </div>
         <p className="text-xs text-charcoal/60 mt-1">
-          Select 2 or 3 events to compare participant satisfaction, sentiment shifts, and recurring bottlenecks
+          Select 2 or 3 events across any category to compare participant satisfaction, sentiment shifts, and recurring bottlenecks
         </p>
       </div>
 
@@ -152,49 +154,59 @@ export const EventComparisonPage = () => {
         <div className="space-y-8">
           {/* Side by side metric cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {comparison.map((item, idx) => (
-              <div
-                key={item.event.id}
-                className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle space-y-4 flex flex-col justify-between"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-coral bg-coral/10 px-2 py-0.5 rounded">
-                      {item.event.code}
-                    </span>
-                    <span className="text-[10px] uppercase font-bold text-charcoal/50">
-                      {item.event.category}
-                    </span>
+            {comparison.map((item) => {
+              const catBadge = getCategoryBadge(item.event.category);
+              return (
+                <div
+                  key={item.event.id}
+                  className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle space-y-4 flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between flex-wrap gap-1.5">
+                      <span className="text-xs font-mono font-bold text-coral bg-coral/10 px-2 py-0.5 rounded">
+                        {item.event.code}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md ${catBadge.bg} ${catBadge.text}`}>
+                          {catBadge.label}
+                        </span>
+                        {item.event.subcategory && (
+                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-ivory border border-charcoal/10 text-charcoal/70">
+                            {item.event.subcategory}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <h3 className="text-base font-heading font-bold text-navy">{item.event.title}</h3>
                   </div>
-                  <h3 className="text-base font-heading font-bold text-navy">{item.event.title}</h3>
-                </div>
 
-                <div className="divide-y divide-charcoal/5 text-xs pt-2">
-                  <div className="py-2 flex justify-between">
-                    <span className="text-charcoal/60">Average Rating:</span>
-                    <span className="font-bold text-navy">{item.metrics.averageRating} / 5.0 ★</span>
-                  </div>
-                  <div className="py-2 flex justify-between">
-                    <span className="text-charcoal/60">Sentiment Index:</span>
-                    <span className="font-bold text-sage-dark">
-                      {item.metrics.sentimentScore >= 0 ? '+' : ''}{item.metrics.sentimentScore}
-                    </span>
-                  </div>
-                  <div className="py-2 flex justify-between">
-                    <span className="text-charcoal/60">Response Rate:</span>
-                    <span className="font-bold text-navy">{item.metrics.responseRate}%</span>
-                  </div>
-                  <div className="py-2 flex justify-between">
-                    <span className="text-charcoal/60">Recurring Issues Flagged:</span>
-                    <span className="font-bold text-coral">{item.recurringIssuesCount}</span>
-                  </div>
-                  <div className="py-2 flex justify-between">
-                    <span className="text-charcoal/60">Positive Highlights:</span>
-                    <span className="font-bold text-sage-dark">{item.positiveHighlightsCount}</span>
+                  <div className="divide-y divide-charcoal/5 text-xs pt-2">
+                    <div className="py-2 flex justify-between">
+                      <span className="text-charcoal/60">Average Rating:</span>
+                      <span className="font-bold text-navy">{item.metrics.averageRating} / 5.0 ★</span>
+                    </div>
+                    <div className="py-2 flex justify-between">
+                      <span className="text-charcoal/60">Sentiment Index:</span>
+                      <span className="font-bold text-sage-dark">
+                        {item.metrics.sentimentScore >= 0 ? '+' : ''}{item.metrics.sentimentScore}
+                      </span>
+                    </div>
+                    <div className="py-2 flex justify-between">
+                      <span className="text-charcoal/60">Response Rate:</span>
+                      <span className="font-bold text-navy">{item.metrics.responseRate}%</span>
+                    </div>
+                    <div className="py-2 flex justify-between">
+                      <span className="text-charcoal/60">Recurring Issues Flagged:</span>
+                      <span className="font-bold text-coral">{item.recurringIssuesCount}</span>
+                    </div>
+                    <div className="py-2 flex justify-between">
+                      <span className="text-charcoal/60">Positive Highlights:</span>
+                      <span className="font-bold text-sage-dark">{item.positiveHighlightsCount}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Comparative Chart */}

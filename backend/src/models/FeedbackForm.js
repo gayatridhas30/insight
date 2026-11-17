@@ -44,7 +44,6 @@ const feedbackFormSchema = new mongoose.Schema(
     },
     templateType: {
       type: String,
-      enum: ['standard', 'workshop', 'hackathon', 'conference', 'custom'],
       default: 'standard',
     },
   },

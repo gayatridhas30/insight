@@ -1,8 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Calendar, PlusCircle, ArrowLeft, Building2, MapPin, Tag, Users, AlertCircle } from 'lucide-react';
+import {
+  Calendar,
+  PlusCircle,
+  ArrowLeft,
+  Building2,
+  MapPin,
+  Tag,
+  Users,
+  AlertCircle,
+  Sparkles,
+  Layers,
+  CheckCircle2,
+  HelpCircle,
+} from 'lucide-react';
 import { eventService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
+import { EVENT_CATEGORIES } from '../../config/eventCategories';
 
 export const CreateEventPage = () => {
   const { activeOrganization } = useAuth();
@@ -10,17 +24,34 @@ export const CreateEventPage = () => {
 
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Workshop',
+    category: 'Marathon',
+    subcategory: 'Half Marathon (21.1K)',
+    customSubcategory: '',
     description: '',
     venueType: 'in-person',
     location: '',
     startDate: new Date().toISOString().slice(0, 16),
-    endDate: new Date(Date.now() + 4 * 3600 * 1000).toISOString().slice(0, 16),
-    targetResponses: 50,
-    tagsString: 'Tech, Students, Innovation',
+    endDate: new Date(Date.now() + 5 * 3600 * 1000).toISOString().slice(0, 16),
+    targetResponses: 75,
+    tagsString: 'Fitness, Health, Community',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const selectedCategoryConfig = EVENT_CATEGORIES[formData.category] || EVENT_CATEGORIES.Workshop;
+  const subcategoriesList = selectedCategoryConfig.subcategories || [];
+
+  const handleCategoryChange = (e) => {
+    const newCategory = e.target.value;
+    const config = EVENT_CATEGORIES[newCategory] || EVENT_CATEGORIES.Workshop;
+    const defaultSub = config.subcategories?.[0] || '';
+    setFormData({
+      ...formData,
+      category: newCategory,
+      subcategory: defaultSub,
+      customSubcategory: '',
+    });
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,13 +73,20 @@ export const CreateEventPage = () => {
         .map((t) => t.trim())
         .filter(Boolean);
 
+      const effectiveSubcategory =
+        formData.subcategory === 'Custom'
+          ? formData.customSubcategory.trim()
+          : formData.subcategory || formData.customSubcategory.trim();
+
       const res = await eventService.createEvent({
         organizationId: activeOrganization.id || activeOrganization._id,
         title: formData.title,
         category: formData.category,
+        subcategory: effectiveSubcategory,
+        subcategories: effectiveSubcategory ? [effectiveSubcategory] : [],
         description: formData.description,
         venueType: formData.venueType,
-        location: formData.location || 'Main Campus Auditorium',
+        location: formData.location || 'Main Venue / Route',
         startDate: formData.startDate,
         endDate: formData.endDate,
         targetResponses: Number(formData.targetResponses) || 50,
@@ -67,7 +105,7 @@ export const CreateEventPage = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fadeIn">
+    <div className="max-w-3xl mx-auto space-y-6 animate-fadeIn pb-12">
       {/* Top back button */}
       <Link
         to="/events"
@@ -77,14 +115,14 @@ export const CreateEventPage = () => {
         <span>Back to Events Directory</span>
       </Link>
 
-      <div className="bg-white rounded-3xl p-8 border border-charcoal/10 shadow-card space-y-6">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-charcoal/10 shadow-card space-y-6">
         <div>
-          <span className="text-xs uppercase font-bold tracking-wider text-coral">Event Setup</span>
+          <span className="text-xs uppercase font-bold tracking-wider text-coral">Universal Event Setup</span>
           <h1 className="text-2xl font-heading font-extrabold text-navy mt-1">
-            Create a New Feedback Event
+            Create a New Universal Feedback Event
           </h1>
           <p className="text-xs text-charcoal/60 mt-1">
-            Fill in the details to generate a unique event code, feedback URL, and QR flyer.
+            Choose your category and subcategory. InsightLoop will initialize category-tailored questions with multilingual prompts (English, Hindi, Marathi).
           </p>
         </div>
 
@@ -96,6 +134,7 @@ export const CreateEventPage = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Title */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
               Event Title *
@@ -106,31 +145,88 @@ export const CreateEventPage = () => {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="e.g. State-level Web3 & AI Hackathon 2026"
+              placeholder="e.g. Pune City Marathon 2026, Sunburn Pro-Nite, or AI Hands-on Workshop"
               className="w-full px-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
             />
           </div>
 
+          {/* Category & Subcategory Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Category *
+                Main Category *
               </label>
               <select
                 name="category"
                 value={formData.category}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
+                onChange={handleCategoryChange}
+                className="w-full px-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50 font-medium"
               >
-                <option value="Workshop">Workshop</option>
-                <option value="Hackathon">Hackathon</option>
-                <option value="Conference">Conference</option>
-                <option value="Seminar">Seminar</option>
-                <option value="Cultural">Cultural Fest</option>
-                <option value="Corporate">Corporate Meeting</option>
+                {Object.keys(EVENT_CATEGORIES).map((key) => (
+                  <option key={key} value={key}>
+                    {EVENT_CATEGORIES[key].name}
+                  </option>
+                ))}
               </select>
             </div>
 
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
+                Subcategory *
+              </label>
+              <select
+                name="subcategory"
+                value={formData.subcategory}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50 font-medium"
+              >
+                {subcategoriesList.map((sub, idx) => (
+                  <option key={idx} value={sub}>
+                    {sub}
+                  </option>
+                ))}
+                <option value="Custom">+ Custom Subcategory...</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Custom Subcategory input if selected */}
+          {formData.subcategory === 'Custom' && (
+            <div className="animate-fadeIn">
+              <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
+                Enter Custom Subcategory
+              </label>
+              <input
+                type="text"
+                required
+                name="customSubcategory"
+                value={formData.customSubcategory}
+                onChange={handleChange}
+                placeholder="e.g. Ultra Trail 50K or Retro Vinyl Night"
+                className="w-full px-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
+              />
+            </div>
+          )}
+
+          {/* Auto-configured question dimensions highlight card */}
+          <div className="p-4 rounded-2xl bg-lavender/30 border border-lavender/80 flex items-start gap-3">
+            <Sparkles size={18} className="text-coral shrink-0 mt-0.5" />
+            <div className="space-y-1 text-xs">
+              <p className="font-bold text-navy">
+                Dynamic Question Templates for {selectedCategoryConfig.name}
+              </p>
+              <p className="text-charcoal/70 leading-relaxed">
+                {selectedCategoryConfig.description}
+                <br />
+                <span className="text-charcoal/80 font-medium">
+                  Questions covering star ratings, NPS, specific operational choices, and voice-enabled open feedback will be generated automatically. You can edit or reorder them in the Form Builder.
+                </span>
+              </p>
+            </div>
+          </div>
+
+          {/* Venue Type & Location */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
                 Venue Type
@@ -141,44 +237,46 @@ export const CreateEventPage = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
               >
-                <option value="in-person">In-Person</option>
-                <option value="virtual">Virtual / Online</option>
+                <option value="in-person">In-Person (Outdoor / Arena / Auditorium)</option>
+                <option value="virtual">Virtual / Online Stream</option>
                 <option value="hybrid">Hybrid</option>
               </select>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-              Location / Venue Details
-            </label>
-            <div className="relative">
-              <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="Central Auditorium, MIT Pune Campus"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
-              />
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
+                Location / Route Details
+              </label>
+              <div className="relative">
+                <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="e.g. Shree Shiv Chhatrapati Sports Complex, Pune"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
+                />
+              </div>
             </div>
           </div>
 
+          {/* Description */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-              Description
+              Event Description & Objectives
             </label>
             <textarea
               rows={3}
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Brief description of the event agenda and objective..."
+              placeholder="Brief description of the event agenda, attendee expectations, and schedule..."
               className="w-full p-3 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50 resize-none"
             />
           </div>
 
+          {/* Dates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
@@ -207,6 +305,7 @@ export const CreateEventPage = () => {
             </div>
           </div>
 
+          {/* Target Responses & Tags */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
@@ -216,19 +315,19 @@ export const CreateEventPage = () => {
                 <Users size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
                 <input
                   type="number"
-                  min="1"
+                  min="5"
+                  max="10000"
                   name="targetResponses"
                   value={formData.targetResponses}
                   onChange={handleChange}
-                  placeholder="50"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-charcoal/15 text-xs focus:outline-none focus:border-coral bg-ivory-50"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Tags (Comma separated)
+                Search Tags (comma separated)
               </label>
               <div className="relative">
                 <Tag size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
@@ -237,26 +336,37 @@ export const CreateEventPage = () => {
                   name="tagsString"
                   value={formData.tagsString}
                   onChange={handleChange}
-                  placeholder="AI, Hackathon, Coding"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
+                  placeholder="e.g. Marathon, HalfMarathon, 21K, Fitness"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-charcoal/15 text-xs focus:outline-none focus:border-coral bg-ivory-50"
                 />
               </div>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-charcoal/10 flex justify-end gap-3">
+          {/* Actions */}
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-charcoal/10">
             <Link
               to="/events"
-              className="px-5 py-2.5 rounded-xl border border-charcoal/15 text-xs font-bold text-charcoal hover:bg-ivory"
+              className="px-5 py-2.5 rounded-xl border border-charcoal/15 text-charcoal/70 hover:text-navy text-xs font-bold transition-colors"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all flex items-center gap-2 disabled:opacity-50"
             >
-              {loading ? 'Creating Event...' : 'Create & Configure Form'}
+              {loading ? (
+                <>
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  <span>Creating Event & Initializing Questions...</span>
+                </>
+              ) : (
+                <>
+                  <PlusCircle size={16} />
+                  <span>Create Event & Continue to Form Builder</span>
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -264,5 +374,3 @@ export const CreateEventPage = () => {
     </div>
   );
 };
-
-export default CreateEventPage;

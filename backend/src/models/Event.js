@@ -30,6 +30,17 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
       default: 'Workshop',
+      index: true,
+    },
+    subcategory: {
+      type: String,
+      default: '',
+      trim: true,
+      index: true,
+    },
+    subcategories: {
+      type: [String],
+      default: [],
     },
     bannerUrl: {
       type: String,
@@ -86,5 +97,7 @@ const eventSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+eventSchema.index({ category: 1, subcategory: 1 });
 
 export default mongoose.model('Event', eventSchema);

@@ -133,6 +133,7 @@ export const generateAIQuestions = async (req, res, next) => {
     const aiForm = await aiService.generateFormQuestions({
       title: event.title,
       category: event.category,
+      subcategory: event.subcategory || '',
       description: event.description,
     });
 

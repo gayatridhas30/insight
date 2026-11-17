@@ -22,11 +22,15 @@ export const submitFeedback = async (req, res, next) => {
 
     const event = await Event.findOne({ code: eventCode.toUpperCase() });
     if (!event) {
-      return res.status(404).json({ success: false, message: `Event '${eventCode}' was not found. Please verify the code.` });
+      return res.status(404).json({ success: false, message: `Event '${eventCode}' was not found. Please verify the event code.` });
+    }
+
+    if (event.status === 'draft') {
+      return res.status(403).json({ success: false, message: 'This event is currently in draft mode and not accepting public feedback.' });
     }
 
     if (!event.isFeedbackOpen) {
-      return res.status(403).json({ success: false, message: 'Feedback collection for this event has been closed by the host.' });
+      return res.status(403).json({ success: false, message: 'Feedback collection for this event has been closed by the organizer.' });
     }
 
     if (event.feedbackDeadline && new Date() > new Date(event.feedbackDeadline)) {
@@ -154,6 +158,7 @@ export const submitFeedback = async (req, res, next) => {
           organizationId: event.organizationId.toString(),
           eventTitle: event.title,
           eventCategory: event.category,
+          eventSubcategory: event.subcategory || '',
           responses: formatted,
         });
       } catch (aiErr) {
@@ -208,7 +213,7 @@ export const getResponsesByEvent = async (req, res, next) => {
 export const getResponseById = async (req, res, next) => {
   try {
     const response = await FeedbackResponse.findById(req.params.id)
-      .populate('eventId', 'title code category')
+      .populate('eventId', 'title code category subcategory')
       .populate('sessionId', 'title speakerName');
 
     if (!response) {

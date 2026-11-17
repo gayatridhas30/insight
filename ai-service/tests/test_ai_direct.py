@@ -9,15 +9,15 @@ from app.rag_engine import rag_engine
 from app.main import generate_dynamic_form, FormGenerationRequest
 
 def run_tests():
-    print('Testing AI Analyzer...')
+    print('Testing AI Analyzer (Universal Events)...')
     items = [
         FeedbackItem(
             eventId="evt_1",
             participantName="Pooja",
-            textOriginal="Great workshop, loved the speaker explanations!",
-            textTranslated="Great workshop, loved the speaker explanations!",
+            textOriginal="Great workshop, loved the hands-on explanations!",
+            textTranslated="Great workshop, loved the hands-on explanations!",
             rating=5.0,
-            category="Speaker & Delivery"
+            category="Content, Trainer & Materials"
         ),
         FeedbackItem(
             eventId="evt_1",
@@ -25,7 +25,7 @@ def run_tests():
             textOriginal="The audio microphone in the auditorium was noisy and delayed.",
             textTranslated="The audio microphone in the auditorium was noisy and delayed.",
             rating=2.0,
-            category="Audio & Visual"
+            category="Audio & Visual Acoustics"
         )
     ]
 
@@ -33,7 +33,9 @@ def run_tests():
         event_id="evt_1",
         organization_id="org_1",
         event_title="AI Workshop",
-        responses=items
+        responses=items,
+        event_category="Workshop",
+        event_subcategory="AI & Machine Learning"
     )
 
     assert analysis.totalResponsesAnalyzed == 2
@@ -41,7 +43,30 @@ def run_tests():
     assert analysis.sentimentSummary.negative >= 1
     assert len(analysis.recurringIssues) >= 1
     assert len(analysis.recommendations) >= 1
-    print('[PASS] AI Analyzer: Sentiment, Themes, Issues & Recommendations Verified')
+    print('[PASS] AI Analyzer: Universal Sentiment, Themes, Issues & Recommendations Verified')
+
+    print('Testing Marathon AI Analysis...')
+    marathon_items = [
+        FeedbackItem(
+            eventId="evt_marathon",
+            participantName="Vikram",
+            textOriginal="धावण्याचा मार्ग आणि पाण्याची सोय उत्तम होती. पण १५ किलोमीटरच्या स्टॉलवर पाणी संपले होते.",
+            textTranslated="The running route and water facilities were great. However, water ran short at 15km.",
+            rating=3.0,
+            category="Hydration & Medical Aid"
+        )
+    ]
+    marathon_analysis = analyze_feedback_batch(
+        event_id="evt_marathon",
+        organization_id="org_1",
+        event_title="City Marathon",
+        responses=marathon_items,
+        event_category="Marathon",
+        event_subcategory="Half Marathon"
+    )
+    assert marathon_analysis.totalResponsesAnalyzed == 1
+    assert len(marathon_analysis.recommendations) >= 1
+    print('[PASS] Marathon Specific Analysis & Recommendations Verified')
 
     print('Testing RAG Engine...')
     rag_engine.index_feedback("org_1", [
@@ -52,7 +77,7 @@ def run_tests():
             "textTranslated": "The audio microphone in the auditorium was noisy and delayed.",
             "rating": 2.0,
             "sentimentLabel": "negative",
-            "category": "Audio & Visual"
+            "category": "Audio & Visual Acoustics"
         }
     ])
 
@@ -61,18 +86,19 @@ def run_tests():
     assert len(rag_res['supportingEvidence']) >= 1
     print('[PASS] RAG Engine: Isolated Vector Index & Evidence Citations Verified')
 
-    print('Testing AI Dynamic Form Generator...')
+    print('Testing Universal AI Dynamic Form Generator...')
     req = FormGenerationRequest(
-        title="Full-Stack AI Sprint",
-        category="Hackathon",
-        description="Coding competition"
+        title="City Heritage Half Marathon 2026",
+        category="Marathon",
+        subcategory="Half Marathon (21.1K)",
+        description="21K running race"
     )
     form_res = generate_dynamic_form(req)
     assert len(form_res['questions']) >= 3
-    print('[PASS] Form Generator: Multilingual Question Templates Verified')
+    print('[PASS] Form Generator: Category-tailored Multilingual Questions Verified')
 
     print('\n=============================================')
-    print(' ALL AI SERVICE TESTS PASSED 100% SUCCESFULLY!')
+    print(' ALL UNIVERSAL AI SERVICE TESTS PASSED 100% !')
     print('=============================================')
 
 if __name__ == '__main__':

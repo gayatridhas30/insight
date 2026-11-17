@@ -5,7 +5,7 @@
 [![AI Service](https://img.shields.io/badge/AI%20service-verified%20100%25-blue.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)]()
 
-> **InsightLoop** is a production-grade SaaS web application that transforms unstructured attendee feedback into verified institutional improvements. Designed for colleges, hackathons, academic clubs, enterprises, and conferences, it bridges Indian language processing (English, Hindi, Marathi) with vector-powered RAG intelligence and automated task accountability.
+> **InsightLoop** is a production-grade SaaS web application that transforms unstructured attendee feedback into verified institutional improvements. Designed for colleges, hackathons, marathons, concerts, sports tournaments, corporate events, and conferences, it bridges Indian language processing (English, Hindi, Marathi) with vector-powered RAG intelligence and automated task accountability.
 
 ---
 
@@ -122,11 +122,11 @@ The platform avoids generic templates by strictly adhering to a bespoke color pa
 
 Run `cd backend && npm run seed` to populate demo records:
 
-| Role | Email | Password | Organization / Notes |
-|---|---|---|---|
-| **Host / Organizer** | `organizer@mitpune.edu` | `Password123!` | MIT Pune Tech & Innovation Council |
-| **Co-Host / Admin** | `coordinator@mitpune.edu` | `Password123!` | MIT Pune Tech Council (Admin role) |
-| **Platform Admin** | `admin@insightloop.io` | `Password123!` | Full System Governance Access |
+| Role | Name | Email | Password | Organization / Notes |
+|---|---|---|---|---|
+| **Host / Organizer** | **Yash Dhawale** | `organizer@vitpune.edu` | `Password123!` | VIT Pune Tech & Innovation Council |
+| **Co-Host / Admin** | **Sanika Dhone** | `coordinator@vitpune.edu` | `Password123!` | VIT Pune Tech Council (Admin role) |
+| **Platform Admin** | **Chaitali** | `admin@insightloop.io` | `Password123!` | Full System Governance Access |
 
 *Public Feedback Demo Link*: `http://localhost:5173/feedback/HACK-2026`
 
@@ -231,7 +231,7 @@ npm run dev
   - **Result: 100% Passed**
 
 - **Frontend Production Build** (`cd frontend && npm run build`):
-  - 2,375 modules transformed cleanly with zero errors into `dist/`.
+  - 2,376 modules transformed cleanly with zero errors into `dist/`.
 
 ---
 

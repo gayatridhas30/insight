@@ -27,7 +27,7 @@ describe('InsightLoop Backend API Suite', () => {
     const res = await request(app)
       .post('/api/auth/login')
       .send({
-        email: 'organizer@mitpune.edu',
+        email: 'organizer@vitpune.edu',
         password: 'Password123!',
       });
 

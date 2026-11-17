@@ -77,14 +77,14 @@ export const LoginPage = () => {
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => handleQuickLogin('organizer@mitpune.edu', 'Password123!')}
+                onClick={() => handleQuickLogin('organizer@vitpune.edu', 'Password123!')}
                 className="p-2.5 rounded-xl border border-charcoal/15 bg-ivory hover:border-coral hover:bg-coral/5 text-left text-xs transition-all flex flex-col gap-0.5"
               >
                 <div className="flex items-center gap-1 font-bold text-navy">
                   <UserCheck size={13} className="text-coral" />
                   <span>Host / Organizer</span>
                 </div>
-                <span className="text-[10px] text-charcoal/60">Prof. Ananya Sharma</span>
+                <span className="text-[10px] text-charcoal/60">Yash Dhawale</span>
               </button>
 
               <button
@@ -96,7 +96,7 @@ export const LoginPage = () => {
                   <Shield size={13} className="text-lavender-dark" />
                   <span>Platform Admin</span>
                 </div>
-                <span className="text-[10px] text-charcoal/60">Dr. Rajesh Deshmukh</span>
+                <span className="text-[10px] text-charcoal/60">Chaitali</span>
               </button>
             </div>
           </div>
@@ -122,7 +122,7 @@ export const LoginPage = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="organizer@mitpune.edu"
+                    placeholder="organizer@vitpune.edu"
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral/20 bg-ivory-50 transition-all"
                   />
                 </div>

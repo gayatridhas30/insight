@@ -17,6 +17,7 @@ import {
   Notification,
   AuditLog,
 } from '../models/index.js';
+import { getDefaultQuestionsForCategory } from '../config/eventCategories.js';
 
 const seedDatabase = async () => {
   try {
@@ -44,7 +45,7 @@ const seedDatabase = async () => {
     const passwordHash = await bcrypt.hash('Password123!', salt);
 
     const adminUser = await User.create({
-      name: 'Dr. Rajesh Deshmukh (Admin)',
+      name: 'Chaitali (Admin)',
       email: 'admin@insightloop.io',
       passwordHash,
       role: 'admin',
@@ -53,8 +54,8 @@ const seedDatabase = async () => {
     });
 
     const hostUser = await User.create({
-      name: 'Prof. Ananya Sharma',
-      email: 'organizer@mitpune.edu',
+      name: 'Yash Dhawale',
+      email: 'organizer@vitpune.edu',
       passwordHash,
       role: 'host',
       phone: '+91 98450 44556',
@@ -62,8 +63,8 @@ const seedDatabase = async () => {
     });
 
     const cohostUser = await User.create({
-      name: 'Rohan Joshi',
-      email: 'coordinator@mitpune.edu',
+      name: 'Sanika Dhone',
+      email: 'coordinator@vitpune.edu',
       passwordHash,
       role: 'host',
       phone: '+91 97300 77889',
@@ -72,11 +73,11 @@ const seedDatabase = async () => {
 
     console.log('[Seed] Creating organizations & memberships...');
     const organization = await Organization.create({
-      name: 'MIT Pune Tech & Innovation Council',
-      slug: 'mit-pune-tech',
-      description: 'Premier collegiate council organizing state and national level hackathons, AI workshops, and technology summits.',
+      name: 'VIT Pune Tech & Innovation Council',
+      slug: 'vit-pune-tech',
+      description: 'Universal event host council organizing state and national level marathons, sports championships, hackathons, AI workshops, and cultural festivals.',
       category: 'college',
-      website: 'https://mitpune.edu',
+      website: 'https://vitpune.edu',
       createdBy: hostUser._id,
       isVerified: true,
     });
@@ -86,13 +87,16 @@ const seedDatabase = async () => {
       { organizationId: organization._id, userId: cohostUser._id, role: 'admin', status: 'active', invitedBy: hostUser._id },
     ]);
 
-    console.log('[Seed] Creating events & sessions...');
-    // Event 1: National AI Hackathon
+    console.log('[Seed] Creating universal events across all categories...');
+
+    // 1. Collegiate Hackathon
     const event1 = await Event.create({
       organizationId: organization._id,
       title: 'National AI Hackathon & Sprint 2026',
       code: 'HACK-2026',
-      category: 'Hackathon',
+      category: 'College',
+      subcategory: 'Hackathon & Coding Sprint',
+      subcategories: ['Hackathon & Coding Sprint', 'Tech Fest & Project Expo'],
       description: '36-hour offline hackathon bringing 250+ student developers to build AI solutions for healthcare and agriculture.',
       venueType: 'in-person',
       location: 'Central Computer Center & Auditorium, Pune',
@@ -105,12 +109,14 @@ const seedDatabase = async () => {
       createdBy: hostUser._id,
     });
 
-    // Event 2: Full-Stack React & AI Agents
+    // 2. Workshop
     const event2 = await Event.create({
       organizationId: organization._id,
       title: 'Hands-on Workshop: Full-Stack React & AI Agents',
       code: 'WORK-2026',
       category: 'Workshop',
+      subcategory: 'AI, Machine Learning & Data Science',
+      subcategories: ['AI, Machine Learning & Data Science', 'Coding & Web Development'],
       description: 'Interactive deep-dive into building autonomous multi-agent systems and modern frontend architectures.',
       venueType: 'hybrid',
       location: 'Seminar Hall 3 & Virtual Zoom Stream',
@@ -123,12 +129,14 @@ const seedDatabase = async () => {
       createdBy: hostUser._id,
     });
 
-    // Event 3: Leadership Summit
+    // 3. Conference
     const event3 = await Event.create({
       organizationId: organization._id,
       title: 'Annual Leadership & Technology Summit',
       code: 'LEAD-2026',
       category: 'Conference',
+      subcategory: 'Technical & Engineering Summit',
+      subcategories: ['Technical & Engineering Summit', 'Business & Entrepreneurship'],
       description: 'Keynotes from industry leaders, panel discussions on career pathways, and startup showcases.',
       venueType: 'in-person',
       location: 'Grand Convention Center, Pune',
@@ -138,6 +146,66 @@ const seedDatabase = async () => {
       isFeedbackOpen: true,
       targetResponses: 100,
       tags: ['Leadership', 'Networking', 'Careers'],
+      createdBy: hostUser._id,
+    });
+
+    // 4. Universal Event: Marathon & Running
+    const event4 = await Event.create({
+      organizationId: organization._id,
+      title: 'Pune Heritage City Marathon 2026',
+      code: 'RUN-2026',
+      category: 'Marathon',
+      subcategory: 'Half Marathon (21.1K)',
+      subcategories: ['Half Marathon (21.1K)', '10K Challenge', '5K Fun Run'],
+      description: 'Annual city marathon spanning historical landmarks of Pune with 3,500+ runners across 21K, 10K, and 5K categories.',
+      venueType: 'in-person',
+      location: 'Shree Shiv Chhatrapati Sports Complex & Baner Route, Pune',
+      startDate: new Date(Date.now() - 3 * 24 * 3600 * 1000),
+      endDate: new Date(Date.now() - 3 * 24 * 3600 * 1000 + 6 * 3600 * 1000),
+      status: 'completed',
+      isFeedbackOpen: true,
+      targetResponses: 80,
+      tags: ['Marathon', 'Running', 'Fitness', 'Heritage'],
+      createdBy: hostUser._id,
+    });
+
+    // 5. Universal Event: Concert & Music Festival
+    const event5 = await Event.create({
+      organizationId: organization._id,
+      title: 'Sunwave Arena Indie Rock & Fusion Live',
+      code: 'LIVE-2026',
+      category: 'Concert',
+      subcategory: 'Live Band Concert',
+      subcategories: ['Live Band Concert', 'EDM / DJ Night', 'Classical & Fusion Recital'],
+      description: 'High-energy outdoor music festival featuring leading Indian Indie bands, acoustic fusion, and synchronized light spectacles.',
+      venueType: 'in-person',
+      location: 'Mahalaxmi Lawns & Amphitheatre, Pune',
+      startDate: new Date(Date.now() - 1 * 24 * 3600 * 1000),
+      endDate: new Date(Date.now() - 1 * 24 * 3600 * 1000 + 8 * 3600 * 1000),
+      status: 'completed',
+      isFeedbackOpen: true,
+      targetResponses: 60,
+      tags: ['Music', 'Concert', 'Indie', 'LiveBand'],
+      createdBy: hostUser._id,
+    });
+
+    // 6. Universal Event: Sports Tournament
+    const event6 = await Event.create({
+      organizationId: organization._id,
+      title: 'Maharashtra Inter-Collegiate Cricket Championship',
+      code: 'PLAY-2026',
+      category: 'Sports',
+      subcategory: 'Cricket Championship',
+      subcategories: ['Cricket Championship', 'Football Tournament'],
+      description: 'State-level cricket knockout championship featuring top university teams competing over 4 days.',
+      venueType: 'in-person',
+      location: 'University Sports Ground & Stadium, Pune',
+      startDate: new Date(Date.now() - 4 * 24 * 3600 * 1000),
+      endDate: new Date(Date.now() - 1 * 24 * 3600 * 1000),
+      status: 'completed',
+      isFeedbackOpen: true,
+      targetResponses: 50,
+      tags: ['Sports', 'Cricket', 'Athletics', 'Championship'],
       createdBy: hostUser._id,
     });
 
@@ -151,92 +219,61 @@ const seedDatabase = async () => {
       roomOrLink: 'Main Stage',
     });
 
-    const session2 = await EventSession.create({
-      eventId: event1._id,
-      title: 'Mentorship Sprint & Mid-Evaluation',
-      speakerName: 'Industry Mentors Panel',
-      startTime: new Date(Date.now() - 6 * 24 * 3600 * 1000),
-      endTime: new Date(Date.now() - 6 * 24 * 3600 * 1000 + 4 * 3600 * 1000),
-      roomOrLink: 'Lab 4 & 5',
+    // Sessions for Marathon
+    await EventSession.create({
+      eventId: event4._id,
+      title: '21K Flag-off & Elite Wave',
+      speakerName: 'Race Director & Chief Marshal',
+      startTime: new Date(Date.now() - 3 * 24 * 3600 * 1000 + 5 * 3600 * 1000),
+      endTime: new Date(Date.now() - 3 * 24 * 3600 * 1000 + 9 * 3600 * 1000),
+      roomOrLink: 'Start Holding Area Corral A',
     });
 
-    console.log('[Seed] Creating dynamic feedback forms & multilingual questions...');
-    const form1 = await FeedbackForm.create({
-      eventId: event1._id,
-      title: 'National AI Hackathon Participant Experience',
-      description: 'Your feedback enables us to refine future hackathon logistics, mentorship, and venue facilities.',
-      isAnonymousAllowed: true,
-      supportedLanguages: ['en', 'hi', 'mr'],
-      allowVoiceFeedback: true,
-      templateType: 'hackathon',
-    });
+    console.log('[Seed] Creating forms and questions tailored to each category...');
 
-    const q1 = await Question.create([
-      {
-        formId: form1._id,
-        order: 1,
-        type: 'star_rating',
-        category: 'overall',
-        isRequired: true,
+    // Helper to seed form & questions
+    const seedEventForm = async (event) => {
+      const form = await FeedbackForm.create({
+        eventId: event._id,
+        title: `${event.title} Feedback Form`,
+        description: `We appreciate your valuable feedback for ${event.title}. Help us continuously enhance future editions.`,
+        isAnonymousAllowed: true,
+        supportedLanguages: ['en', 'hi', 'mr'],
+        allowVoiceFeedback: true,
+        templateType: event.category.toLowerCase(),
+      });
+
+      const templateQuestions = getDefaultQuestionsForCategory(event.category, event.subcategory);
+      const questionsToInsert = templateQuestions.map((q, idx) => ({
+        formId: form._id,
+        order: idx + 1,
+        type: q.type,
+        category: q.category || 'overall',
+        isRequired: Boolean(q.isRequired),
         prompt: {
-          en: 'How would you rate your overall experience at the Hackathon?',
-          hi: 'हैकथॉन में आपका समग्र अनुभव कैसा रहा?',
-          mr: 'हॅकाथॉनमधील आपला एकंदर अनुभव कसा होता?',
+          en: (q.prompt?.en || '').replace(/\$\{title\}/g, event.title),
+          hi: (q.prompt?.hi || '').replace(/\$\{title\}/g, event.title),
+          mr: (q.prompt?.mr || '').replace(/\$\{title\}/g, event.title),
         },
-        description: { en: '1 to 5 stars', hi: '1 से 5 स्टार', mr: '1 ते 5 स्टार' },
-      },
-      {
-        formId: form1._id,
-        order: 2,
-        type: 'nps',
-        category: 'overall',
-        isRequired: true,
-        prompt: {
-          en: 'How likely are you to recommend our hackathons to other students?',
-          hi: 'आप अन्य छात्रों को हमारे हैकथॉन की सिफारिश करने की कितनी संभावना रखते हैं?',
-          mr: 'आपण इतर विद्यार्थ्यांना आमच्या हॅकाथॉनची शिफारस करण्याची किती शक्यता आहे?',
-        },
-        description: { en: '0 (Not likely) to 10 (Extremely likely)', hi: '0 से 10', mr: '0 ते 10' },
-      },
-      {
-        formId: form1._id,
-        order: 3,
-        type: 'single_choice',
-        category: 'venue_logistics',
-        isRequired: true,
-        prompt: {
-          en: 'How was the high-speed WiFi connectivity throughout the 36 hours?',
-          hi: '36 घंटों के दौरान वाईफाई कनेक्टिविटी कैसी रही?',
-          mr: '36 तासांच्या दरम्यान हाय-स्पीड वायफाय कनेक्टिव्हिटी कशी होती?',
-        },
-        description: { en: 'Select one', hi: 'एक विकल्प चुनें', mr: 'एक पर्याय निवडा' },
-        options: [
-          { id: 'opt_stable', label: { en: 'Extremely stable and fast', hi: 'बहुत स्थिर और तेज', mr: 'अतिशय वेगवान व सुरळीत' } },
-          { id: 'opt_decent', label: { en: 'Decent with occasional drops', hi: 'ठीक-ठाक, कभी-कभी समस्या', mr: 'मध्यम, क्वचित अडचणी' } },
-          { id: 'opt_poor', label: { en: 'Frequent disconnects in Lab 4', hi: 'बार-बार रुकावट', mr: 'वारंवार डिस्कनेक्ट झाले' } },
-        ],
-      },
-      {
-        formId: form1._id,
-        order: 4,
-        type: 'long_text',
-        category: 'overall',
-        isRequired: false,
-        prompt: {
-          en: 'What did you appreciate most, and what should we improve for next edition?',
-          hi: 'आपको क्या सबसे अच्छा लगा, और हम अगले संस्करण में क्या सुधार कर सकते हैं?',
-          mr: 'आपल्याला काय सर्वाधिक आवडले, आणि पुढील वेळी आम्ही काय सुधारणा करावी?',
-        },
-        description: {
-          en: 'Share in English, Hindi, or Marathi (Type or record voice)',
-          hi: 'अंग्रेजी, हिंदी या मराठी में साझा करें',
-          mr: 'इंग्रजी, हिंदी किंवा मराठीत लिहा किंवा आवाज रेकॉर्ड करा',
-        },
-      },
-    ]);
+        description: q.description || { en: '', hi: '', mr: '' },
+        options: q.options || [],
+      }));
+
+      const createdQuestions = await Question.insertMany(questionsToInsert);
+      return { form, questions: createdQuestions };
+    };
+
+    const form1Data = await seedEventForm(event1);
+    const form2Data = await seedEventForm(event2);
+    const form3Data = await seedEventForm(event3);
+    const form4Data = await seedEventForm(event4); // Marathon
+    const form5Data = await seedEventForm(event5); // Concert
+    const form6Data = await seedEventForm(event6); // Sports
 
     console.log('[Seed] Populating realistic multilingual feedback responses...');
-    const sampleResponses = [
+
+    // Responses for Event 1 (Hackathon)
+    const hackathonResponses = [
       {
         isAnonymous: false,
         name: 'Aarav Mehta',
@@ -299,30 +336,6 @@ const seedDatabase = async () => {
       },
       {
         isAnonymous: false,
-        name: 'Karan Sharma',
-        email: 'karan.sharma@devs.io',
-        lang: 'hi',
-        rating: 4,
-        nps: 8,
-        textOriginal: 'मेंटरिंग राउंड बहुत उपयोगी था। अगली बार 36 घंटे के सत्र में आराम करने के लिए शांत कमरों की व्यवस्था करें।',
-        textTranslated: 'The mentoring round was very useful. Next time please arrange quiet rest rooms for downtime during 36-hour sessions.',
-        sentiment: 'positive',
-        score: 0.45,
-      },
-      {
-        isAnonymous: true,
-        name: 'Anonymous Participant',
-        email: '',
-        lang: 'en',
-        rating: 3,
-        nps: 6,
-        textOriginal: 'Good hackathon overall, but registration line took nearly 45 minutes on Saturday morning.',
-        textTranslated: 'Good hackathon overall, but registration line took nearly 45 minutes on Saturday morning.',
-        sentiment: 'neutral',
-        score: -0.1,
-      },
-      {
-        isAnonymous: false,
         name: 'Sneha Kulkarni',
         email: 'sneha.k@pune.edu',
         lang: 'mr',
@@ -335,10 +348,10 @@ const seedDatabase = async () => {
       },
     ];
 
-    for (const item of sampleResponses) {
+    for (const item of hackathonResponses) {
       await FeedbackResponse.create({
         eventId: event1._id,
-        formId: form1._id,
+        formId: form1Data.form._id,
         sessionId: session1._id,
         isAnonymous: item.isAnonymous,
         participantName: item.name,
@@ -346,31 +359,23 @@ const seedDatabase = async () => {
         submissionLanguage: item.lang,
         answers: [
           {
-            questionId: q1[0]._id,
+            questionId: form1Data.questions[0]._id,
             questionType: 'star_rating',
-            questionPrompt: q1[0].prompt.en,
+            questionPrompt: form1Data.questions[0].prompt.en,
             ratingValue: item.rating,
           },
           {
-            questionId: q1[1]._id,
+            questionId: form1Data.questions[1]._id,
             questionType: 'nps',
-            questionPrompt: q1[1].prompt.en,
+            questionPrompt: form1Data.questions[1].prompt.en,
             ratingValue: item.nps,
           },
           {
-            questionId: q1[2]._id,
-            questionType: 'single_choice',
-            questionPrompt: q1[2].prompt.en,
-            selectedOptions: [item.rating >= 4 ? 'opt_stable' : 'opt_poor'],
-          },
-          {
-            questionId: q1[3]._id,
+            questionId: form1Data.questions[form1Data.questions.length - 1]._id,
             questionType: 'long_text',
-            questionPrompt: q1[3].prompt.en,
+            questionPrompt: form1Data.questions[form1Data.questions.length - 1].prompt.en,
             textResponseOriginal: item.textOriginal,
             textResponseTranslated: item.textTranslated,
-            audioTranscriptionOriginal: item.lang !== 'en' ? item.textOriginal : '',
-            audioTranscriptionEdited: item.lang !== 'en' ? item.textOriginal : '',
           },
         ],
         sentimentScore: item.score,
@@ -379,89 +384,328 @@ const seedDatabase = async () => {
       });
     }
 
-    console.log('[Seed] Generating comprehensive AI analysis...');
-    const aiAnalysis = await AIAnalysis.create({
+    // Responses for Event 4 (Marathon)
+    const marathonResponses = [
+      {
+        isAnonymous: false,
+        name: 'Vikram Joshi',
+        email: 'vikram.runner@gmail.com',
+        lang: 'en',
+        rating: 5,
+        nps: 10,
+        textOriginal: 'Superbly planned race route! The scenic morning course along the bypass was clean, and traffic management by Pune Police was exceptional.',
+        textTranslated: 'Superbly planned race route! The scenic morning course along the bypass was clean, and traffic management by Pune Police was exceptional.',
+        sentiment: 'positive',
+        score: 0.9,
+      },
+      {
+        isAnonymous: false,
+        name: 'Aditi Deshmukh',
+        email: 'aditi.d@sports.org',
+        lang: 'mr',
+        rating: 4,
+        nps: 8,
+        textOriginal: 'धावण्याचा मार्ग आणि पाण्याची सोय उत्तम होती. पण १५ किलोमीटरच्या स्टॉलवर इलेक्ट्रोलाइट्स संपले होते. मेडलचे डिझाईन अप्रतिम आहे!',
+        textTranslated: 'The running route and water facilities were great. However, electrolytes ran out at the 15km stall. The finisher medal design is magnificent!',
+        sentiment: 'positive',
+        score: 0.6,
+      },
+      {
+        isAnonymous: true,
+        name: 'Anonymous Runner',
+        email: '',
+        lang: 'hi',
+        rating: 3,
+        nps: 6,
+        textOriginal: 'रूट बहुत अच्छा था, लेकिन फिनिश लाइन पर नाश्ते के काउंटर पर बहुत ज्यादा भीड़ हो गई थी। टोकन सिस्टम होना चाहिए।',
+        textTranslated: 'The route was very good, but the breakfast counter at the finish line was extremely overcrowded. A token system should be implemented.',
+        sentiment: 'neutral',
+        score: -0.1,
+      },
+      {
+        isAnonymous: false,
+        name: 'Suresh Patil',
+        email: 'suresh.p@marathoners.in',
+        lang: 'mr',
+        rating: 5,
+        nps: 10,
+        textOriginal: 'टायमिंग चिप अतिशय अचूक होती. फिनिश लाईन ओलांडताच लगेच एसएमएस आला. स्वयंसेवकांचा उत्साह वाखाणण्याजोगा होता.',
+        textTranslated: 'Timing chip was extremely accurate. Received SMS immediately upon crossing the finish line. Volunteer enthusiasm was commendable.',
+        sentiment: 'positive',
+        score: 0.95,
+      },
+    ];
+
+    for (const item of marathonResponses) {
+      await FeedbackResponse.create({
+        eventId: event4._id,
+        formId: form4Data.form._id,
+        isAnonymous: item.isAnonymous,
+        participantName: item.name,
+        participantEmail: item.email,
+        submissionLanguage: item.lang,
+        answers: [
+          {
+            questionId: form4Data.questions[0]._id,
+            questionType: form4Data.questions[0].type,
+            questionPrompt: form4Data.questions[0].prompt.en,
+            ratingValue: item.rating,
+          },
+          {
+            questionId: form4Data.questions[form4Data.questions.length - 1]._id,
+            questionType: 'long_text',
+            questionPrompt: form4Data.questions[form4Data.questions.length - 1].prompt.en,
+            textResponseOriginal: item.textOriginal,
+            textResponseTranslated: item.textTranslated,
+          },
+        ],
+        sentimentScore: item.score,
+        sentimentLabel: item.sentiment,
+        processedByAI: true,
+      });
+    }
+
+    // Responses for Event 5 (Concert)
+    const concertResponses = [
+      {
+        isAnonymous: false,
+        name: 'Riya Sen',
+        email: 'riya.sen@musicfan.com',
+        lang: 'en',
+        rating: 5,
+        nps: 10,
+        textOriginal: 'Unbelievable energy! The audio bass and visual laser lights were top-notch. Headliner gave an unforgettable 2-hour set.',
+        textTranslated: 'Unbelievable energy! The audio bass and visual laser lights were top-notch. Headliner gave an unforgettable 2-hour set.',
+        sentiment: 'positive',
+        score: 0.95,
+      },
+      {
+        isAnonymous: true,
+        name: 'Concert Goer',
+        email: '',
+        lang: 'mr',
+        rating: 3,
+        nps: 6,
+        textOriginal: 'गाणी आणि कलाकारांचे सादरीकरण अप्रतिम होते, पण गेट २ वर प्रवेशासाठी ४० मिनिटे रांगेत उभे राहावे लागले. गर्दीचे नियोजन हवे होते.',
+        textTranslated: 'Songs and artist performance was superb, but had to stand in queue for 40 minutes for entry at Gate 2. Crowd management was needed.',
+        sentiment: 'neutral',
+        score: 0.1,
+      },
+      {
+        isAnonymous: false,
+        name: 'Manish Kumar',
+        email: 'manish.k@live.in',
+        lang: 'hi',
+        rating: 4,
+        nps: 8,
+        textOriginal: 'ध्वनि की गुणवत्ता बहुत शानदार थी, स्टेज और विजुअल बहुत खूबसूरत लगे। वॉशरूम की संख्या बढ़ाई जानी चाहिए।',
+        textTranslated: 'The sound quality was superb, stage and visuals looked very beautiful. Number of restrooms should be increased.',
+        sentiment: 'positive',
+        score: 0.65,
+      },
+    ];
+
+    for (const item of concertResponses) {
+      await FeedbackResponse.create({
+        eventId: event5._id,
+        formId: form5Data.form._id,
+        isAnonymous: item.isAnonymous,
+        participantName: item.name,
+        participantEmail: item.email,
+        submissionLanguage: item.lang,
+        answers: [
+          {
+            questionId: form5Data.questions[0]._id,
+            questionType: form5Data.questions[0].type,
+            questionPrompt: form5Data.questions[0].prompt.en,
+            ratingValue: item.rating,
+          },
+          {
+            questionId: form5Data.questions[form5Data.questions.length - 1]._id,
+            questionType: 'long_text',
+            questionPrompt: form5Data.questions[form5Data.questions.length - 1].prompt.en,
+            textResponseOriginal: item.textOriginal,
+            textResponseTranslated: item.textTranslated,
+          },
+        ],
+        sentimentScore: item.score,
+        sentimentLabel: item.sentiment,
+        processedByAI: true,
+      });
+    }
+
+    console.log('[Seed] Generating AI analyses and category-tailored recommendations...');
+
+    // AI Analysis for Hackathon
+    await AIAnalysis.create({
       eventId: event1._id,
       organizationId: organization._id,
       analyzedAt: new Date(),
-      totalResponsesAnalyzed: sampleResponses.length,
+      totalResponsesAnalyzed: hackathonResponses.length,
       sentimentSummary: {
-        positive: 5,
-        neutral: 2,
+        positive: 4,
+        neutral: 1,
         negative: 1,
-        averageScore: 0.47,
+        averageScore: 0.48,
       },
       themes: [
         {
-          name: 'Mentorship & Judging',
+          name: 'Mentorship & Problem Quality',
           sentiment: 'positive',
-          responseCount: 6,
-          representativeQuotes: [
-            'Outstanding mentorship from industry leaders! Problem statements were pragmatic and challenging.',
-            'Great judging panel and transparent evaluation rubrics.',
-          ],
-          keywords: ['mentors', 'evaluation', 'guidance', 'judging'],
+          responseCount: 5,
+          representativeQuotes: ['Outstanding mentorship from industry leaders! Problem statements were pragmatic.'],
+          keywords: ['mentors', 'evaluation', 'guidance', 'problems'],
         },
         {
-          name: 'Audio & Visual',
+          name: 'Audio & Visual Setup',
           sentiment: 'negative',
           responseCount: 2,
-          representativeQuotes: [
-            'The audio system in the auditorium was very poor. Those in back rows could barely hear.',
-            'Main auditorium microphone was echoing intermittently during opening speeches.',
-          ],
-          keywords: ['audio', 'mic', 'echo', 'inaudible'],
-        },
-        {
-          name: 'WiFi & Connectivity',
-          sentiment: 'neutral',
-          responseCount: 2,
-          representativeQuotes: [
-            'WiFi speed in Lab 4 slowed down at midnight during heavy push hours.',
-          ],
-          keywords: ['wifi', 'network', 'disconnect', 'speed'],
+          representativeQuotes: ['The audio system in the auditorium was very poor. Back rows could barely hear.'],
+          keywords: ['audio', 'mic', 'echo', 'volume'],
         },
       ],
       recurringIssues: [
         {
-          issue: 'Auditorium audio echo and low volume in back rows during keynote sessions.',
+          issue: 'Auditorium audio echo and low audibility in rear seating rows.',
           severity: 'high',
           frequency: 2,
           category: 'Audio & Visual',
-          evidence: [
-            'Audio system in the auditorium was very poor. Those in back rows could barely hear.',
-            'Microphone was echoing intermittently during opening speeches.',
-          ],
-        },
-        {
-          issue: 'Saturday morning registration bottleneck creating 45-minute attendee queues.',
-          severity: 'medium',
-          frequency: 1,
-          category: 'Venue & Logistics',
-          evidence: ['Registration line took nearly 45 minutes on Saturday morning.'],
+          evidence: ['Audio system in auditorium was very poor. Those in back rows could barely hear.'],
         },
       ],
       positiveHighlights: [
         {
-          highlight: 'Participant NPS is exceptional (Average rating 4.25/5 with 88% promoters).',
-          frequency: 5,
-          category: 'Mentorship & Delivery',
+          highlight: 'Participant NPS is exceptional (Average rating 4.2/5 with high willingness to return).',
+          frequency: 4,
+          category: 'Mentorship',
           evidence: ['Outstanding mentorship and transparent project rubrics.'],
         },
-        {
-          highlight: 'Midnight meals and refreshments earned broad praise from student teams.',
-          frequency: 3,
-          category: 'Food & Hospitality',
-          evidence: ['Food arrangements during midnight were truly appreciated.'],
-        },
-      ],
-      complaintClusters: [
-        { clusterName: 'Audio Hardware', count: 2, examples: ['Auditorium mic echo', 'Back-row inaudible'] },
-        { clusterName: 'Check-in Queue', count: 1, examples: ['45-min badge check-in delay'] },
       ],
     });
 
-    console.log('[Seed] Creating actionable AI recommendations...');
+    // AI Analysis for Marathon
+    await AIAnalysis.create({
+      eventId: event4._id,
+      organizationId: organization._id,
+      analyzedAt: new Date(),
+      totalResponsesAnalyzed: marathonResponses.length,
+      sentimentSummary: {
+        positive: 3,
+        neutral: 1,
+        negative: 0,
+        averageScore: 0.59,
+      },
+      themes: [
+        {
+          name: 'Route Demarcation & Safety',
+          sentiment: 'positive',
+          responseCount: 4,
+          representativeQuotes: ['Superbly planned race route along the bypass; clean and well-barricaded.'],
+          keywords: ['route', 'traffic', 'safety', 'police'],
+        },
+        {
+          name: 'Hydration & Post-Race Logistics',
+          sentiment: 'neutral',
+          responseCount: 2,
+          representativeQuotes: ['Electrolytes ran out at 15km; finish line breakfast had crowd congestion.'],
+          keywords: ['hydration', 'electrolytes', 'breakfast', 'crowd'],
+        },
+      ],
+      recurringIssues: [
+        {
+          issue: 'Electrolyte supply depleted at 15km checkpoint for mid-pack runners.',
+          severity: 'medium',
+          frequency: 1,
+          category: 'Hydration & Medical',
+          evidence: ['15km stall ran out of electrolytes'],
+        },
+      ],
+      positiveHighlights: [
+        {
+          highlight: 'Chip timing accuracy and instantaneous SMS result delivery received 100% acclaim.',
+          frequency: 3,
+          category: 'Race Timing',
+          evidence: ['Received SMS immediately upon crossing finish line.'],
+        },
+      ],
+    });
+
+    // Recommendations for Marathon
+    await Recommendation.create([
+      {
+        eventId: event4._id,
+        organizationId: organization._id,
+        title: 'Buffer 15km and 18km aid station electrolyte stock by 35%',
+        description: 'Mid-pack half-marathon runners experienced shortages of electrolyte drinks during the later stages.',
+        category: 'Hydration & Medical',
+        priority: 'high',
+        impact: 'Guarantees optimal replenishment for all runner paces and prevents fatigue injuries.',
+        suggestedAction: 'Deploy a dedicated replenishment vehicle with 1,500 extra sealed electrolyte bottles.',
+        supportingEvidence: ['Electrolytes ran out at 15km checkpoint'],
+        isConvertedToTask: false,
+      },
+      {
+        eventId: event4._id,
+        organizationId: organization._id,
+        title: 'Implement segregated breakfast queue corridors by distance bib color',
+        description: 'Finish line congestion peaked when 10K and 21K runners finished simultaneously.',
+        category: 'Finish Line Operations',
+        priority: 'medium',
+        impact: 'Reduces finish area wait times from 15 minutes to under 2 minutes.',
+        suggestedAction: 'Set up 4 separate food distribution tents mapped to bib color codes.',
+        supportingEvidence: ['Breakfast counter at finish line was overcrowded'],
+        isConvertedToTask: false,
+      },
+    ]);
+
+    // AI Analysis for Concert
+    await AIAnalysis.create({
+      eventId: event5._id,
+      organizationId: organization._id,
+      analyzedAt: new Date(),
+      totalResponsesAnalyzed: concertResponses.length,
+      sentimentSummary: {
+        positive: 2,
+        neutral: 1,
+        negative: 0,
+        averageScore: 0.57,
+      },
+      themes: [
+        {
+          name: 'Acoustics & Lighting Show',
+          sentiment: 'positive',
+          responseCount: 3,
+          representativeQuotes: ['Mind-blowing bass, laser visuals, and exceptional headline set.'],
+          keywords: ['audio', 'bass', 'lights', 'band'],
+        },
+        {
+          name: 'Entry Queue & Crowd Flow',
+          sentiment: 'neutral',
+          responseCount: 1,
+          representativeQuotes: ['40-minute queue delay at Gate 2 security check during peak entry.'],
+          keywords: ['queue', 'gate', 'security', 'delay'],
+        },
+      ],
+      recurringIssues: [
+        {
+          issue: 'Gate 2 security baggage screening caused 40-minute entrance queues.',
+          severity: 'high',
+          frequency: 1,
+          category: 'Crowd Management',
+          evidence: ['Had to stand in queue for 40 minutes at Gate 2'],
+        },
+      ],
+      positiveHighlights: [
+        {
+          highlight: 'World-class sound balance and stunning synchronized lighting production.',
+          frequency: 2,
+          category: 'Production Quality',
+          evidence: ['Unbelievable energy and top-notch audio bass.'],
+        },
+      ],
+    });
+
+    // Recommendations for Hackathon
     const rec1 = await Recommendation.create({
       eventId: event1._id,
       organizationId: organization._id,
@@ -521,18 +765,10 @@ const seedDatabase = async () => {
       {
         userId: hostUser._id,
         organizationId: organization._id,
-        title: 'AI Analysis Complete for HACK-2026',
-        message: 'InsightLoop AI synthesized 8 responses with an average sentiment score of +0.47.',
+        title: 'Universal AI Analysis Ready',
+        message: 'InsightLoop AI synthesized Marathon, Concert, and Hackathon responses across all languages.',
         type: 'ai_ready',
         link: `/events/${event1._id}/ai`,
-      },
-      {
-        userId: hostUser._id,
-        organizationId: organization._id,
-        title: 'New Response Milestone Reached',
-        message: 'Your event WORK-2026 has reached 25 responses (83% of target).',
-        type: 'response_milestone',
-        link: `/events/${event2._id}/responses`,
       },
     ]);
 
@@ -540,29 +776,22 @@ const seedDatabase = async () => {
       {
         organizationId: organization._id,
         userId: hostUser._id,
-        action: 'AI_ANALYSIS_EXECUTED',
-        resourceType: 'AIAnalysis',
-        resourceId: aiAnalysis._id.toString(),
-        details: { eventCode: 'HACK-2026', responsesAnalyzed: 8 },
-      },
-      {
-        organizationId: organization._id,
-        userId: hostUser._id,
-        action: 'EVENT_CREATED',
-        resourceType: 'Event',
-        resourceId: event1._id.toString(),
-        details: { title: event1.title, code: event1.code },
+        action: 'UNIVERSAL_SYSTEM_INITIALIZED',
+        resourceType: 'System',
+        resourceId: organization._id.toString(),
+        details: { seededCategories: ['College', 'Workshop', 'Conference', 'Marathon', 'Concert', 'Sports'] },
       },
     ]);
 
     console.log('===========================================================');
-    console.log(' SEED COMPLETED SUCCESSFULLY!');
-    console.log(' Demo Accounts Created:');
-    console.log(' 1. Admin: admin@insightloop.io / Password123!');
-    console.log(' 2. Host: organizer@mitpune.edu / Password123!');
-    console.log(' 3. Co-Host: coordinator@mitpune.edu / Password123!');
-    console.log(' Organization: MIT Pune Tech & Innovation Council');
-    console.log(' Seeded Events: HACK-2026, WORK-2026, LEAD-2026');
+    console.log(' UNIVERSAL SEED COMPLETED SUCCESSFULLY!');
+    console.log(' Universal Events Seeded:');
+    console.log(' 1. HACK-2026: College AI Hackathon');
+    console.log(' 2. WORK-2026: Hands-on AI Workshop');
+    console.log(' 3. LEAD-2026: Leadership Conference');
+    console.log(' 4. RUN-2026:  Pune City Marathon (Half Marathon 21K)');
+    console.log(' 5. LIVE-2026: Sunwave Indie Rock Concert');
+    console.log(' 6. PLAY-2026: Cricket Sports Championship');
     console.log('===========================================================');
 
     await disconnectDB();

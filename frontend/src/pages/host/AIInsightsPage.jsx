@@ -13,6 +13,11 @@ import {
   Sliders,
   Layers,
   CheckSquare,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Languages,
+  Activity,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -25,7 +30,14 @@ import {
   PieChart,
   Pie,
 } from 'recharts';
-import { aiIntelligenceService, eventService, improvementTaskService } from '../../api/services';
+import {
+  aiIntelligenceService,
+  eventService,
+  improvementTaskService,
+  reportService,
+  feedbackService,
+} from '../../api/services';
+import { getCategoryBadge } from '../../config/eventCategories';
 
 export const AIInsightsPage = () => {
   const { id } = useParams();
@@ -34,9 +46,11 @@ export const AIInsightsPage = () => {
   const [event, setEvent] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
+  const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [convertingId, setConvertingId] = useState(null);
+  const [downloadingReport, setDownloadingReport] = useState(false);
 
   useEffect(() => {
     fetchEventsAndInit();
@@ -69,15 +83,19 @@ export const AIInsightsPage = () => {
 
   const loadEventIntelligence = async (eventId) => {
     try {
-      const [evtRes, aiRes] = await Promise.all([
+      const [evtRes, aiRes, respRes] = await Promise.all([
         eventService.getEventById(eventId),
         aiIntelligenceService.getAnalysis(eventId),
+        feedbackService.getResponsesByEvent(eventId, { limit: 100 }),
       ]);
 
       if (evtRes.data?.success) setEvent(evtRes.data.event);
       if (aiRes.data?.success) {
         setAnalysis(aiRes.data.analysis);
         setRecommendations(aiRes.data.recommendations || []);
+      }
+      if (respRes.data?.success) {
+        setResponses(respRes.data.responses || []);
       }
     } catch (err) {
       console.warn('AI intelligence fetch error:', err.message);
@@ -111,7 +129,10 @@ export const AIInsightsPage = () => {
   const handleConvertToTask = async (rec) => {
     try {
       setConvertingId(rec._id);
-      const orgId = typeof event?.organizationId === 'object' ? (event.organizationId._id || event.organizationId.id) : event?.organizationId;
+      const orgId =
+        typeof event?.organizationId === 'object'
+          ? event.organizationId._id || event.organizationId.id
+          : event?.organizationId;
       await improvementTaskService.createTask({
         organizationId: orgId,
         relatedEventId: event?._id || event?.id || selectedEventId,
@@ -122,7 +143,6 @@ export const AIInsightsPage = () => {
         status: 'todo',
         notes: `Impact: ${rec.impact}`,
       });
-      // Refresh recommendations
       if (selectedEventId) {
         loadEventIntelligence(selectedEventId);
       }
@@ -133,23 +153,78 @@ export const AIInsightsPage = () => {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    if (!selectedEventId) return;
+    try {
+      setDownloadingReport(true);
+      const res = await reportService.downloadPDF(selectedEventId);
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `InsightLoop-Report-${event?.code || 'event'}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Failed to download PDF report: ' + err.message);
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
+
+  const handleDownloadExcel = async () => {
+    if (!selectedEventId) return;
+    try {
+      setDownloadingReport(true);
+      const res = await reportService.downloadExcel(selectedEventId);
+      const blob = new Blob([res.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `InsightLoop-Report-${event?.code || 'event'}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Failed to download Excel workbook: ' + err.message);
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64 text-sm font-semibold text-navy">
         <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-        <span>Synthesizing event intelligence...</span>
+        <span>Synthesizing universal event intelligence...</span>
       </div>
     );
   }
 
+  const categoryMeta = getCategoryBadge(event?.category);
+
+  // Sentiment bar chart data
   const sentimentData = [
     { name: 'Positive', count: analysis?.sentimentSummary?.positive || 0, color: '#10B981' },
     { name: 'Neutral', count: analysis?.sentimentSummary?.neutral || 0, color: '#6366F1' },
     { name: 'Negative', count: analysis?.sentimentSummary?.negative || 0, color: '#F43F5E' },
   ];
 
+  // Language stats calculation
+  const totalResp = responses.length || 1;
+  const enCount = responses.filter((r) => r.submissionLanguage === 'en').length;
+  const hiCount = responses.filter((r) => r.submissionLanguage === 'hi').length;
+  const mrCount = responses.filter((r) => r.submissionLanguage === 'mr').length;
+
+  const languagePieData = [
+    { name: 'English', value: enCount, color: '#4F46E5' },
+    { name: 'हिन्दी (Hindi)', value: hiCount, color: '#F59E0B' },
+    { name: 'मराठी (Marathi)', value: mrCount, color: '#10B981' },
+  ].filter((d) => d.value > 0);
+
   return (
-    <div className="space-y-8 animate-fadeIn max-w-6xl mx-auto">
+    <div className="space-y-8 animate-fadeIn max-w-6xl mx-auto pb-16">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -174,40 +249,65 @@ export const AIInsightsPage = () => {
             <h1 className="text-2xl font-heading font-extrabold text-navy">
               AI Feedback Intelligence
             </h1>
-            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-coral/10 text-coral">
-              AI Engine
+            <span
+              className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${categoryMeta.badgeColor}`}
+            >
+              {event?.category || 'Universal'}
             </span>
+            {event?.subcategory && (
+              <span className="text-[10px] font-semibold text-charcoal/70 bg-ivory px-2 py-0.5 rounded-full border border-charcoal/10">
+                {event.subcategory}
+              </span>
+            )}
           </div>
           <p className="text-xs text-charcoal/60 mt-0.5">
             {event?.title || 'Selected Event'} ({analysis?.totalResponsesAnalyzed || 0} responses analyzed)
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        {/* Right Action Toolbar */}
+        <div className="flex flex-wrap items-center gap-2">
           {eventsList.length > 0 && (
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-charcoal/60">Select Event:</label>
-              <select
-                value={selectedEventId}
-                onChange={handleSelectEvent}
-                className="bg-white border border-charcoal/15 rounded-xl px-3 py-2 text-xs font-semibold text-navy shadow-subtle focus:outline-none focus:border-coral"
-              >
-                {eventsList.map((e) => (
-                  <option key={e._id || e.id} value={e._id || e.id}>
-                    {e.title} ({e.code})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={selectedEventId}
+              onChange={handleSelectEvent}
+              className="bg-white border border-charcoal/15 rounded-xl px-3 py-2 text-xs font-semibold text-navy shadow-subtle focus:outline-none focus:border-coral"
+            >
+              {eventsList.map((e) => (
+                <option key={e._id || e.id} value={e._id || e.id}>
+                  [{e.category}] {e.title} ({e.code})
+                </option>
+              ))}
+            </select>
           )}
+
+          <button
+            onClick={handleDownloadPDF}
+            disabled={downloadingReport}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-charcoal/15 text-xs font-bold text-navy hover:border-coral transition-colors"
+            title="Download 1-Click Executive PDF Report"
+          >
+            <FileText size={14} className="text-coral" />
+            <span>PDF Report</span>
+          </button>
+
+          <button
+            onClick={handleDownloadExcel}
+            disabled={downloadingReport}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-charcoal/15 text-xs font-bold text-navy hover:border-sage transition-colors"
+            title="Download Multi-Tab Excel Workbook"
+          >
+            <FileSpreadsheet size={14} className="text-sage" />
+            <span>Excel (.xlsx)</span>
+          </button>
 
           <button
             onClick={handleRunAnalysis}
             disabled={analyzing || !selectedEventId}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95 disabled:opacity-50"
           >
             <RefreshCw size={14} className={analyzing ? 'animate-spin' : ''} />
-            <span>{analyzing ? 'Processing NLP Pipeline...' : (analysis ? 'Re-run AI Analysis' : 'Run AI Analysis Now')}</span>
+            <span>{analyzing ? 'Analyzing...' : analysis ? 'Re-run AI' : 'Run AI Analysis'}</span>
           </button>
         </div>
       </div>
@@ -217,7 +317,7 @@ export const AIInsightsPage = () => {
           <Brain size={36} className="text-indigo-600 mx-auto" />
           <h3 className="text-base font-bold text-slate-900">AI Intelligence Pipeline Ready</h3>
           <p className="text-xs text-slate-600 max-w-md mx-auto">
-            Run our multi-model NLP pipeline to synthesize attendee feedback, cluster recurring complaints, identify positive highlights, and generate priority improvements.
+            Synthesize multilingual attendee feedback across Hindi, Marathi, and English. Cluster category-specific bottlenecks and generate actionable recommendations.
           </p>
           <button
             onClick={handleRunAnalysis}
@@ -234,39 +334,48 @@ export const AIInsightsPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white rounded-3xl p-5 border border-charcoal/10 shadow-subtle">
           <span className="text-xs font-bold text-charcoal/60">Analyzed Feedback</span>
-          <p className="text-2xl font-extrabold text-navy mt-1">{analysis?.totalResponsesAnalyzed || 0}</p>
-          <span className="text-[10px] text-sage-dark font-semibold">100% of collection</span>
+          <p className="text-2xl font-extrabold text-navy mt-1">
+            {analysis?.totalResponsesAnalyzed || 0}
+          </p>
+          <span className="text-[10px] text-sage font-semibold">100% of collection</span>
         </div>
 
         <div className="bg-white rounded-3xl p-5 border border-charcoal/10 shadow-subtle">
-          <span className="text-xs font-bold text-sage-dark">Positive Responses</span>
-          <p className="text-2xl font-extrabold text-sage-dark mt-1">{analysis?.sentimentSummary?.positive || 0}</p>
+          <span className="text-xs font-bold text-sage">Positive Responses</span>
+          <p className="text-2xl font-extrabold text-sage mt-1">
+            {analysis?.sentimentSummary?.positive || 0}
+          </p>
           <span className="text-[10px] text-charcoal/50">Promoters & Enthusiasts</span>
         </div>
 
         <div className="bg-white rounded-3xl p-5 border border-charcoal/10 shadow-subtle">
           <span className="text-xs font-bold text-coral">Recurring Issues</span>
-          <p className="text-2xl font-extrabold text-coral mt-1">{analysis?.recurringIssues?.length || 0}</p>
+          <p className="text-2xl font-extrabold text-coral mt-1">
+            {analysis?.recurringIssues?.length || 0}
+          </p>
           <span className="text-[10px] text-charcoal/50">Bottlenecks flagged</span>
         </div>
 
         <div className="bg-white rounded-3xl p-5 border border-charcoal/10 shadow-subtle">
           <span className="text-xs font-bold text-navy">Sentiment Index</span>
           <p className="text-2xl font-extrabold text-navy mt-1">
-            {analysis?.sentimentSummary?.averageScore >= 0 ? '+' : ''}{analysis?.sentimentSummary?.averageScore || 0}
+            {analysis?.sentimentSummary?.averageScore >= 0 ? '+' : ''}
+            {analysis?.sentimentSummary?.averageScore || 0}
           </p>
           <span className="text-[10px] text-charcoal/50">-1.0 (Critical) to +1.0 (Ideal)</span>
         </div>
       </div>
 
-      {/* Main Split: Themes & Sentiment Chart */}
+      {/* Main Split: Themes & Polarity / Language Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Extracted Themes */}
         <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-7 border border-charcoal/10 shadow-subtle space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-heading font-bold text-navy">Extracted Feedback Themes</h3>
-              <p className="text-xs text-charcoal/60">Clustered participant topics & representative citations</p>
+              <p className="text-xs text-charcoal/60">
+                Clustered participant topics & representative citations ({event?.category})
+              </p>
             </div>
           </div>
 
@@ -286,7 +395,7 @@ export const AIInsightsPage = () => {
                   <span
                     className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
                       th.sentiment === 'positive'
-                        ? 'bg-sage/30 text-sage-dark'
+                        ? 'bg-sage/20 text-sage'
                         : th.sentiment === 'negative'
                         ? 'bg-coral/20 text-coral'
                         : 'bg-lavender/50 text-navy'
@@ -311,44 +420,85 @@ export const AIInsightsPage = () => {
           </div>
         </div>
 
-        {/* Sentiment Breakdown Chart */}
-        <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle flex flex-col justify-between space-y-4">
-          <div>
-            <h3 className="text-lg font-heading font-bold text-navy">Polarity Ratio</h3>
-            <p className="text-xs text-charcoal/60">Response counts by sentiment category</p>
+        {/* Polarity & Multilingual Distribution Side Panel */}
+        <div className="space-y-6">
+          {/* Sentiment Bar */}
+          <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle space-y-4">
+            <div>
+              <h3 className="text-sm font-heading font-bold text-navy">Polarity Ratio</h3>
+              <p className="text-xs text-charcoal/60">Response counts by sentiment category</p>
+            </div>
+
+            <div className="h-40 w-full flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sentimentData} layout="vertical">
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" textAnchor="end" tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Bar dataKey="count" radius={[0, 8, 8, 0]}>
+                    {sentimentData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          <div className="h-48 w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={sentimentData} layout="vertical">
-                <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" textAnchor="end" tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Bar dataKey="count" radius={[0, 8, 8, 0]}>
-                  {sentimentData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {/* Multilingual Submission Stats */}
+          <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-heading font-bold text-navy flex items-center gap-1.5">
+                  <Languages size={15} className="text-coral" />
+                  <span>Language Distribution</span>
+                </h3>
+                <p className="text-xs text-charcoal/60">English, हिन्दी & मराठी usage</p>
+              </div>
+            </div>
 
-          <div className="p-4 rounded-2xl bg-ivory text-xs space-y-1.5 border border-charcoal/10">
-            <span className="font-bold text-navy block">AI Recommendation Readiness</span>
-            <p className="text-charcoal/60">
-              InsightLoop has converted friction patterns into actionable improvement tasks below.
-            </p>
+            <div className="space-y-2 pt-1 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 font-medium text-charcoal/80">
+                  <span className="w-2.5 h-2.5 rounded-full bg-coral" />
+                  <span>English</span>
+                </span>
+                <span className="font-bold text-navy">
+                  {enCount} ({Math.round((enCount / totalResp) * 100)}%)
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 font-medium text-charcoal/80">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                  <span>हिन्दी (Hindi)</span>
+                </span>
+                <span className="font-bold text-navy">
+                  {hiCount} ({Math.round((hiCount / totalResp) * 100)}%)
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 font-medium text-charcoal/80">
+                  <span className="w-2.5 h-2.5 rounded-full bg-sage" />
+                  <span>मराठी (Marathi)</span>
+                </span>
+                <span className="font-bold text-navy">
+                  {mrCount} ({Math.round((mrCount / totalResp) * 100)}%)
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Recurring Issues & Positive Highlights Grid */}
+      {/* Recurring Bottlenecks & Positive Highlights Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Recurring Issues */}
         <div className="bg-white rounded-3xl p-6 sm:p-7 border border-charcoal/10 shadow-subtle space-y-4">
           <div className="flex items-center gap-2">
             <AlertTriangle size={18} className="text-coral" />
-            <h3 className="text-base font-heading font-bold text-navy">Recurring Bottlenecks & Friction</h3>
+            <h3 className="text-base font-heading font-bold text-navy">
+              Recurring Bottlenecks & Friction
+            </h3>
           </div>
 
           <div className="space-y-3">
@@ -374,16 +524,16 @@ export const AIInsightsPage = () => {
         {/* Positive Highlights */}
         <div className="bg-white rounded-3xl p-6 sm:p-7 border border-charcoal/10 shadow-subtle space-y-4">
           <div className="flex items-center gap-2">
-            <CheckCircle2 size={18} className="text-sage-dark" />
+            <CheckCircle2 size={18} className="text-sage" />
             <h3 className="text-base font-heading font-bold text-navy">Key Highlights & Strengths</h3>
           </div>
 
           <div className="space-y-3">
             {analysis?.positiveHighlights?.map((high, idx) => (
-              <div key={idx} className="p-4 rounded-2xl bg-sage/10 border border-sage-dark/20 space-y-1.5">
+              <div key={idx} className="p-4 rounded-2xl bg-sage/10 border border-sage/20 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-navy">{high.category}</span>
-                  <span className="text-[10px] font-bold text-sage-dark">{high.frequency} endorsements</span>
+                  <span className="text-[10px] font-bold text-sage">{high.frequency} endorsements</span>
                 </div>
                 <p className="text-xs text-charcoal/80 font-medium">{high.highlight}</p>
               </div>
@@ -403,7 +553,7 @@ export const AIInsightsPage = () => {
               Actionable AI Recommendations
             </h3>
             <p className="text-xs text-charcoal/60">
-              Transform AI findings directly into tracked tasks for team members
+              Transform AI findings directly into tracked tasks for team members ({event?.category})
             </p>
           </div>
           <Link
@@ -437,7 +587,7 @@ export const AIInsightsPage = () => {
                   </span>
                 </div>
                 <p className="text-xs text-charcoal/70">{rec.suggestedAction}</p>
-                <div className="flex items-center gap-2 text-[11px] text-sage-dark font-medium">
+                <div className="flex items-center gap-2 text-[11px] text-sage font-medium">
                   <TrendingUp size={13} />
                   <span>Impact: {rec.impact}</span>
                 </div>
@@ -450,8 +600,8 @@ export const AIInsightsPage = () => {
                   onClick={() => handleConvertToTask(rec)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
                     rec.isConvertedToTask
-                      ? 'bg-sage/20 text-sage-dark border border-sage-dark/30 cursor-default'
-                      : 'bg-navy hover:bg-navy-700 text-white shadow-sm'
+                      ? 'bg-sage/20 text-sage border border-sage/30 cursor-default'
+                      : 'bg-navy hover:bg-navy-900 text-white shadow-sm'
                   }`}
                 >
                   <CheckSquare size={14} />

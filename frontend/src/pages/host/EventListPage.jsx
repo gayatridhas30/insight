@@ -13,8 +13,12 @@ import {
   CheckCircle,
   MoreVertical,
   RefreshCw,
+  Sparkles,
+  MapPin,
+  Tag,
 } from 'lucide-react';
 import { eventService } from '../../api/services';
+import { EVENT_CATEGORIES, getCategoryBadge } from '../../config/eventCategories';
 
 export const EventListPage = () => {
   const [events, setEvents] = useState([]);
@@ -52,7 +56,7 @@ export const EventListPage = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn pb-16">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -60,13 +64,13 @@ export const EventListPage = () => {
             Events Directory
           </h1>
           <p className="text-xs sm:text-sm text-charcoal/60 mt-1">
-            Manage feedback forms, live responses, and intelligence dashboards
+            Universal feedback management across Marathons, Concerts, Sports, Workshops, and Conferences
           </p>
         </div>
 
         <Link
           to="/events/create"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95 shrink-0"
         >
           <PlusCircle size={16} />
           <span>Create New Event</span>
@@ -81,12 +85,12 @@ export const EventListPage = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title or event code..."
+            placeholder="Search by title, code, or subcategory..."
             className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
           />
         </form>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -104,11 +108,12 @@ export const EventListPage = () => {
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="px-3 py-2 text-xs font-semibold rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral text-charcoal"
           >
-            <option value="all">All Categories</option>
-            <option value="Hackathon">Hackathon</option>
-            <option value="Workshop">Workshop</option>
-            <option value="Conference">Conference</option>
-            <option value="Corporate">Corporate</option>
+            <option value="all">All Universal Categories</option>
+            {Object.keys(EVENT_CATEGORIES).map((key) => (
+              <option key={key} value={key}>
+                {EVENT_CATEGORIES[key].name}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -124,7 +129,7 @@ export const EventListPage = () => {
           <Calendar size={36} className="text-coral mx-auto" />
           <h3 className="text-lg font-heading font-bold text-navy">No Events Found</h3>
           <p className="text-xs text-charcoal/60 max-w-sm mx-auto">
-            Try adjusting your search criteria or create your first feedback event.
+            Try adjusting your search criteria or create your first universal feedback event.
           </p>
           <Link
             to="/events/create"
@@ -137,6 +142,8 @@ export const EventListPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((evt) => {
             const eventId = evt.id || evt._id;
+            const categoryMeta = getCategoryBadge(evt.category);
+
             return (
               <div
                 key={eventId}
@@ -150,7 +157,7 @@ export const EventListPage = () => {
                     <span
                       className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
                         evt.status === 'completed'
-                          ? 'bg-sage/30 text-sage-dark'
+                          ? 'bg-sage/20 text-sage'
                           : evt.status === 'ongoing'
                           ? 'bg-coral/20 text-coral'
                           : 'bg-lavender/50 text-navy'
@@ -164,16 +171,27 @@ export const EventListPage = () => {
                     <Link to={`/events/${eventId}`}>{evt.title}</Link>
                   </h3>
 
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span
+                      className={`text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full border ${categoryMeta.badgeColor}`}
+                    >
+                      {evt.category}
+                    </span>
+                    {evt.subcategory && (
+                      <span className="text-[10px] font-semibold text-charcoal/70 bg-ivory px-2 py-0.5 rounded-full border border-charcoal/10">
+                        {evt.subcategory}
+                      </span>
+                    )}
+                  </div>
+
                   <p className="text-xs text-charcoal/60 line-clamp-2">
                     {evt.description || 'No description provided.'}
                   </p>
 
-                  <div className="pt-2 text-xs text-charcoal/50 flex flex-wrap gap-2">
-                    <span>{evt.category}</span>
-                    <span>•</span>
+                  <div className="pt-1 text-xs text-charcoal/50 flex flex-wrap gap-2">
                     <span>{evt.venueType}</span>
                     <span>•</span>
-                    <span>{evt.location || 'Online'}</span>
+                    <span className="truncate max-w-[180px]">{evt.location || 'Online'}</span>
                   </div>
                 </div>
 
@@ -211,7 +229,7 @@ export const EventListPage = () => {
                     </Link>
                     <Link
                       to={`/events/${eventId}/ai`}
-                      className="py-2 rounded-xl bg-ivory hover:bg-sage-dark hover:text-white text-charcoal text-xs font-semibold text-center transition-colors"
+                      className="py-2 rounded-xl bg-ivory hover:bg-sage hover:text-white text-charcoal text-xs font-semibold text-center transition-colors"
                       title="AI Feedback Insights"
                     >
                       AI

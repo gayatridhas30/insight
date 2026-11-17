@@ -1,6 +1,7 @@
 import { Event, EventSession, FeedbackForm, Question, FeedbackResponse, AIAnalysis } from '../models/index.js';
 import { qrService } from '../services/qrService.js';
 import { logAudit } from '../middleware/audit.js';
+import { getDefaultQuestionsForCategory, getCategoryConfig } from '../config/eventCategories.js';
 
 export const createEvent = async (req, res, next) => {
   try {
@@ -8,6 +9,8 @@ export const createEvent = async (req, res, next) => {
       organizationId,
       title,
       category = 'Workshop',
+      subcategory = '',
+      subcategories = [],
       description,
       venueType = 'in-person',
       location,
@@ -21,16 +24,22 @@ export const createEvent = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Event title and organizationId are required.' });
     }
 
-    // Generate clean alphanumeric code (e.g., TECH-4921)
-    const prefix = title.slice(0, 4).toUpperCase().replace(/[^A-Z]/g, 'EVT');
+    // Generate clean alphanumeric code (e.g., TECH-4921 or RUN-3829)
+    const categoryPrefix = category ? category.slice(0, 4).toUpperCase().replace(/[^A-Z]/g, 'EVT') : 'EVT';
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const code = `${prefix}-${randomSuffix}`;
+    const code = `${categoryPrefix}-${randomSuffix}`;
+
+    const subcats = Array.isArray(subcategories) && subcategories.length > 0
+      ? subcategories
+      : subcategory ? [subcategory] : [];
 
     const event = await Event.create({
       organizationId,
       title,
       code,
       category,
+      subcategory: subcategory || (subcats[0] || ''),
+      subcategories: subcats,
       description: description || '',
       venueType,
       location: location || 'Main Auditorium',
@@ -51,67 +60,27 @@ export const createEvent = async (req, res, next) => {
       isAnonymousAllowed: true,
       supportedLanguages: ['en', 'hi', 'mr'],
       allowVoiceFeedback: true,
+      templateType: category.toLowerCase(),
     });
 
-    // Seed 4 standard initial questions
-    await Question.create([
-      {
-        formId: form._id,
-        order: 1,
-        type: 'star_rating',
-        category: 'overall',
-        isRequired: true,
-        prompt: {
-          en: `How would you rate your overall experience at ${title}?`,
-          hi: `${title} में आपका समग्र अनुभव कैसा रहा?`,
-          mr: `${title} मधील आपला एकंदर अनुभव कसा होता?`,
-        },
-        description: { en: 'Select 1 to 5 stars', hi: '1 से 5 स्टार', mr: '1 ते 5 स्टार' },
+    // Dynamically retrieve category and subcategory-tailored questions
+    const templateQuestions = getDefaultQuestionsForCategory(category, event.subcategory);
+    const seededQuestions = templateQuestions.map((q, idx) => ({
+      formId: form._id,
+      order: idx + 1,
+      type: q.type,
+      category: q.category || 'overall',
+      isRequired: Boolean(q.isRequired),
+      prompt: {
+        en: (q.prompt?.en || '').replace(/\$\{title\}/g, title),
+        hi: (q.prompt?.hi || '').replace(/\$\{title\}/g, title),
+        mr: (q.prompt?.mr || '').replace(/\$\{title\}/g, title),
       },
-      {
-        formId: form._id,
-        order: 2,
-        type: 'nps',
-        category: 'overall',
-        isRequired: true,
-        prompt: {
-          en: 'How likely are you to recommend our future events to peers or colleagues?',
-          hi: 'आप किसी सहकर्मी को हमारे भविष्य के कार्यक्रमों की सिफारिश करने की कितनी संभावना रखते हैं?',
-          mr: 'आपण मित्रांना किंवा सहकाऱ्यांना आमच्या पुढील कार्यक्रमांची शिफारस करण्याची किती शक्यता आहे?',
-        },
-        description: { en: '0 (Not likely) to 10 (Extremely likely)', hi: '0 से 10', mr: '0 ते 10' },
-      },
-      {
-        formId: form._id,
-        order: 3,
-        type: 'star_rating',
-        category: 'content',
-        isRequired: false,
-        prompt: {
-          en: 'How was the quality and relevance of the session content?',
-          hi: 'सत्र सामग्री की गुणवत्ता और प्रासंगिकता कैसी थी?',
-          mr: 'सत्र साहित्याचा दर्जा आणि प्रासंगिकता कशी होती?',
-        },
-        description: { en: '1 to 5 stars', hi: '1 से 5 स्टार', mr: '1 ते 5 स्टार' },
-      },
-      {
-        formId: form._id,
-        order: 4,
-        type: 'long_text',
-        category: 'overall',
-        isRequired: false,
-        prompt: {
-          en: 'What did you appreciate most, and what should we improve next time?',
-          hi: 'आपको क्या सबसे अच्छा लगा, और हम अगली बार क्या सुधार कर सकते हैं?',
-          mr: 'आपल्याला काय सर्वाधिक आवडले, आणि पुढील वेळी काय सुधारणा केली पाहिजे?',
-        },
-        description: {
-          en: 'Feel free to type or record voice in English, Hindi, or Marathi',
-          hi: 'अंग्रेजी, हिंदी या मराठी में लिखें या आवाज रिकॉर्ड करें',
-          mr: 'इंग्रजी, हिंदी किंवा मराठीत लिहा किंवा आवाज रेकॉर्ड करा',
-        },
-      },
-    ]);
+      description: q.description || { en: '', hi: '', mr: '' },
+      options: q.options || [],
+    }));
+
+    await Question.insertMany(seededQuestions);
 
     // Generate QR Code data
     const qrData = await qrService.generateFeedbackQRCode(event.code);
@@ -121,7 +90,7 @@ export const createEvent = async (req, res, next) => {
       action: 'EVENT_CREATED',
       resourceType: 'Event',
       resourceId: event._id.toString(),
-      details: { title: event.title, code: event.code },
+      details: { title: event.title, code: event.code, category, subcategory: event.subcategory },
       organizationId,
     });
 
@@ -138,16 +107,19 @@ export const createEvent = async (req, res, next) => {
 
 export const getEvents = async (req, res, next) => {
   try {
-    const { organizationId, status, category, search, page = 1, limit = 20 } = req.query;
+    const { organizationId, status, category, subcategory, search, page = 1, limit = 20 } = req.query;
 
     const query = {};
     if (organizationId) query.organizationId = organizationId;
     if (status) query.status = status;
     if (category) query.category = category;
+    if (subcategory) query.subcategory = subcategory;
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
         { code: { $regex: search, $options: 'i' } },
+        { subcategory: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } },
       ];
     }
 
@@ -235,9 +207,12 @@ export const getEventByCode = async (req, res, next) => {
       success: true,
       event: {
         id: event._id,
+        _id: event._id,
         title: event.title,
         code: event.code,
         category: event.category,
+        subcategory: event.subcategory || '',
+        subcategories: event.subcategories || [],
         description: event.description,
         venueType: event.venueType,
         location: event.location,
@@ -358,6 +333,7 @@ export const compareEvents = async (req, res, next) => {
           title: evt.title,
           code: evt.code,
           category: evt.category,
+          subcategory: evt.subcategory || '',
           date: evt.startDate,
         },
         metrics: {

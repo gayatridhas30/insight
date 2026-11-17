@@ -37,6 +37,7 @@ export const runEventAnalysis = async (req, res, next) => {
       organizationId: event.organizationId.toString(),
       eventTitle: event.title,
       eventCategory: event.category,
+      eventSubcategory: event.subcategory || '',
       responses: formattedResponses,
     });
 
@@ -85,7 +86,7 @@ export const runEventAnalysis = async (req, res, next) => {
       action: 'AI_ANALYSIS_EXECUTED',
       resourceType: 'AIAnalysis',
       resourceId: savedAnalysis._id.toString(),
-      details: { totalResponses: responses.length },
+      details: { totalResponses: responses.length, category: event.category, subcategory: event.subcategory },
       organizationId: event.organizationId,
     });
 

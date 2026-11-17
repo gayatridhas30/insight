@@ -19,7 +19,7 @@ export const AIAssistantPage = () => {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: `Hello! I am your InsightLoop RAG AI Intelligence Assistant for ${activeOrganization?.name || 'your organization'}. Ask me questions about attendee satisfaction, recurring problems, speaker engagement, or comparison across past sessions.`,
+      text: `Hello! I am your InsightLoop RAG AI Intelligence Assistant for ${activeOrganization?.name || 'your organization'}. Ask me questions about attendee satisfaction, recurring problems, speaker engagement, marathon hydration, concert audio quality, or comparisons across past events.`,
       supportingEvidence: [],
       timestamp: 'Just now',
     },
@@ -27,11 +27,11 @@ export const AIAssistantPage = () => {
   const [loading, setLoading] = useState(false);
 
   const suggestedQueries = [
-    'What were the biggest problems in my previous events?',
-    'What did participants appreciate most?',
-    'Have food or audio-related complaints increased?',
-    'Compare my last workshops on content delivery.',
-    'What should I improve next time for our upcoming hackathon?',
+    'What were the biggest issues reported in the marathon?',
+    'How was sound quality and crowd management at the concert?',
+    'What did participants appreciate most across workshops?',
+    'Have hydration or audio complaints increased?',
+    'What key improvements should we prioritize next time?',
   ];
 
   const handleSend = async (queryText) => {
@@ -97,7 +97,7 @@ export const AIAssistantPage = () => {
             </span>
           </div>
           <p className="text-xs text-charcoal/60">
-            Ask natural language questions backed by real participant citations
+            Ask natural language questions backed by real participant citations across any event category
           </p>
         </div>
 
@@ -118,7 +118,7 @@ export const AIAssistantPage = () => {
               key={idx}
               type="button"
               onClick={() => handleSend(sq)}
-              className="text-xs px-3 py-1.5 rounded-xl bg-white border border-charcoal/10 hover:border-coral hover:text-coral text-charcoal/80 transition-all font-medium"
+              className="text-xs px-3 py-1.5 rounded-xl bg-white border border-charcoal/10 hover:border-coral hover:text-coral text-charcoal/80 transition-all font-medium shadow-xs"
             >
               {sq}
             </button>
@@ -195,7 +195,7 @@ export const AIAssistantPage = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask a question about your events, complaints, or speaker feedback..."
+          placeholder="Ask a question about your marathon, concert, workshop, or sports event..."
           className="w-full pl-5 pr-14 py-3.5 rounded-2xl border border-charcoal/15 bg-white text-sm focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral/20 shadow-subtle"
         />
         <button

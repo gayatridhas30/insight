@@ -77,7 +77,7 @@ export const RegisterPage = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="Prof. Ananya Sharma"
+                    placeholder="Yash Dhawale"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
                   />
                 </div>

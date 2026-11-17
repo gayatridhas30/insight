@@ -20,6 +20,7 @@ class ReportService {
       { prop: 'Event Title', val: event.title },
       { prop: 'Event Code', val: event.code },
       { prop: 'Category', val: event.category },
+      { prop: 'Subcategory', val: event.subcategory || 'N/A' },
       { prop: 'Venue Type', val: event.venueType },
       { prop: 'Location', val: event.location },
       { prop: 'Total Responses', val: responses.length },
@@ -119,7 +120,7 @@ class ReportService {
         // Event Metadata
         doc.fillColor('#292D35').fontSize(18).font('Helvetica-Bold').text(event.title);
         doc.fontSize(10).font('Helvetica').fillColor('#636C7C')
-          .text(`Event Code: ${event.code}  |  Category: ${event.category}  |  Location: ${event.location || 'Online'}`);
+          .text(`Event Code: ${event.code}  |  Category: ${event.category}${event.subcategory ? ` (${event.subcategory})` : ''}  |  Location: ${event.location || 'Online'}`);
 
         doc.moveDown();
         doc.strokeColor('#E7ECF3').lineWidth(1).moveTo(40, doc.y).lineTo(doc.page.width - 40, doc.y).stroke();
@@ -158,30 +159,25 @@ class ReportService {
           doc.fontSize(12).font('Helvetica-Bold').fillColor('#FF7058').text('Recurring Friction Points & Areas for Improvement');
           doc.moveDown(0.3);
           analysis.recurringIssues.slice(0, 3).forEach((issue) => {
-            doc.fontSize(10).font('Helvetica').fillColor('#292D35').text(`✖ [${issue.severity.toUpperCase()}] ${issue.issue}`);
+            doc.fontSize(10).font('Helvetica').fillColor('#292D35')
+              .text(`▲ [${issue.severity.toUpperCase()}] ${issue.issue} (Reported by ${issue.frequency} attendees)`);
           });
           doc.moveDown();
         }
 
-        // Actionable AI Recommendations
-        if (recommendations && recommendations.length) {
-          doc.fontSize(12).font('Helvetica-Bold').fillColor('#17243A').text('Actionable AI Recommendations');
+        // Actionable Recommendations
+        if (recommendations?.length) {
+          doc.fontSize(12).font('Helvetica-Bold').fillColor('#17243A').text('Actionable AI Improvement Recommendations');
           doc.moveDown(0.3);
-          recommendations.slice(0, 3).forEach((rec, idx) => {
-            doc.fontSize(10).font('Helvetica-Bold').fillColor('#FF7058').text(`${idx + 1}. ${rec.title} (${rec.priority.toUpperCase()} PRIORITY)`);
-            doc.font('Helvetica').fillColor('#292D35').text(`   Action: ${rec.suggestedAction}`);
-            doc.fontSize(9).fillColor('#636C7C').text(`   Projected Impact: ${rec.impact}`);
-            doc.moveDown(0.5);
+          recommendations.slice(0, 4).forEach((rec, idx) => {
+            doc.fontSize(10).font('Helvetica-Bold').fillColor('#292D35')
+              .text(`${idx + 1}. ${rec.title} [Priority: ${rec.priority.toUpperCase()}]`);
+            doc.font('Helvetica').fillColor('#636C7C')
+              .text(`   Action: ${rec.suggestedAction}`)
+              .text(`   Impact: ${rec.impact}`);
+            doc.moveDown(0.2);
           });
         }
-
-        // Footer
-        doc.fontSize(8).fillColor('#9AA3B2').text(
-          'InsightLoop Universal Event Feedback Platform — Confidential report generated automatically.',
-          40,
-          doc.page.height - 30,
-          { align: 'center', width: doc.page.width - 80 }
-        );
 
         doc.end();
       } catch (err) {

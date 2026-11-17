@@ -18,9 +18,9 @@ from .rag_engine import rag_engine
 load_dotenv()
 
 app = FastAPI(
-    title="InsightLoop AI Feedback Intelligence & RAG Service",
-    description="Multilingual Sentiment, Theme Extraction, Recurring Issues & Vector-assisted RAG Assistant",
-    version="1.0.0"
+    title="InsightLoop Universal AI Feedback Intelligence & RAG Service",
+    description="Multilingual Sentiment, Theme Extraction, Recurring Issues & Vector-assisted RAG Assistant for Universal Events",
+    version="2.0.0"
 )
 
 # Enable CORS
@@ -35,15 +35,19 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {
-        "service": "InsightLoop AI Engine",
+        "service": "InsightLoop Universal AI Engine",
         "status": "online",
-        "version": "1.0.0",
-        "capabilities": ["sentiment_analysis", "theme_clustering", "rag_assistant", "form_generator"]
+        "version": "2.0.0",
+        "supportedCategories": [
+            "Marathon", "Sports", "Concert", "Conference",
+            "Workshop", "Cultural", "Corporate", "Charity", "Community", "College"
+        ],
+        "capabilities": ["multilingual_sentiment", "universal_themes", "category_recommendations", "rag_assistant", "form_generator"]
     }
 
 @app.get("/health")
 def health():
-    return {"status": "healthy", "service": "insightloop-ai"}
+    return {"status": "healthy", "service": "insightloop-ai", "version": "2.0.0"}
 
 @app.post("/api/ai/analyze-responses", response_model=AnalysisResponse)
 def analyze_responses(payload: AnalysisRequest):
@@ -52,7 +56,9 @@ def analyze_responses(payload: AnalysisRequest):
             event_id=payload.eventId,
             organization_id=payload.organizationId,
             event_title=payload.eventTitle or "Event",
-            responses=payload.responses
+            responses=payload.responses,
+            event_category=payload.eventCategory or "Workshop",
+            event_subcategory=payload.eventSubcategory or ""
         )
         # Also index into RAG engine for immediate natural-language retrieval
         if payload.responses:
@@ -64,7 +70,7 @@ def analyze_responses(payload: AnalysisRequest):
                     "textTranslated": r.textTranslated,
                     "rating": r.rating,
                     "sentimentLabel": "positive" if (r.rating and r.rating >= 4) else "negative" if (r.rating and r.rating <= 2) else "neutral",
-                    "category": r.category or "General"
+                    "category": r.category or payload.eventCategory or "General"
                 }
                 for r in payload.responses
             ]
@@ -100,6 +106,7 @@ def generate_dynamic_form(payload: FormGenerationRequest):
     """Generate contextual feedback questions based on event category and title."""
     title = payload.title
     cat = (payload.category or "").lower()
+    subcat = (payload.subcategory or "").lower()
 
     questions = [
         {
@@ -125,21 +132,21 @@ def generate_dynamic_form(payload: FormGenerationRequest):
             "category": "overall",
             "isRequired": True,
             "prompt": {
-                "en": "How likely are you to recommend our future events to a peer or colleague?",
-                "hi": "आप किसी सहकर्मी को हमारे भविष्य के कार्यक्रमों की सिफारिश करने की कितनी संभावना रखते हैं?",
-                "mr": "आपण आपल्या मित्रांना किंवा सहकाऱ्यांना आमच्या भविष्यातील कार्यक्रमांची शिफारस करण्याची किती शक्यता आहे?"
+                "en": "How likely are you to recommend our future events to peers or friends?",
+                "hi": "आप किसी मित्र को हमारे भविष्य के कार्यक्रमों की सिफारिश करने की कितनी संभावना रखते हैं?",
+                "mr": "आपण मित्रांना आमच्या पुढील कार्यक्रमांची शिफारस करण्याची किती शक्यता आहे?"
             },
             "description": {
                 "en": "0 (Not likely) to 10 (Extremely likely)",
-                "hi": "0 (बिल्कुल नहीं) से 10 (अत्यधिक संभावना)",
-                "mr": "0 (अजिबात नाही) ते 10 (नक्कीच)"
+                "hi": "0 से 10",
+                "mr": "0 ते 10"
             },
             "options": []
         }
     ]
 
-    # Category-specific questions
-    if "hackathon" in cat or "coding" in cat or "tech" in cat:
+    # Category and subcategory tailored questions
+    if "marathon" in cat or "run" in cat:
         questions.extend([
             {
                 "order": 3,
@@ -147,32 +154,98 @@ def generate_dynamic_form(payload: FormGenerationRequest):
                 "category": "venue_logistics",
                 "isRequired": True,
                 "prompt": {
-                    "en": "How was the network stability and power backup throughout the hackathon?",
-                    "hi": "हैकथॉन के दौरान नेटवर्क स्थिरता और पावर बैकअप कैसा था?",
-                    "mr": "हॅकाथॉन दरम्यान नेटवर्क स्थिरता आणि वीज बॅकअप कसा होता?"
+                    "en": "How was the hydration and medical aid along the course?",
+                    "hi": "मार्ग पर हाइड्रेशन (पानी/इलेक्ट्रोलाइट) और चिकित्सा सहायता कैसी थी?",
+                    "mr": "मार्गावरील पाणी/इलेक्ट्रोलाइट्स आणि वैद्यकीय मदत कशी होती?"
                 },
                 "description": { "en": "Select one option", "hi": "एक विकल्प चुनें", "mr": "एक पर्याय निवडा" },
                 "options": [
-                    { "id": "opt_fast", "label": { "en": "Flawless & High Speed", "hi": "उत्कृष्ट और उच्च गति", "mr": "अतिशय वेगवान व सुरळीत" } },
-                    { "id": "opt_ok", "label": { "en": "Decent with minor drops", "hi": "ठीक-ठाक, कभी-कभी रुकावट", "mr": "मध्यम, क्वचित अडचणी" } },
-                    { "id": "opt_slow", "label": { "en": "Frequent disconnects", "hi": "लगातार डिस्कनेक्शन", "mr": "वारंवार डिस्कनेक्ट झाले" } }
+                    { "id": "opt_abundant", "label": { "en": "Abundant and well supplied", "hi": "पर्याप्त और भरपूर", "mr": "मुबलक आणि वेळेवर" } },
+                    { "id": "opt_moderate", "label": { "en": "Sufficient but crowded", "hi": "ठीक-ठाक, लेकिन भीड़भाड़", "mr: ": "पुरेशी पण गर्दी होती" } },
+                    { "id": "opt_short", "label": { "en": "Ran out at later aid stations", "hi": "बाद के स्टॉलों पर कमी थी", "mr": "पुढील स्टॉल्सवर कमतरता होती" } }
                 ]
             },
             {
                 "order": 4,
                 "type": "star_rating",
-                "category": "speaker",
-                "isRequired": False,
+                "category": "organization",
+                "isRequired": True,
                 "prompt": {
-                    "en": "Rate the mentorship and technical judging quality.",
-                    "hi": "मेंटरशिप और तकनीकी मूल्यांकन की गुणवत्ता को रेट करें।",
-                    "mr": "मार्गदर्शन आणि तांत्रिक मूल्यमापनाचा दर्जा ठरवा."
+                    "en": "Rate the route marking, traffic control, and finish line management.",
+                    "hi": "दौड़ मार्ग के चिह्नांकन, ट्रैफिक नियंत्रण और फिनिश लाइन व्यवस्था को रेट करें।",
+                    "mr": "मार्गाचे दिशा-दर्शन, वाहतूक नियंत्रण आणि फिनिश लाईन व्यवस्थेचे मूल्यांकन करा."
                 },
                 "description": { "en": "1 to 5 stars", "hi": "1 से 5 स्टार", "mr": "1 ते 5 स्टार" },
                 "options": []
             }
         ])
-    elif "workshop" in cat or "webinar" in cat:
+    elif "concert" in cat or "music" in cat:
+        questions.extend([
+            {
+                "order": 3,
+                "type": "star_rating",
+                "category": "venue_logistics",
+                "isRequired": True,
+                "prompt": {
+                    "en": "How was the acoustic clarity, bass balance, and lighting visuals?",
+                    "hi": "ध्वनि की गुणवत्ता (साउंड), बास और स्टेज लाइटिंग शो कैसा था?",
+                    "mr": "ध्वनीचा दर्जा (साउंड), बास आणि स्टेज लाईट शो कसा होता?"
+                },
+                "description": { "en": "1 to 5 stars", "hi": "1 से 5 स्टार", "mr": "1 ते 5 स्टार" },
+                "options": []
+            },
+            {
+                "order": 4,
+                "type": "single_choice",
+                "category": "venue_logistics",
+                "isRequired": True,
+                "prompt": {
+                    "en": "How was the entry gate queue speed and crowd management?",
+                    "hi": "प्रवेश द्वार कतार की गति और भीड़ नियंत्रण कैसा था?",
+                    "mr": "प्रवेशद्वारावरील रांगेचा वेग आणि गर्दी नियंत्रण कसे होते?"
+                },
+                "description": { "en": "Select experience", "hi": "अनुभव चुनें", "mr": "अनुभव निवडा" },
+                "options": [
+                    { "id": "opt_smooth", "label": { "en": "Smooth & fast entry (< 10 mins)", "hi": "सहज और त्वरित प्रवेश", "mr": "सुरळीत आणि जलद प्रवेश" } },
+                    { "id": "opt_moderate", "label": { "en": "Moderate wait (15-25 mins)", "hi": "मध्यम प्रतीक्षा", "mr": "मध्यम प्रतीक्षा" } },
+                    { "id": "opt_bottleneck", "label": { "en": "Severe bottleneck (> 30 mins)", "hi": "अत्यधिक भीड़ और देरी", "mr": "खूप जास्त गर्दी व विलंब" } }
+                ]
+            }
+        ])
+    elif "sports" in cat:
+        questions.extend([
+            {
+                "order": 3,
+                "type": "star_rating",
+                "category": "venue_logistics",
+                "isRequired": True,
+                "prompt": {
+                    "en": "How would you rate the playing turf, court condition, and lighting?",
+                    "hi": "मैदान/पिच/कोर्ट की स्थिति और लाइटिंग को आप क्या रेटिंग देंगे?",
+                    "mr": "मैदान/पिच/कोर्टची गुणवत्ता आणि प्रकाशव्यवस्थेला आपण काय रेटिंग द्याल?"
+                },
+                "description": { "en": "1 to 5 stars", "hi": "1 से 5 स्टार", "mr": "1 ते 5 स्टार" },
+                "options": []
+            },
+            {
+                "order": 4,
+                "type": "single_choice",
+                "category": "organization",
+                "isRequired": True,
+                "prompt": {
+                    "en": "How fair and professional was the refereeing / officiating?",
+                    "hi": "अंपायरिंग और रेफरी का निर्णय कितना निष्पक्ष और पेशेवर था?",
+                    "mr": "पंच आणि पंचांचे निर्णय किती निष्पक्ष व व्यावसायिक होते?"
+                },
+                "description": { "en": "Select fairness", "hi": "सटीकता चुनें", "mr": "अचूकता निवडा" },
+                "options": [
+                    { "id": "opt_fair", "label": { "en": "Impartial & Professional", "hi": "निष्पक्ष और पेशेवर", "mr": "निष्पक्ष आणि व्यावसायिक" } },
+                    { "id": "opt_disputed", "label": { "en": "Acceptable with minor disputed calls", "hi": "स्वीकार्य, कुछ विवादास्पद निर्णय", "mr": "समाधानकारक, किरकोळ त्रुटी" } },
+                    { "id": "opt_biased", "label": { "en": "Inconsistent calls made", "hi": "असंगत निर्णय", "mr": "विसंगत निर्णय" } }
+                ]
+            }
+        ])
+    elif "workshop" in cat:
         questions.extend([
             {
                 "order": 3,
@@ -180,28 +253,28 @@ def generate_dynamic_form(payload: FormGenerationRequest):
                 "category": "content",
                 "isRequired": True,
                 "prompt": {
-                    "en": "Was the pace of the hands-on session appropriate?",
-                    "hi": "क्या अभ्यास सत्र की गति उपयुक्त थी?",
-                    "mr": "प्रात्यक्षिक सत्राचा वेग योग्य होता का?"
+                    "en": "Was the balance between theoretical concepts and hands-on exercises appropriate?",
+                    "hi": "क्या सैद्धांतिक ज्ञान और व्यावहारिक (हैंड्स-ऑन) अभ्यास का संतुलन उपयुक्त था?",
+                    "mr": "सैद्धांतिक संकल्पना आणि प्रत्यक्ष प्रात्यक्षिके (हँड्स-ऑन) यांचा ताळमेळ योग्य होता का?"
                 },
-                "description": { "en": "Select pace", "hi": "गति चुनें", "mr": "वेग निवडा" },
+                "description": { "en": "Select pace & balance", "hi": "संतुलन चुनें", "mr": "तोल निवडा" },
                 "options": [
-                    { "id": "pace_fast", "label": { "en": "Too fast", "hi": "बहुत तेज", "mr": "खूप वेगवान" } },
-                    { "id": "pace_just_right", "label": { "en": "Just right", "hi": "बिल्कुल सही", "mr": "अगदी योग्य" } },
-                    { "id": "pace_slow", "label": { "en": "Too slow", "hi": "धीमा", "mr": "खूप संथ" } }
+                    { "id": "opt_balanced", "label": { "en": "Just right balance", "hi": "बिल्कुल सही संतुलन", "mr": "अतिशय योग्य ताळमेळ" } },
+                    { "id": "opt_more_hands_on", "label": { "en": "Wanted more hands-on coding", "hi": "अधिक व्यावहारिक अभ्यास चाहिए था", "mr": "आणखी प्रात्यक्षिक सराव हवा होता" } },
+                    { "id": "opt_too_fast", "label": { "en": "Pace was too fast", "hi": "गति बहुत तेज थी", "mr": "वेग खूप वेगवान होता" } }
                 ]
             },
             {
                 "order": 4,
-                "type": "yes_no",
-                "category": "content",
-                "isRequired": False,
+                "type": "star_rating",
+                "category": "speaker",
+                "isRequired": True,
                 "prompt": {
-                    "en": "Did the workshop materials & slides meet your learning expectations?",
-                    "hi": "क्या कार्यशाला सामग्री और स्लाइड्स आपकी अपेक्षाओं पर खरी उतरीं?",
-                    "mr": "कार्यशाळेचे साहित्य आणि सादरीकरण आपल्या अपेक्षा पूर्ण करणारे होते का?"
+                    "en": "Rate the instructor clarity and responsiveness to audience queries.",
+                    "hi": "प्रशिक्षक की स्पष्टता और सवालों के उत्तर देने की शैली को रेट करें।",
+                    "mr": "प्रशिक्षकांची शिकवण्याची पद्धत आणि शंका निरसनाचे मूल्यांकन करा."
                 },
-                "description": { "en": "Yes or No", "hi": "हाँ या ना", "mr": "होय किंवा नाही" },
+                "description": { "en": "1 to 5 stars", "hi": "1 से 5 स्टार", "mr": "1 ते 5 स्टार" },
                 "options": []
             }
         ])
@@ -213,9 +286,9 @@ def generate_dynamic_form(payload: FormGenerationRequest):
                 "category": "venue_logistics",
                 "isRequired": False,
                 "prompt": {
-                    "en": "How would you rate the venue, seating, and audio/visual setup?",
-                    "hi": "स्थान, बैठने की व्यवस्था और ऑडियो/वीडियो सेटअप को आप क्या रेटिंग देंगे?",
-                    "mr": "ठिकाण, बैठक व्यवस्था आणि ध्वनी/प्रक्षेपण सेटअपला आपण काय रेटिंग द्याल?"
+                    "en": "How would you rate the venue facilities, seating, and presentation screen?",
+                    "hi": "स्थान, बैठने की व्यवस्था और स्क्रीन को आप क्या रेटिंग देंगे?",
+                    "mr": "ठिकाण, बैठक व्यवस्था आणि पडद्याला आपण काय रेटिंग द्याल?"
                 },
                 "description": { "en": "1 to 5 stars", "hi": "1 से 5 स्टार", "mr": "1 ते 5 स्टार" },
                 "options": []
@@ -230,11 +303,10 @@ def generate_dynamic_form(payload: FormGenerationRequest):
                     "hi": "कौन सी व्यवस्थाएं सबसे संतोषजनक थीं?",
                     "mr": "कोणत्या व्यवस्था सर्वाधिक समाधानकारक होत्या?"
                 },
-                "description": { "en": "Select all that apply", "hi": "लागू होने वाले सभी विकल्प चुनें", "mr": "लागू असलेले सर्व पर्याय निवडा" },
+                "description": { "en": "Select all that apply", "hi": "सभी लागू विकल्प चुनें", "mr": "लागू सर्व पर्याय निवडा" },
                 "options": [
                     { "id": "opt_reg", "label": { "en": "Registration & Check-in", "hi": "पंजीकरण और चेक-इन", "mr": "नोंदणी आणि चेक-इन" } },
                     { "id": "opt_food", "label": { "en": "Refreshments & Water", "hi": "नाश्ता और पानी", "mr": "अल्पोपहार आणि पाणी" } },
-                    { "id": "opt_av", "label": { "en": "Sound & Presentation Screen", "hi": "ध्वनि और स्क्रीन", "mr": "ध्वनी आणि पडदा" } },
                     { "id": "opt_staff", "label": { "en": "Volunteers & Support", "hi": "स्वयंसेवक सहायता", "mr": "स्वयंसेवक मदत" } }
                 ]
             }
@@ -247,9 +319,9 @@ def generate_dynamic_form(payload: FormGenerationRequest):
         "category": "overall",
         "isRequired": False,
         "prompt": {
-            "en": "What did you enjoy most, or what could we improve for our next event?",
-            "hi": "आपको सबसे ज्यादा क्या पसंद आया, या हम अगले कार्यक्रम में क्या सुधार कर सकते हैं?",
-            "mr": "आपल्याला काय सर्वाधिक आवडले, किंवा पुढील कार्यक्रमासाठी आम्ही काय सुधारणा करू शकतो?"
+            "en": "What did you enjoy most, or what suggestions do you have for our next edition?",
+            "hi": "आपको सबसे ज्यादा क्या पसंद आया, या अगले संस्करण के लिए आपके क्या सुझाव हैं?",
+            "mr": "आपल्याला काय सर्वाधिक आवडले, किंवा पुढील आवृत्तीसाठी काय सुधारणा सुचवाल?"
         },
         "description": {
             "en": "Feel free to share in English, Hindi, or Marathi (Type or record voice)",

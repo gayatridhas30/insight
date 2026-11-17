@@ -15,8 +15,10 @@ import {
   RefreshCw,
   FileSpreadsheet,
   Trash2,
+  FileText,
 } from 'lucide-react';
 import { eventService } from '../../api/services';
+import { getCategoryBadge } from '../../config/eventCategories';
 
 export const EventDetailPage = () => {
   const { id } = useParams();
@@ -81,19 +83,38 @@ export const EventDetailPage = () => {
     return <div>Event not found.</div>;
   }
 
+  const categoryMeta = getCategoryBadge(event.category);
+
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn pb-16">
       {/* Event Header Banner */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-charcoal/10 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-coral bg-coral/10 px-2.5 py-1 rounded-lg">
               {event.code}
             </span>
-            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-sage/30 text-sage-dark">
+            <span
+              className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${categoryMeta.badgeColor}`}
+            >
+              {event.category}
+            </span>
+            {event.subcategory && (
+              <span className="text-[10px] font-semibold text-charcoal/70 bg-ivory px-2 py-0.5 rounded-full border border-charcoal/10">
+                {event.subcategory}
+              </span>
+            )}
+            <span
+              className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                event.status === 'completed'
+                  ? 'bg-sage/20 text-sage'
+                  : event.status === 'ongoing'
+                  ? 'bg-coral/20 text-coral'
+                  : 'bg-lavender/50 text-navy'
+              }`}
+            >
               {event.status}
             </span>
-            <span className="text-xs text-charcoal/50">• {event.category}</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-navy">
@@ -110,7 +131,7 @@ export const EventDetailPage = () => {
               <span>{event.location || 'Online'}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Users size={14} className="text-sage-dark" />
+              <Users size={14} className="text-sage" />
               <span>Target: {event.targetResponses || 50} attendees</span>
             </div>
           </div>
@@ -140,7 +161,7 @@ export const EventDetailPage = () => {
           </Link>
           <Link
             to={`/events/${id}/qr`}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-navy hover:bg-navy-700 text-white text-xs font-bold transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-navy hover:bg-navy-900 text-white text-xs font-bold transition-all"
           >
             <QrCode size={14} />
             <span>QR Flyer</span>
@@ -156,14 +177,16 @@ export const EventDetailPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-heading font-bold text-navy">Event Sessions & Agenda</h3>
-                <p className="text-xs text-charcoal/60">Attach feedback specifically to individual speakers or workshops</p>
+                <p className="text-xs text-charcoal/60">
+                  Attach feedback specifically to individual waves, speakers, or matches
+                </p>
               </div>
               <button
                 onClick={() => setIsAddSessionOpen(true)}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-coral/10 hover:bg-coral hover:text-white text-coral text-xs font-bold transition-all"
               >
                 <Plus size={14} />
-                <span>Add Session</span>
+                <span>Add Session / Wave</span>
               </button>
             </div>
 
@@ -187,7 +210,7 @@ export const EventDetailPage = () => {
                         <h4 className="text-sm font-bold text-navy">{sess.title}</h4>
                       </div>
                       <p className="text-xs text-charcoal/60">
-                        Speaker: <span className="font-semibold text-charcoal">{sess.speakerName || 'TBA'}</span> • Stage / Room: {sess.roomOrLink || 'Main Hall'}
+                        Lead: <span className="font-semibold text-charcoal">{sess.speakerName || 'TBA'}</span> • Stage / Zone: {sess.roomOrLink || 'Main Area'}
                       </p>
                     </div>
                   </div>
@@ -199,101 +222,39 @@ export const EventDetailPage = () => {
 
         {/* Quick QR & Link Column */}
         <div className="space-y-6">
-          <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle text-center space-y-4">
-            <h3 className="text-base font-heading font-bold text-navy">Participant Access QR</h3>
-            <p className="text-xs text-charcoal/60">Attendees can scan without installing an app or signing in.</p>
-
+          <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-card text-center space-y-4">
+            <h3 className="text-sm font-heading font-bold text-navy">Feedback Access QR</h3>
             {qr?.dataUrl && (
-              <div className="p-4 bg-ivory rounded-2xl border border-charcoal/10 inline-block shadow-inner">
-                <img src={qr.dataUrl} alt="Event QR" className="w-44 h-44 rounded-xl mx-auto" />
+              <div className="p-4 bg-ivory rounded-2xl border border-charcoal/10 inline-block">
+                <img
+                  src={qr.dataUrl}
+                  alt={`QR code for ${event.title}`}
+                  className="w-48 h-48 rounded-xl mx-auto"
+                />
               </div>
             )}
-
-            <div className="pt-2 flex flex-col gap-2">
-              <Link
-                to={`/feedback/${event.code}`}
-                target="_blank"
-                className="w-full py-2.5 rounded-xl bg-ivory hover:bg-charcoal/10 text-xs font-bold text-navy transition-colors flex items-center justify-center gap-1.5"
-              >
-                <span>Open Public Feedback Form</span>
-                <ExternalLink size={14} />
-              </Link>
+            <p className="text-xs font-mono font-bold text-coral">{event.code}</p>
+            <div className="flex flex-col gap-2 pt-2">
               <Link
                 to={`/events/${id}/qr`}
-                className="w-full py-2.5 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navy-700 transition-colors"
+                className="w-full py-2.5 rounded-xl bg-navy hover:bg-navy-900 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5"
               >
-                Download High-Res & Flyer
+                <QrCode size={14} />
+                <span>Open Full Flyer & Print</span>
               </Link>
+              <a
+                href={`/feedback/${event.code}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2 rounded-xl bg-ivory hover:bg-coral/10 text-charcoal hover:text-coral border border-charcoal/15 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
+              >
+                <span>Test Feedback Form</span>
+                <ExternalLink size={13} />
+              </a>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Add Session Modal */}
-      {isAddSessionOpen && (
-        <div className="fixed inset-0 z-50 bg-navy/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-card border border-charcoal/10 space-y-5 animate-scaleUp">
-            <h3 className="text-lg font-heading font-bold text-navy">Add Event Session</h3>
-            <form onSubmit={handleCreateSession} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                  Session Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={sessionForm.title}
-                  onChange={(e) => setSessionForm({ ...sessionForm, title: e.target.value })}
-                  placeholder="Keynote: Emerging Tech in 2026"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                  Speaker Name
-                </label>
-                <input
-                  type="text"
-                  value={sessionForm.speakerName}
-                  onChange={(e) => setSessionForm({ ...sessionForm, speakerName: e.target.value })}
-                  placeholder="Dr. Rajesh Deshmukh"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                  Room or Virtual Link
-                </label>
-                <input
-                  type="text"
-                  value={sessionForm.roomOrLink}
-                  onChange={(e) => setSessionForm({ ...sessionForm, roomOrLink: e.target.value })}
-                  placeholder="Main Auditorium / Zoom"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddSessionOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-charcoal border border-charcoal/15"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-coral text-white text-xs font-bold shadow-coral-glow"
-                >
-                  Save Session
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

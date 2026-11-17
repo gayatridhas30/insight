@@ -18,6 +18,7 @@ class AnalysisRequest(BaseModel):
     organizationId: str
     eventTitle: Optional[str] = ""
     eventCategory: Optional[str] = ""
+    eventSubcategory: Optional[str] = ""
     responses: List[FeedbackItem]
 
 class SentimentSummary(BaseModel):
@@ -81,6 +82,7 @@ class RAGQueryResponse(BaseModel):
 class FormGenerationRequest(BaseModel):
     title: str
     category: str
+    subcategory: Optional[str] = ""
     description: Optional[str] = ""
-    targetAudience: Optional[str] = "Students and professionals"
+    targetAudience: Optional[str] = "Attendees and participants"
     languages: Optional[List[str]] = ["en", "hi", "mr"]

@@ -59,3 +59,30 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* Professional Print Stylesheet for Printable QR Flyers */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  nav, sidebar, header, footer, button, .print\\:hidden {
+    display: none !important;
+  }
+
+  .print\\:block {
+    display: block !important;
+  }
+
+  .print-flyer {
+    box-shadow: none !important;
+    border: 2px solid #0F172A !important;
+    page-break-inside: avoid;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 2.5rem !important;
+  }
+}

@@ -14,8 +14,14 @@ import {
   Wifi,
   RefreshCw,
   Info,
+  Share2,
+  MessageCircle,
+  Calendar,
+  MapPin,
+  Tag,
 } from 'lucide-react';
 import { eventService } from '../../api/services';
+import { getCategoryBadge } from '../../config/eventCategories';
 
 export const QRCodePage = () => {
   const { id } = useParams();
@@ -47,7 +53,7 @@ export const QRCodePage = () => {
   const activeUrl =
     targetMode === 'network' && qrData?.networkUrl
       ? qrData.networkUrl
-      : qrData?.localUrl || `http://localhost:5173/feedback/${event?.code}`;
+      : qrData?.localUrl || `${window.location.origin}/feedback/${event?.code}`;
 
   const activeQrImage =
     targetMode === 'network' && qrData?.networkDataUrl
@@ -64,14 +70,37 @@ export const QRCodePage = () => {
     if (activeQrImage) {
       const a = document.createElement('a');
       a.href = activeQrImage;
-      a.download = `InsightLoop-QR-${event?.code || 'event'}-${targetMode}.png`;
+      a.download = `InsightLoop-QR-${event?.code || 'event'}.png`;
       a.click();
+    }
+  };
+
+  const handleShareWhatsApp = () => {
+    const text = `Please share your feedback for ${event?.title || 'our event'}: ${activeUrl}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: event?.title || 'Event Feedback',
+          text: `Share your instant feedback for ${event?.title}:`,
+          url: activeUrl,
+        });
+      } catch (err) {
+        console.warn('Share cancelled', err);
+      }
+    } else {
+      handleCopyLink();
     }
   };
 
   const handlePrintFlyer = () => {
     window.print();
   };
+
+  const categoryMeta = getCategoryBadge(event?.category);
 
   if (loading) {
     return (
@@ -83,7 +112,7 @@ export const QRCodePage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
+    <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn pb-16">
       {/* Top Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
         <div>
@@ -94,25 +123,40 @@ export const QRCodePage = () => {
             <ArrowLeft size={14} />
             <span>Back to Event Details</span>
           </Link>
-          <h1 className="text-2xl font-heading font-extrabold text-navy">
-            Event Feedback QR & Access Link
-          </h1>
-          <p className="text-xs text-charcoal/60">
-            Share this with attendees or display on stage projectors for instant feedback collection
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-heading font-extrabold text-navy">
+              Event Feedback QR & Access Link
+            </h1>
+            <span
+              className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${categoryMeta.badgeColor}`}
+            >
+              {event?.category}
+            </span>
+          </div>
+          <p className="text-xs text-charcoal/60 mt-0.5">
+            Display this on banners, aid stations, registration desks, or presentation slides for instant mobile submissions.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Share and Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleCopyLink}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-charcoal/15 text-xs font-bold text-navy hover:border-coral transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-charcoal/15 text-xs font-bold text-navy hover:border-coral transition-colors"
           >
-            {copied ? <Check size={14} className="text-sage-dark" /> : <Copy size={14} />}
-            <span>{copied ? 'Copied!' : 'Copy Link'}</span>
+            {copied ? <Check size={14} className="text-sage" /> : <Copy size={14} />}
+            <span>{copied ? 'Copied Link!' : 'Copy Link'}</span>
+          </button>
+          <button
+            onClick={handleShareWhatsApp}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
+          >
+            <MessageCircle size={14} />
+            <span>WhatsApp</span>
           </button>
           <button
             onClick={handleDownloadPNG}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-navy hover:bg-navy-700 text-white text-xs font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-navy hover:bg-navy-900 text-white text-xs font-bold transition-colors"
           >
             <Download size={14} />
             <span>Download PNG</span>
@@ -127,15 +171,15 @@ export const QRCodePage = () => {
         </div>
       </div>
 
-      {/* Direct Test in Browser Banner (Solves testing immediately) */}
+      {/* Direct Test in Browser Banner */}
       <div className="bg-coral/10 border border-coral/30 rounded-3xl p-5 print:hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <span className="text-xs uppercase font-extrabold text-coral tracking-wider flex items-center gap-1">
             <Sparkles size={14} />
-            <span>Direct Browser Access (No Phone Scanner Needed)</span>
+            <span>Direct Browser Access (Test Without Phone Camera)</span>
           </span>
           <p className="text-xs text-charcoal/80">
-            Testing on this laptop? You can click the button to launch and submit feedback directly in your browser.
+            Testing on this laptop? You can click the button to launch the dynamic feedback form directly in a new browser tab.
           </p>
         </div>
 
@@ -155,10 +199,10 @@ export const QRCodePage = () => {
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-navy flex items-center gap-2">
             <Wifi size={16} className="text-coral" />
-            <span>QR Code Destination Target</span>
+            <span>QR Code Destination Network Target</span>
           </h3>
           <span className="text-[11px] text-charcoal/50">
-            Detected Wi-Fi IP: <span className="font-mono font-bold text-navy">{qrData?.networkIp || '172.20.10.2'}</span>
+            Local Wi-Fi IP: <span className="font-mono font-bold text-navy">{qrData?.networkIp || '127.0.0.1'}</span>
           </span>
         </div>
 
@@ -175,7 +219,7 @@ export const QRCodePage = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-bold text-xs text-navy">
                 <Smartphone size={15} className="text-coral" />
-                <span>Mobile Phone Camera Mode (Wi-Fi)</span>
+                <span>Mobile Phone Camera Mode (Wi-Fi LAN)</span>
               </div>
               {targetMode === 'network' && <Check size={14} className="text-coral font-bold" />}
             </div>
@@ -204,7 +248,7 @@ export const QRCodePage = () => {
               {targetMode === 'local' && <Check size={14} className="text-navy font-bold" />}
             </div>
             <p className="text-[11px] text-charcoal/60 leading-normal">
-              Encodes <code className="text-navy">localhost:5173</code>. Suitable when testing directly on this machine.
+              Encodes <code className="text-navy">localhost:5173</code>. Ideal when testing directly on this laptop.
             </p>
             <span className="text-[10px] font-mono text-charcoal/60 mt-1 truncate">
               {qrData?.localUrl}
@@ -214,38 +258,47 @@ export const QRCodePage = () => {
       </div>
 
       {/* Printable Flyer Container */}
-      <div className="bg-white rounded-3xl p-8 sm:p-12 border border-charcoal/10 shadow-card text-center space-y-6 print:border-none print:shadow-none">
+      <div className="bg-white rounded-3xl p-8 sm:p-12 border border-charcoal/10 shadow-card text-center space-y-6 print:border-2 print:border-navy print:shadow-none print-flyer">
         <div className="flex items-center justify-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-navy text-coral flex items-center justify-center shadow-sm">
-            <Sparkles size={20} />
+          <div className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center shadow-sm">
+            <Sparkles size={20} className="text-coral" />
           </div>
-          <span className="text-xl font-heading font-extrabold text-navy">
+          <span className="text-2xl font-heading font-extrabold text-navy">
             Insight<span className="text-coral">Loop</span>
           </span>
         </div>
 
         <div className="space-y-2 max-w-lg mx-auto">
-          <span className="text-xs uppercase font-bold tracking-widest text-coral font-mono">
-            {event?.code}
-          </span>
+          <div className="flex items-center justify-center gap-2">
+            <span
+              className={`text-[11px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-full border ${categoryMeta.badgeColor}`}
+            >
+              {event?.category}
+            </span>
+            {event?.subcategory && (
+              <span className="text-[11px] font-semibold text-charcoal/70 bg-ivory px-2.5 py-0.5 rounded-full border border-charcoal/10">
+                {event.subcategory}
+              </span>
+            )}
+          </div>
           <h2 className="text-3xl font-heading font-extrabold text-navy">
             {event?.title}
           </h2>
-          <p className="text-sm text-charcoal/70">
+          <p className="text-xs sm:text-sm text-charcoal/70">
             Scan below to share your instant event feedback. Multilingual text & voice supported in English, Hindi, and Marathi.
           </p>
         </div>
 
         {/* QR Code Container */}
         {activeQrImage && (
-          <div className="p-6 bg-ivory rounded-3xl border border-charcoal/10 inline-block shadow-inner">
+          <div className="p-6 bg-ivory-50 rounded-3xl border-2 border-dashed border-charcoal/20 inline-block shadow-inner">
             <img
               src={activeQrImage}
               alt={`QR Code for ${event?.title}`}
-              className="w-64 h-64 rounded-2xl mx-auto shadow-sm"
+              className="w-64 h-64 rounded-2xl mx-auto shadow-sm bg-white p-2"
             />
-            <span className="block text-xs font-bold text-navy mt-3 font-mono">
-              Event Code: {event?.code}
+            <span className="block text-sm font-mono font-extrabold text-navy mt-3 tracking-wider">
+              EVENT CODE: {event?.code}
             </span>
           </div>
         )}
@@ -259,16 +312,16 @@ export const QRCodePage = () => {
             href={activeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-3 bg-ivory hover:bg-coral/5 rounded-xl border border-charcoal/10 font-mono text-xs text-coral font-bold break-all transition-colors"
+            className="block p-3 bg-ivory-50 hover:bg-coral/5 rounded-xl border border-charcoal/15 font-mono text-xs text-coral font-bold break-all transition-colors"
           >
             {activeUrl}
           </a>
         </div>
 
-        <div className="pt-4 border-t border-charcoal/10 flex items-center justify-center gap-6 text-xs text-charcoal/60 font-medium print:text-[10px]">
+        <div className="pt-4 border-t border-charcoal/10 flex flex-wrap items-center justify-center gap-6 text-xs text-charcoal/60 font-medium">
           <span>✔ No attendee signup required</span>
-          <span>✔ Bhashini Voice Recording</span>
-          <span>✔ Anonymous submission option</span>
+          <span>✔ Bhashini Voice Recording (हिन्दी / मराठी)</span>
+          <span>✔ 100% Anonymous or Identified</span>
         </div>
       </div>
     </div>
