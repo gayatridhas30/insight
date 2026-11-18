@@ -1,11 +1,13 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const LanguageSelector = ({ currentLanguage = 'en', onSelectLanguage, availableLanguages = ['en', 'hi', 'mr'] }) => {
+  const { t } = useTranslation();
   const langConfig = {
-    en: { code: 'en', label: 'English', native: 'English' },
-    hi: { code: 'hi', label: 'Hindi', native: 'हिन्दी' },
-    mr: { code: 'mr', label: 'Marathi', native: 'मराठी' },
+    en: { code: 'en', label: 'English', native: t('languageSelect.en') },
+    hi: { code: 'hi', label: 'Hindi', native: t('languageSelect.hi') },
+    mr: { code: 'mr', label: 'Marathi', native: t('languageSelect.mr') },
   };
 
   return (

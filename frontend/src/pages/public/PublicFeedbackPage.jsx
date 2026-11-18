@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import confetti from 'canvas-confetti';
 import {
   Sparkles,
@@ -28,15 +29,16 @@ import { LanguageSelector } from '../../components/feedback/LanguageSelector';
 import { getCategoryBadge } from '../../config/eventCategories';
 
 export const PublicFeedbackPage = () => {
+  const { t, i18n } = useTranslation();
   const { code } = useParams();
   const [event, setEvent] = useState(null);
   const [form, setForm] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
 
   // Participant form state
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const selectedLanguage = i18n.language || 'en';
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [participantName, setParticipantName] = useState('');
   const [participantEmail, setParticipantEmail] = useState('');
@@ -48,6 +50,8 @@ export const PublicFeedbackPage = () => {
 
   const questionRefs = useRef({});
 
+  const errorText = error ? (error.key ? t(error.key, error.params) : error.message) : '';
+
   useEffect(() => {
     fetchEventData();
   }, [code]);
@@ -55,7 +59,7 @@ export const PublicFeedbackPage = () => {
   const fetchEventData = async () => {
     try {
       setLoading(true);
-      setError('');
+      setError(null);
       const eventCode = (code || 'RUN-2026').toUpperCase();
       const res = await eventService.getEventByCode(eventCode);
       if (res.data?.success) {
@@ -64,10 +68,11 @@ export const PublicFeedbackPage = () => {
         setQuestions(res.data.questions || []);
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          `Event code '${code}' could not be loaded. Please ensure the code is correct.`
-      );
+      if (err.response?.data?.message) {
+        setError({ message: err.response.data.message });
+      } else {
+        setError({ key: 'feedbackPage.loadError', params: { code } });
+      }
     } finally {
       setLoading(false);
     }
@@ -83,7 +88,7 @@ export const PublicFeedbackPage = () => {
     }));
     if (missingQuestionId === questionId) {
       setMissingQuestionId(null);
-      setError('');
+      setError(null);
     }
   };
 
@@ -115,33 +120,13 @@ export const PublicFeedbackPage = () => {
 
     let sampleComment = '';
     if (cat.includes('marathon') || cat.includes('run')) {
-      sampleComment =
-        selectedLanguage === 'mr'
-          ? 'धावण्याचा मार्ग आणि पाण्याची सोय उत्तम होती. फिनिश लाईनवरील मेडल आणि नाश्ता छान होता.'
-          : selectedLanguage === 'hi'
-          ? 'दौड़ मार्ग बहुत अच्छा और सुरक्षित था। पानी के स्टॉल पर्याप्त थे, समय पर आयोजन हुआ।'
-          : 'Scenic and well-marked race route! Water stations were well supplied and timing chip was accurate.';
+      sampleComment = t('feedbackPage.sampleComments.marathon');
     } else if (cat.includes('concert') || cat.includes('music')) {
-      sampleComment =
-        selectedLanguage === 'mr'
-          ? 'साउंड सिस्टीम आणि लाईट शो अतिशय जबरदस्त होता! कलाकारांचे सादरीकरण अप्रतिम झाले.'
-          : selectedLanguage === 'hi'
-          ? 'ध्वनि की गुणवत्ता बहुत शानदार थी, स्टेज और विजुअल बहुत खूबसूरत लगे।'
-          : 'Unbelievable audio bass and visual laser lights! Headline artist gave an unforgettable set.';
+      sampleComment = t('feedbackPage.sampleComments.concert');
     } else if (cat.includes('sports')) {
-      sampleComment =
-        selectedLanguage === 'mr'
-          ? 'मैदानाची स्थिती छान होती, पंच निर्णय निष्पक्ष होते आणि स्पर्धा वेळेवर सुरू झाली.'
-          : selectedLanguage === 'hi'
-          ? 'मैदान बहुत अच्छा था और मैच का आयोजन बहुत ही पेशेवर और निष्पक्ष रहा।'
-          : 'Top standard turf and equipment! Tournament scheduling and umpiring were well-coordinated.';
+      sampleComment = t('feedbackPage.sampleComments.sports');
     } else {
-      sampleComment =
-        selectedLanguage === 'mr'
-          ? 'सत्र अतिशय माहितीपूर्ण आणि उपयुक्त होते. प्रात्यक्षिके उत्तम झाली.'
-          : selectedLanguage === 'hi'
-          ? 'सत्र बहुत अच्छा और व्यावहारिक था। आयोजन सराहनीय था।'
-          : 'The session was well-structured, insightful, and practical hands-on examples were very clear.';
+      sampleComment = t('feedbackPage.sampleComments.general');
     }
 
     questions.forEach((q) => {
@@ -156,14 +141,14 @@ export const PublicFeedbackPage = () => {
       } else if (q.type === 'yes_no') {
         sample[q._id] = { selectedOptions: ['yes'] };
       } else if (q.type === 'short_text') {
-        sample[q._id] = { textResponse: 'Great event!' };
+        sample[q._id] = { textResponse: t('feedbackPage.sampleShortText') };
       } else if (q.type === 'long_text') {
         sample[q._id] = { textResponse: sampleComment };
       }
     });
 
     setAnswers(sample);
-    setError('');
+    setError(null);
     setMissingQuestionId(null);
   };
 
@@ -173,88 +158,10 @@ export const PublicFeedbackPage = () => {
     return obj[selectedLanguage] || obj.en || Object.values(obj)[0] || '';
   };
 
-  // Localized UI strings
-  const labels = {
-    en: {
-      required: 'Required',
-      optional: 'Optional',
-      submit: 'Submit Event Feedback',
-      submitting: 'Submitting Response...',
-      completed: 'Required Questions Completed:',
-      privacy: 'Submission Privacy',
-      anonDesc: 'Your identity is fully anonymous. No personal info will be recorded.',
-      identDesc: 'Your contact details will be shared with the event organizer.',
-      anon: 'Anonymous',
-      ident: 'Identified',
-      name: 'Your Name',
-      email: 'Your Email',
-      autoFill: '1-Click Auto Fill (Demo)',
-      closedTitle: 'Feedback Closed',
-      closedMsg: 'Feedback collection for this event has been closed by the organizer.',
-      draftMsg: 'This event is currently in draft mode and not accepting public feedback.',
-      deadlineMsg: 'The deadline for submitting feedback for this event has passed.',
-      thankYou: 'Thank You for Your Feedback!',
-      thankYouDesc: 'Your response has been securely recorded and analyzed by the InsightLoop AI engine.',
-      submitAnother: 'Submit Another Response',
-      backHome: 'Back to Home',
-      typeResponse: 'Type your thoughts, praise, or suggestions here...',
-    },
-    hi: {
-      required: 'आवश्यक',
-      optional: 'वैकल्पिक',
-      submit: 'प्रतिक्रिया सबमिट करें',
-      submitting: 'प्रतिक्रिया भेजी जा रही है...',
-      completed: 'आवश्यक प्रश्न पूर्ण:',
-      privacy: 'प्रस्तुति गोपनीयता',
-      anonDesc: 'आपकी पहचान पूरी तरह गोपनीय रहेगी। कोई व्यक्तिगत जानकारी दर्ज नहीं होगी।',
-      identDesc: 'आपका विवरण आयोजक के साथ साझा किया जाएगा।',
-      anon: 'गुमनाम (Anonymous)',
-      ident: 'पहचान सहित',
-      name: 'आपका नाम',
-      email: 'आपकी ईमेल',
-      autoFill: '1-क्लिक ऑटो फिल (डेमो)',
-      closedTitle: 'फीडबैक बंद है',
-      closedMsg: 'इस कार्यक्रम के लिए फीडबैक संग्रह आयोजक द्वारा बंद कर दिया गया है।',
-      draftMsg: 'यह कार्यक्रम अभी ड्राफ्ट मोड में है और सार्वजनिक फीडबैक स्वीकार नहीं कर रहा है।',
-      deadlineMsg: 'इस कार्यक्रम के लिए फीडबैक जमा करने की समय सीमा समाप्त हो चुकी है।',
-      thankYou: 'आपकी बहुमूल्य प्रतिक्रिया के लिए धन्यवाद!',
-      thankYouDesc: 'आपकी प्रतिक्रिया सुरक्षित रूप से दर्ज कर ली गई है और AI इंजन द्वारा विश्लेषित की जा रही है।',
-      submitAnother: 'एक और प्रतिक्रिया दें',
-      backHome: 'होमपेज पर जाएं',
-      typeResponse: 'अपने विचार, प्रशंसा या सुझाव यहाँ लिखें...',
-    },
-    mr: {
-      required: 'आवश्यक',
-      optional: 'ऐच्छिक',
-      submit: 'प्रतिक्रिया सबमिट करा',
-      submitting: 'प्रतिक्रिया पाठवली जात आहे...',
-      completed: 'आवश्यक प्रश्न पूर्ण:',
-      privacy: 'गोपनीयता पर्याय',
-      anonDesc: 'आपली ओळख पूर्णपणे गोपनीय राहील. कोणतीही वैयक्तिक माहिती घेतली जाणार नाही.',
-      identDesc: 'आपली संपर्क माहिती आयोजकांसोबत शेअर केली जाईल.',
-      anon: 'निनावी (Anonymous)',
-      ident: 'ओळख नमूद करून',
-      name: 'आपले नाव',
-      email: 'आपला ईमेल',
-      autoFill: '१-क्लिक डेमो भरा',
-      closedTitle: 'प्रतिक्रिया बंद आहे',
-      closedMsg: 'या कार्यक्रमासाठी प्रतिक्रिया संकलन आयोजकांनी बंद केले आहे.',
-      draftMsg: 'हा कार्यक्रम अद्याप ड्राफ्ट स्वरूपात असून सार्वजनिक प्रतिसाद घेत नाही.',
-      deadlineMsg: 'या कार्यक्रमाची प्रतिक्रिया नोंदवण्याची अंतिम मुदत संपली आहे.',
-      thankYou: 'आपल्या मौल्यवान प्रतिक्रियेबद्दल धन्यवाद!',
-      thankYouDesc: 'आपला प्रतिसाद सुरक्षितपणे जतन करण्यात आला असून AI द्वारे त्याचे विश्लेषण केले जात आहे.',
-      submitAnother: 'पुन्हा नवीन प्रतिक्रिया द्या',
-      backHome: 'मुख्यपृष्ठावर जा',
-      typeResponse: 'आपले विचार, अनुभव किंवा सुधारणा येथे लिहा...',
-    },
-  };
-
-  const ui = labels[selectedLanguage] || labels.en;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setError('');
+    setError(null);
     setMissingQuestionId(null);
 
     // Validate required questions
@@ -277,7 +184,7 @@ export const PublicFeedbackPage = () => {
 
         if (!isAnswered) {
           const promptText = getLocalized(q.prompt);
-          setError(`Please complete required question: "${promptText}"`);
+          setError({ key: 'feedbackPage.requiredQuestionError', params: { prompt: promptText } });
           setMissingQuestionId(q._id);
           setSubmitting(false);
 
@@ -324,9 +231,11 @@ export const PublicFeedbackPage = () => {
         });
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || 'Failed to submit feedback. Please check your submission.'
-      );
+      if (err.response?.data?.message) {
+        setError({ message: err.response.data.message });
+      } else {
+        setError({ key: 'feedbackPage.submitError' });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -337,40 +246,40 @@ export const PublicFeedbackPage = () => {
       <div className="min-h-screen bg-ivory flex items-center justify-center p-4">
         <div className="flex items-center gap-3 text-sm font-semibold text-navy bg-white p-6 rounded-2xl shadow-card">
           <RefreshCw size={20} className="animate-spin text-coral" />
-          <span>Loading feedback form for event '{code || 'RUN-2026'}'...</span>
+          <span>{t('feedbackPage.loading', { code: code || 'RUN-2026' })}</span>
         </div>
       </div>
     );
   }
 
   // Event not found error
-  if (error && !event) {
+  if (errorText && !event) {
     return (
       <div className="min-h-screen bg-ivory flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-charcoal/10 shadow-card text-center space-y-4">
           <div className="w-12 h-12 rounded-2xl bg-coral/10 text-coral flex items-center justify-center mx-auto">
             <AlertCircle size={24} />
           </div>
-          <h2 className="text-xl font-heading font-extrabold text-navy">Event Not Found</h2>
-          <p className="text-xs text-charcoal/70">{error}</p>
+          <h2 className="text-xl font-heading font-extrabold text-navy">{t('feedbackPage.eventNotFound')}</h2>
+          <p className="text-xs text-charcoal/70">{errorText}</p>
           <div className="pt-2 flex flex-col gap-2">
             <Link
               to="/feedback/RUN-2026"
               className="w-full py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold transition-all"
             >
-              Open Marathon Demo (RUN-2026)
+              {t('feedbackPage.openMarathonDemo')}
             </Link>
             <Link
               to="/feedback/HACK-2026"
               className="w-full py-2.5 rounded-xl bg-navy hover:bg-navy-900 text-white text-xs font-bold transition-all"
             >
-              Open Hackathon Demo (HACK-2026)
+              {t('feedbackPage.openHackathonDemo')}
             </Link>
             <Link
               to="/"
               className="w-full py-2.5 rounded-xl bg-ivory text-navy text-xs font-bold hover:bg-charcoal/10 transition-colors"
             >
-              Back to Homepage
+              {t('feedbackPage.backHome')}
             </Link>
           </div>
         </div>
@@ -391,20 +300,24 @@ export const PublicFeedbackPage = () => {
             <Lock size={26} />
           </div>
           <h2 className="text-2xl font-heading font-extrabold text-navy">
-            {ui.closedTitle}
+            {t('feedbackPage.closedTitle')}
           </h2>
           <p className="text-xs text-charcoal/70 leading-relaxed">
-            {isDraft ? ui.draftMsg : isExpired ? ui.deadlineMsg : ui.closedMsg}
+            {isDraft
+              ? t('feedbackPage.draftMsg')
+              : isExpired
+              ? t('feedbackPage.deadlineMsg')
+              : t('feedbackPage.closedMsg')}
           </p>
           <div className="p-3 bg-ivory rounded-xl border border-charcoal/10 text-xs font-medium text-navy">
-            Event: {event?.title} ({event?.code})
+            {t('feedbackPage.event')}: {event?.title} ({event?.code})
           </div>
           <div className="pt-2 flex flex-col gap-2">
             <Link
               to="/"
               className="w-full py-2.5 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navy-900 transition-all"
             >
-              {ui.backHome}
+              {t('feedbackPage.backHome')}
             </Link>
           </div>
         </div>
@@ -423,39 +336,45 @@ export const PublicFeedbackPage = () => {
 
           <div className="space-y-2">
             <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-navy">
-              {ui.thankYou}
+              {t('feedback.thankYou')}
             </h2>
             <p className="text-sm text-charcoal/70">
-              {ui.thankYouDesc}
+              {t('feedbackPage.thankYouDesc')}
             </p>
           </div>
 
           <div className="bg-ivory rounded-2xl p-4 border border-charcoal/10 text-left space-y-2 text-xs">
             <div className="flex justify-between text-charcoal/60">
-              <span>Event:</span>
+              <span>{t('feedbackPage.event')}:</span>
               <span className="font-bold text-navy">
                 {event?.title} ({event?.code})
               </span>
             </div>
             <div className="flex justify-between text-charcoal/60">
-              <span>Category:</span>
+              <span>{t('feedbackPage.category')}:</span>
               <span className="font-bold text-navy">
                 {event?.category} {event?.subcategory ? `• ${event.subcategory}` : ''}
               </span>
             </div>
             <div className="flex justify-between text-charcoal/60">
-              <span>Mode:</span>
+              <span>{t('feedbackPage.mode')}:</span>
               <span className="font-bold text-navy">
-                {isAnonymous ? 'Anonymous' : participantName || 'Identified'}
+                {isAnonymous
+                  ? t('feedbackPage.modeAnonymous')
+                  : participantName || t('feedbackPage.modeIdentified')}
               </span>
             </div>
             <div className="flex justify-between text-charcoal/60">
-              <span>Language:</span>
-              <span className="font-bold uppercase text-coral">{selectedLanguage}</span>
+              <span>{t('feedbackPage.language')}:</span>
+              <span className="font-bold uppercase text-coral">
+                {t(`feedbackPage.languageNames.${selectedLanguage}`, selectedLanguage)}
+              </span>
             </div>
             <div className="flex justify-between text-charcoal/60">
-              <span>Calculated Sentiment:</span>
-              <span className="font-bold uppercase text-sage">{sentimentLabel}</span>
+              <span>{t('feedbackPage.calculatedSentiment')}:</span>
+              <span className="font-bold uppercase text-sage">
+                {t(`feedbackPage.sentiment.${sentimentLabel}`, sentimentLabel)}
+              </span>
             </div>
           </div>
 
@@ -468,14 +387,14 @@ export const PublicFeedbackPage = () => {
               }}
               className="flex-1 py-3 rounded-xl border border-charcoal/15 text-xs font-bold text-charcoal hover:border-coral transition-colors"
             >
-              {ui.submitAnother}
+              {t('feedbackPage.submitAnother')}
             </button>
             <Link
               to="/"
               className="flex-1 py-3 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navy-900 transition-colors flex items-center justify-center gap-1.5"
             >
               <Home size={14} />
-              <span>{ui.backHome}</span>
+              <span>{t('feedbackPage.backHome')}</span>
             </Link>
           </div>
         </div>
@@ -501,7 +420,10 @@ export const PublicFeedbackPage = () => {
         {/* Quick Language Switcher */}
         <LanguageSelector
           currentLanguage={selectedLanguage}
-          onSelectLanguage={setSelectedLanguage}
+          onSelectLanguage={(lang) => {
+            i18n.changeLanguage(lang);
+            localStorage.setItem('insightloop_lang', lang);
+          }}
           availableLanguages={form?.supportedLanguages || ['en', 'hi', 'mr']}
         />
       </header>
@@ -515,7 +437,7 @@ export const PublicFeedbackPage = () => {
               <span
                 className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${categoryMeta.badgeColor}`}
               >
-                {event?.category || 'Event'}
+                {event?.category || t('feedbackPage.event')}
               </span>
               {event?.subcategory && (
                 <span className="text-[11px] font-semibold text-charcoal/70 bg-ivory-100 px-2.5 py-0.5 rounded-full border border-charcoal/10">
@@ -524,7 +446,7 @@ export const PublicFeedbackPage = () => {
               )}
             </div>
             <span className="text-xs font-mono font-bold text-navy bg-ivory px-2.5 py-1 rounded-lg border border-charcoal/10">
-              Code: {event?.code}
+              {t('feedbackPage.codeLabel')}: {event?.code}
             </span>
           </div>
 
@@ -533,7 +455,7 @@ export const PublicFeedbackPage = () => {
               {event?.title}
             </h1>
             <p className="text-xs sm:text-sm text-charcoal/70 mt-1">
-              {form?.description || 'Your feedback helps the organizers improve subsequent editions.'}
+              {form?.description || t('feedbackPage.defaultDescription')}
             </p>
           </div>
 
@@ -550,10 +472,10 @@ export const PublicFeedbackPage = () => {
               type="button"
               onClick={handleQuickFill}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-ivory hover:bg-coral/10 text-charcoal/80 hover:text-coral border border-charcoal/15 text-xs font-bold transition-all ml-auto"
-              title="Pre-fills sample ratings and comments for instant testing"
+              title={t('feedbackPage.autoFillTitle')}
             >
               <Wand2 size={13} className="text-coral" />
-              <span>{ui.autoFill}</span>
+              <span>{t('feedbackPage.autoFill')}</span>
             </button>
           </div>
         </div>
@@ -562,9 +484,9 @@ export const PublicFeedbackPage = () => {
         {form?.isAnonymousAllowed && (
           <div className="bg-white rounded-2xl p-4 sm:p-5 border border-charcoal/10 shadow-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="text-xs font-bold text-navy block">{ui.privacy}</span>
+              <span className="text-xs font-bold text-navy block">{t('feedbackPage.privacy')}</span>
               <span className="text-[11px] text-charcoal/60">
-                {isAnonymous ? ui.anonDesc : ui.identDesc}
+                {isAnonymous ? t('feedbackPage.anonDesc') : t('feedbackPage.identDesc')}
               </span>
             </div>
 
@@ -578,7 +500,7 @@ export const PublicFeedbackPage = () => {
                     : 'bg-ivory text-charcoal/70 hover:bg-charcoal/10'
                 }`}
               >
-                {ui.anon}
+                {t('feedback.anonymous')}
               </button>
               <button
                 type="button"
@@ -589,7 +511,7 @@ export const PublicFeedbackPage = () => {
                     : 'bg-ivory text-charcoal/70 hover:bg-charcoal/10'
                 }`}
               >
-                {ui.ident}
+                {t('feedback.identified')}
               </button>
             </div>
           </div>
@@ -600,7 +522,7 @@ export const PublicFeedbackPage = () => {
           <div className="bg-white rounded-2xl p-5 border border-charcoal/10 shadow-subtle grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fadeIn">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                {ui.name}
+                {t('feedback.namePlaceholder')}
               </label>
               <div className="relative">
                 <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
@@ -608,7 +530,7 @@ export const PublicFeedbackPage = () => {
                   type="text"
                   value={participantName}
                   onChange={(e) => setParticipantName(e.target.value)}
-                  placeholder="e.g. Aarav Mehta"
+                  placeholder={t('feedbackPage.nameExample')}
                   className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
                 />
               </div>
@@ -616,7 +538,7 @@ export const PublicFeedbackPage = () => {
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                {ui.email}
+                {t('feedback.emailPlaceholder')}
               </label>
               <div className="relative">
                 <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
@@ -624,7 +546,7 @@ export const PublicFeedbackPage = () => {
                   type="email"
                   value={participantEmail}
                   onChange={(e) => setParticipantEmail(e.target.value)}
-                  placeholder="e.g. aarav@example.com"
+                  placeholder={t('feedbackPage.emailExample')}
                   className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
                 />
               </div>
@@ -633,10 +555,10 @@ export const PublicFeedbackPage = () => {
         )}
 
         {/* Error notification banner (Top) */}
-        {error && (
+        {errorText && (
           <div className="p-4 rounded-2xl bg-coral/10 border border-coral/30 text-coral text-xs font-bold flex items-center gap-2 animate-shake">
             <AlertCircle size={18} className="shrink-0" />
-            <span>{error}</span>
+            <span>{errorText}</span>
           </div>
         )}
 
@@ -661,15 +583,15 @@ export const PublicFeedbackPage = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-coral font-mono">
-                      Q{idx + 1}
+                      {t('feedbackPage.questionLabel', { n: idx + 1 })}
                     </span>
                     {q.isRequired ? (
                       <span className="text-[10px] uppercase font-bold text-coral bg-coral/10 px-2 py-0.5 rounded-full">
-                        {ui.required}
+                        {t('feedbackPage.required')}
                       </span>
                     ) : (
                       <span className="text-[10px] uppercase font-bold text-charcoal/50 bg-ivory px-2 py-0.5 rounded-full">
-                        {ui.optional}
+                        {t('feedbackPage.optional')}
                       </span>
                     )}
                   </div>
@@ -766,7 +688,7 @@ export const PublicFeedbackPage = () => {
                           : 'bg-ivory border-charcoal/15 text-charcoal hover:border-charcoal/30'
                       }`}
                     >
-                      {selectedLanguage === 'mr' ? 'होय (Yes)' : selectedLanguage === 'hi' ? 'हाँ (Yes)' : 'Yes'}
+                      {t('feedbackPage.yes')}
                     </button>
                     <button
                       type="button"
@@ -777,7 +699,7 @@ export const PublicFeedbackPage = () => {
                           : 'bg-ivory border-charcoal/15 text-charcoal hover:border-charcoal/30'
                       }`}
                     >
-                      {selectedLanguage === 'mr' ? 'नाही (No)' : selectedLanguage === 'hi' ? 'ना (No)' : 'No'}
+                      {t('feedbackPage.no')}
                     </button>
                   </div>
                 )}
@@ -788,7 +710,7 @@ export const PublicFeedbackPage = () => {
                       type="text"
                       value={ans.textResponse || ''}
                       onChange={(e) => handleAnswerChange(q._id, 'textResponse', e.target.value)}
-                      placeholder={ui.typeResponse}
+                      placeholder={t('feedbackPage.typeResponse')}
                       className="w-full p-3 rounded-2xl border border-charcoal/15 bg-white text-sm focus:outline-none focus:border-coral"
                     />
 
@@ -813,7 +735,7 @@ export const PublicFeedbackPage = () => {
                       rows={3}
                       value={ans.textResponse || ''}
                       onChange={(e) => handleAnswerChange(q._id, 'textResponse', e.target.value)}
-                      placeholder={ui.typeResponse}
+                      placeholder={t('feedbackPage.typeResponse')}
                       className="w-full p-3.5 rounded-2xl border border-charcoal/15 bg-ivory-50 text-sm focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral/20 resize-none"
                     />
 
@@ -836,17 +758,17 @@ export const PublicFeedbackPage = () => {
           })}
 
           {/* Error Banner right above submit if present */}
-          {error && (
+          {errorText && (
             <div className="p-4 rounded-2xl bg-coral/10 border border-coral/30 text-coral text-xs font-bold flex items-center gap-2">
               <AlertCircle size={18} className="shrink-0" />
-              <span>{error}</span>
+              <span>{errorText}</span>
             </div>
           )}
 
           {/* Submit Action Block */}
           <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-card space-y-4">
             <div className="flex items-center justify-between text-xs font-bold text-navy">
-              <span>{ui.completed}</span>
+              <span>{t('feedbackPage.completed')}</span>
               <span
                 className={
                   answeredRequiredCount >= requiredQuestions.length
@@ -854,7 +776,10 @@ export const PublicFeedbackPage = () => {
                     : 'text-coral'
                 }
               >
-                {answeredRequiredCount} of {requiredQuestions.length}
+                {t('feedbackPage.completedCount', {
+                  answered: answeredRequiredCount,
+                  total: requiredQuestions.length,
+                })}
               </span>
             </div>
 
@@ -866,18 +791,18 @@ export const PublicFeedbackPage = () => {
               {submitting ? (
                 <>
                   <RefreshCw size={18} className="animate-spin" />
-                  <span>{ui.submitting}</span>
+                  <span>{t('feedback.submitting')}</span>
                 </>
               ) : (
                 <>
                   <Send size={18} />
-                  <span>{ui.submit}</span>
+                  <span>{t('feedback.submit')}</span>
                 </>
               )}
             </button>
 
             <p className="text-[11px] text-charcoal/50 text-center">
-              Responses are securely captured and analyzed using the InsightLoop intelligence engine.
+              {t('feedbackPage.secureNote')}
             </p>
           </div>
         </form>
@@ -885,7 +810,7 @@ export const PublicFeedbackPage = () => {
 
       {/* Simplified Mobile-Optimized Footer */}
       <footer className="py-6 border-t border-charcoal/10 bg-white text-center text-xs text-charcoal/50">
-        InsightLoop Universal Event Feedback Platform
+        {t('feedbackPage.footerText')}
       </footer>
     </div>
   );

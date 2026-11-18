@@ -1,0 +1,128 @@
+{
+  "admin": {
+    "dashboard": {
+      "loading": "Loading platform administration console...",
+      "title": "Platform Administration & Health",
+      "subtitle": "Universal metrics, security governance, and multi-tenant audit surveillance",
+      "registeredUsers": "Registered Users",
+      "hostsAdmins": "Hosts & Administrators",
+      "organizations": "Organizations",
+      "collegesClubs": "Colleges, Clubs, NGOs",
+      "totalEvents": "Total Events",
+      "platformWide": "Platform-wide",
+      "feedbackCollected": "Feedback Collected",
+      "multilingual": "Multilingual text & voice",
+      "languageBreakdown": "Language Ingestion Breakdown",
+      "languages": {
+        "english": "English",
+        "hindi": "हिन्दी (Hindi)",
+        "marathi": "मराठी (Marathi)"
+      },
+      "sentimentTitle": "Global Sentiment Polarity",
+      "sentiment": {
+        "positive": "Positive",
+        "neutral": "Neutral",
+        "negative": "Negative"
+      },
+      "recentActivity": "Recent System Audit Trail",
+      "activityLine": "User: {{user}} ({{email}}) • Resource: {{resource}}",
+      "systemFallback": "System",
+      "naFallback": "N/A"
+    },
+    "audit": {
+      "title": "System Security & Audit Trail",
+      "subtitle": "Tamper-evident logs of administrative operations, logins, and intelligence queries",
+      "allActions": "All Actions",
+      "recordedEntries": "{{count}} Recorded Entries",
+      "loading": "Loading audit log entries...",
+      "headers": {
+        "action": "Action",
+        "resource": "Resource",
+        "actor": "Actor",
+        "organization": "Organization",
+        "ipAddress": "IP Address",
+        "timestamp": "Timestamp"
+      },
+      "systemAnonymous": "System / Anonymous",
+      "global": "Global"
+    },
+    "events": {
+      "title": "Platform-Wide Event Feed",
+      "subtitle": "Real-time oversight of all hackathons, workshops, and symposiums hosted on InsightLoop",
+      "searchPlaceholder": "Search events across platform...",
+      "eventsLogged": "{{count}} Events Logged",
+      "loading": "Loading platform events...",
+      "headers": {
+        "eventCode": "Event Code",
+        "title": "Title",
+        "organization": "Organization",
+        "category": "Category",
+        "status": "Status",
+        "createdDate": "Created Date"
+      },
+      "orgFallback": "Organization",
+      "statuses": {
+        "draft": "Draft",
+        "published": "Published",
+        "ongoing": "Ongoing",
+        "completed": "Completed",
+        "archived": "Archived"
+      }
+    },
+    "orgs": {
+      "title": "Organization Directory",
+      "subtitle": "Colleges, academic clubs, enterprises, and communities onboarded to InsightLoop",
+      "searchPlaceholder": "Search organization or slug...",
+      "total": "{{count}} Organizations Total",
+      "loading": "Loading organizations...",
+      "headers": {
+        "organization": "Organization",
+        "slug": "Slug Identifier",
+        "category": "Category",
+        "primaryContact": "Primary Contact",
+        "createdDate": "Created Date"
+      },
+      "categories": {
+        "college": "College",
+        "club": "Club",
+        "company": "Company",
+        "ngo": "NGO",
+        "other": "Other"
+      },
+      "owner": "Owner",
+      "na": "N/A"
+    },
+    "users": {
+      "title": "User Management Directory",
+      "subtitle": "Manage platform accounts, role assignments, and suspension status",
+      "searchPlaceholder": "Search by name or email...",
+      "allRoles": "All Roles",
+      "roleOptions": {
+        "admin": "Administrator",
+        "host": "Host / Organizer",
+        "participant": "Participant"
+      },
+      "loading": "Loading user accounts...",
+      "headers": {
+        "user": "User",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "registeredDate": "Registered Date",
+        "actions": "Actions"
+      },
+      "roles": {
+        "admin": "Admin",
+        "host": "Host",
+        "participant": "Participant"
+      },
+      "statuses": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "statusUpdateFailed": "Failed to update user status"
+    }
+  }
+}

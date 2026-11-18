@@ -19,8 +19,10 @@ import {
 } from 'lucide-react';
 import { eventService } from '../../api/services';
 import { EVENT_CATEGORIES, getCategoryBadge } from '../../config/eventCategories';
+import { useTranslation } from 'react-i18next';
 
 export const EventListPage = () => {
+  const { t } = useTranslation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -61,10 +63,10 @@ export const EventListPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-navy">
-            Events Directory
+            {t('eventList.title')}
           </h1>
           <p className="text-xs sm:text-sm text-charcoal/60 mt-1">
-            Universal feedback management across Marathons, Concerts, Sports, Workshops, and Conferences
+            {t('eventList.subtitle')}
           </p>
         </div>
 
@@ -73,7 +75,7 @@ export const EventListPage = () => {
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95 shrink-0"
         >
           <PlusCircle size={16} />
-          <span>Create New Event</span>
+          <span>{t('dashboard.createEvent')}</span>
         </Link>
       </div>
 
@@ -85,7 +87,7 @@ export const EventListPage = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title, code, or subcategory..."
+            placeholder={t('eventList.searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
           />
         </form>
@@ -96,11 +98,11 @@ export const EventListPage = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 text-xs font-semibold rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral text-charcoal"
           >
-            <option value="all">All Statuses</option>
-            <option value="published">Published</option>
-            <option value="ongoing">Ongoing</option>
-            <option value="completed">Completed</option>
-            <option value="draft">Draft</option>
+            <option value="all">{t('eventList.filter.allStatuses')}</option>
+            <option value="published">{t('eventList.status.published')}</option>
+            <option value="ongoing">{t('eventList.status.ongoing')}</option>
+            <option value="completed">{t('eventList.status.completed')}</option>
+            <option value="draft">{t('eventList.status.draft')}</option>
           </select>
 
           <select
@@ -108,7 +110,7 @@ export const EventListPage = () => {
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="px-3 py-2 text-xs font-semibold rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral text-charcoal"
           >
-            <option value="all">All Universal Categories</option>
+            <option value="all">{t('eventList.filter.allCategories')}</option>
             {Object.keys(EVENT_CATEGORIES).map((key) => (
               <option key={key} value={key}>
                 {EVENT_CATEGORIES[key].name}
@@ -122,20 +124,20 @@ export const EventListPage = () => {
       {loading ? (
         <div className="flex items-center justify-center h-48 text-sm font-semibold text-navy">
           <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-          <span>Loading events...</span>
+          <span>{t('eventList.loading')}</span>
         </div>
       ) : events.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-charcoal/10 space-y-4">
           <Calendar size={36} className="text-coral mx-auto" />
-          <h3 className="text-lg font-heading font-bold text-navy">No Events Found</h3>
+          <h3 className="text-lg font-heading font-bold text-navy">{t('eventList.emptyTitle')}</h3>
           <p className="text-xs text-charcoal/60 max-w-sm mx-auto">
-            Try adjusting your search criteria or create your first universal feedback event.
+            {t('eventList.emptyDescription')}
           </p>
           <Link
             to="/events/create"
             className="inline-block px-5 py-2.5 rounded-xl bg-coral text-white text-xs font-bold"
           >
-            Create Event
+            {t('eventList.createEvent')}
           </Link>
         </div>
       ) : (
@@ -162,9 +164,9 @@ export const EventListPage = () => {
                           ? 'bg-coral/20 text-coral'
                           : 'bg-lavender/50 text-navy'
                       }`}
-                    >
-                      {evt.status}
-                    </span>
+                      >
+                        {t(`eventList.status.${evt.status}`, evt.status)}
+                      </span>
                   </div>
 
                   <h3 className="text-base font-heading font-bold text-navy line-clamp-1 hover:text-coral transition-colors">
@@ -185,13 +187,13 @@ export const EventListPage = () => {
                   </div>
 
                   <p className="text-xs text-charcoal/60 line-clamp-2">
-                    {evt.description || 'No description provided.'}
+                    {evt.description || t('eventList.noDescription')}
                   </p>
 
                   <div className="pt-1 text-xs text-charcoal/50 flex flex-wrap gap-2">
-                    <span>{evt.venueType}</span>
+                    <span>{evt.venueType ? t(`eventList.venueType.${String(evt.venueType).replace(/-([a-z])/g, (_, c) => c.toUpperCase())}`, evt.venueType) : ''}</span>
                     <span>•</span>
-                    <span className="truncate max-w-[180px]">{evt.location || 'Online'}</span>
+                    <span className="truncate max-w-[180px]">{evt.location || t('eventList.online')}</span>
                   </div>
                 </div>
 
@@ -199,7 +201,7 @@ export const EventListPage = () => {
                 <div className="pt-4 border-t border-charcoal/10 space-y-4">
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span className="text-charcoal/60">Response Progress</span>
+                      <span className="text-charcoal/60">{t('eventList.responseProgress')}</span>
                       <span className="text-navy font-bold">
                         {evt.responsesCount || 0} / {evt.targetResponses || 50}
                       </span>
@@ -216,28 +218,28 @@ export const EventListPage = () => {
                     <Link
                       to={`/events/${eventId}`}
                       className="py-2 rounded-xl bg-ivory hover:bg-navy hover:text-white text-charcoal text-xs font-semibold text-center transition-colors"
-                      title="Event Details & Sessions"
+                      title={t('eventList.actions.detailsTitle')}
                     >
-                      Details
+                      {t('eventList.actions.details')}
                     </Link>
                     <Link
                       to={`/events/${eventId}/builder`}
                       className="py-2 rounded-xl bg-ivory hover:bg-coral hover:text-white text-charcoal text-xs font-semibold text-center transition-colors"
-                      title="Dynamic Form Builder"
+                      title={t('eventList.actions.builderTitle')}
                     >
-                      Builder
+                      {t('eventList.actions.builder')}
                     </Link>
                     <Link
                       to={`/events/${eventId}/ai`}
                       className="py-2 rounded-xl bg-ivory hover:bg-sage hover:text-white text-charcoal text-xs font-semibold text-center transition-colors"
-                      title="AI Feedback Insights"
+                      title={t('eventList.actions.aiTitle')}
                     >
-                      AI
+                      {t('eventList.actions.ai')}
                     </Link>
                     <Link
                       to={`/events/${eventId}/qr`}
                       className="py-2 rounded-xl bg-ivory hover:bg-navy hover:text-white text-charcoal text-xs font-semibold text-center transition-colors flex items-center justify-center"
-                      title="QR Flyer"
+                      title={t('eventList.actions.qrFlyerTitle')}
                     >
                       <QrCode size={14} />
                     </Link>

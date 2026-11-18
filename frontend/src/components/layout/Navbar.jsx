@@ -35,7 +35,7 @@ export const Navbar = () => {
               Insight<span className="text-coral">Loop</span>
             </span>
             <span className="text-[10px] uppercase font-bold tracking-widest text-charcoal/50 -mt-1">
-              Event Intelligence
+              {t('navbar.eventIntelligence')}
             </span>
           </div>
         </Link>
@@ -50,7 +50,7 @@ export const Navbar = () => {
           </Link>
           <Link to="/feedback/HACK-2026" className="text-sm font-medium text-charcoal/80 hover:text-coral transition-colors flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-coral animate-ping" />
-            <span>Live Feedback Demo</span>
+            <span>{t('navbar.liveDemo')}</span>
           </Link>
         </nav>
 
@@ -108,14 +108,14 @@ export const Navbar = () => {
                     className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl bg-navy text-white hover:bg-navy-700 transition-colors shadow-sm"
                   >
                     <Building2 size={13} className="text-sage" />
-                    <span className="truncate max-w-[140px]">{activeOrganization?.name || 'Organization'}</span>
+                    <span className="truncate max-w-[140px]">{activeOrganization?.name || t('navbar.organization')}</span>
                     <ChevronDown size={12} className="opacity-70" />
                   </button>
 
                   {isOrgDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-card border border-charcoal/10 py-1.5 z-50">
                       <div className="px-3 py-1 text-[11px] font-semibold text-charcoal/50 uppercase tracking-wider">
-                        Your Organizations
+                        {t('navbar.yourOrganizations')}
                       </div>
                       {organizations.map((org) => (
                         <button
@@ -144,24 +144,24 @@ export const Navbar = () => {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all"
               >
                 <LayoutDashboard size={14} />
-                <span>Dashboard</span>
+                <span>{t('nav.dashboard')}</span>
               </Link>
 
               {isAdmin && (
                 <Link
                   to="/admin"
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-charcoal hover:bg-navy-900 text-white text-xs font-bold transition-all"
-                  title="Admin Platform Console"
+                  title={t('navbar.adminTooltip')}
                 >
                   <Shield size={14} className="text-lavender" />
-                  <span className="hidden sm:inline">Admin</span>
+                  <span className="hidden sm:inline">{t('nav.admin')}</span>
                 </Link>
               )}
 
               <button
                 onClick={handleLogout}
                 className="p-2 rounded-xl border border-charcoal/15 text-charcoal/60 hover:text-coral hover:border-coral transition-colors"
-                title="Sign Out"
+                title={t('nav.logout')}
               >
                 <LogOut size={16} />
               </button>

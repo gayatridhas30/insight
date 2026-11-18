@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:https": "vite --config vite.https.config.js",
+    "cert": "powershell -ExecutionPolicy Bypass -File scripts/gen-cert.ps1",
     "build": "vite build",
     "preview": "vite preview"
   },

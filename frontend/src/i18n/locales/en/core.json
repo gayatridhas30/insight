@@ -1,0 +1,20 @@
+{
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "dashboard": "Dashboard",
+    "login": "Sign In",
+    "register": "Get Started",
+    "logout": "Sign Out",
+    "admin": "Admin Console"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back"
+  }
+}

@@ -19,8 +19,10 @@ import {
 } from 'lucide-react';
 import { eventService } from '../../api/services';
 import { getCategoryBadge } from '../../config/eventCategories';
+import { useTranslation } from 'react-i18next';
 
 export const EventDetailPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [event, setEvent] = useState(null);
   const [sessions, setSessions] = useState([]);
@@ -66,7 +68,7 @@ export const EventDetailPage = () => {
         setSessionForm({ title: '', speakerName: '', roomOrLink: '', description: '' });
       }
     } catch (err) {
-      alert('Failed to add session');
+      alert(t('eventDetail.sessionAddFailed'));
     }
   };
 
@@ -74,13 +76,13 @@ export const EventDetailPage = () => {
     return (
       <div className="flex items-center justify-center h-64 text-sm font-semibold text-navy">
         <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-        <span>Loading event details...</span>
+        <span>{t('eventDetail.loading')}</span>
       </div>
     );
   }
 
   if (!event) {
-    return <div>Event not found.</div>;
+    return <div>{t('eventDetail.notFound')}</div>;
   }
 
   const categoryMeta = getCategoryBadge(event.category);
@@ -112,9 +114,9 @@ export const EventDetailPage = () => {
                   ? 'bg-coral/20 text-coral'
                   : 'bg-lavender/50 text-navy'
               }`}
-            >
-              {event.status}
-            </span>
+              >
+                {t(`eventDetail.status.${event.status}`, event.status)}
+              </span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-navy">
@@ -128,11 +130,11 @@ export const EventDetailPage = () => {
             </div>
             <div className="flex items-center gap-1.5">
               <MapPin size={14} className="text-coral" />
-              <span>{event.location || 'Online'}</span>
+              <span>{event.location || t('eventDetail.online')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Users size={14} className="text-sage" />
-              <span>Target: {event.targetResponses || 50} attendees</span>
+              <span>{t('eventDetail.targetAttendees', { count: event.targetResponses || 50 })}</span>
             </div>
           </div>
         </div>
@@ -144,27 +146,27 @@ export const EventDetailPage = () => {
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-ivory hover:bg-coral hover:text-white text-xs font-bold transition-all"
           >
             <Sliders size={14} />
-            <span>Form Builder</span>
+            <span>{t('eventDetail.formBuilder')}</span>
           </Link>
           <Link
             to={`/events/${id}/responses`}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-ivory hover:bg-navy hover:text-white text-xs font-bold transition-all"
           >
-            <span>Responses</span>
+            <span>{t('eventDetail.responses')}</span>
           </Link>
           <Link
             to={`/events/${id}/ai`}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all"
           >
             <Sparkles size={14} />
-            <span>AI Insights</span>
+            <span>{t('eventDetail.aiInsights')}</span>
           </Link>
           <Link
             to={`/events/${id}/qr`}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-navy hover:bg-navy-900 text-white text-xs font-bold transition-all"
           >
             <QrCode size={14} />
-            <span>QR Flyer</span>
+            <span>{t('eventDetail.qrFlyer')}</span>
           </Link>
         </div>
       </div>
@@ -176,9 +178,9 @@ export const EventDetailPage = () => {
           <div className="bg-white rounded-3xl p-6 sm:p-7 border border-charcoal/10 shadow-subtle space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-heading font-bold text-navy">Event Sessions & Agenda</h3>
+                <h3 className="text-lg font-heading font-bold text-navy">{t('eventDetail.sessionsHeading')}</h3>
                 <p className="text-xs text-charcoal/60">
-                  Attach feedback specifically to individual waves, speakers, or matches
+                  {t('eventDetail.sessionsSub')}
                 </p>
               </div>
               <button
@@ -186,14 +188,14 @@ export const EventDetailPage = () => {
                 className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-coral/10 hover:bg-coral hover:text-white text-coral text-xs font-bold transition-all"
               >
                 <Plus size={14} />
-                <span>Add Session / Wave</span>
+                <span>{t('eventDetail.addSession')}</span>
               </button>
             </div>
 
             {sessions.length === 0 ? (
               <div className="p-8 text-center bg-ivory rounded-2xl border border-charcoal/10 space-y-2">
                 <Clock size={28} className="text-charcoal/40 mx-auto" />
-                <p className="text-xs text-charcoal/60">No sessions added yet for this event.</p>
+                <p className="text-xs text-charcoal/60">{t('eventDetail.noSessions')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -205,12 +207,12 @@ export const EventDetailPage = () => {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider bg-navy text-white px-2 py-0.5 rounded-md">
-                          Session {idx + 1}
+                          {t('eventDetail.sessionLabel', { count: idx + 1 })}
                         </span>
                         <h4 className="text-sm font-bold text-navy">{sess.title}</h4>
                       </div>
                       <p className="text-xs text-charcoal/60">
-                        Lead: <span className="font-semibold text-charcoal">{sess.speakerName || 'TBA'}</span> • Stage / Zone: {sess.roomOrLink || 'Main Area'}
+                        {t('eventDetail.leadLabel')} <span className="font-semibold text-charcoal">{sess.speakerName || t('eventDetail.tba')}</span> • {t('eventDetail.stageZoneLabel')} {sess.roomOrLink || t('eventDetail.mainArea')}
                       </p>
                     </div>
                   </div>
@@ -223,12 +225,12 @@ export const EventDetailPage = () => {
         {/* Quick QR & Link Column */}
         <div className="space-y-6">
           <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-card text-center space-y-4">
-            <h3 className="text-sm font-heading font-bold text-navy">Feedback Access QR</h3>
+            <h3 className="text-sm font-heading font-bold text-navy">{t('eventDetail.qrAccessHeading')}</h3>
             {qr?.dataUrl && (
               <div className="p-4 bg-ivory rounded-2xl border border-charcoal/10 inline-block">
                 <img
                   src={qr.dataUrl}
-                  alt={`QR code for ${event.title}`}
+                  alt={t('eventDetail.qrAlt', { title: event.title })}
                   className="w-48 h-48 rounded-xl mx-auto"
                 />
               </div>
@@ -240,7 +242,7 @@ export const EventDetailPage = () => {
                 className="w-full py-2.5 rounded-xl bg-navy hover:bg-navy-900 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5"
               >
                 <QrCode size={14} />
-                <span>Open Full Flyer & Print</span>
+                <span>{t('eventDetail.openFlyer')}</span>
               </Link>
               <a
                 href={`/feedback/${event.code}`}
@@ -248,7 +250,7 @@ export const EventDetailPage = () => {
                 rel="noopener noreferrer"
                 className="w-full py-2 rounded-xl bg-ivory hover:bg-coral/10 text-charcoal hover:text-coral border border-charcoal/15 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
               >
-                <span>Test Feedback Form</span>
+                <span>{t('eventDetail.testForm')}</span>
                 <ExternalLink size={13} />
               </a>
             </div>

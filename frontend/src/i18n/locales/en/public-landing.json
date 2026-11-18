@@ -1,0 +1,219 @@
+{
+  "landing": {
+    "badge": "AI-Powered Universal Event Intelligence",
+    "headline": "Turn Live Attendee Feedback into Actionable Intelligence",
+    "headlineBold": "Actionable Intelligence",
+    "subheadline": "From Marathons and Concerts to Sports Tournaments, Workshops, and College Fests. Capture multilingual voice & text, detect bottlenecks, and close the improvement loop.",
+    "platformPill": "Universal AI Event Feedback & Intelligence Platform",
+    "searchPlaceholder": "Enter Event Code (e.g. RUN-2026, HACK-2026, LIVE-2026)",
+    "giveFeedback": "Give Feedback",
+    "createAccount": "Create Organizer Account",
+    "exploreDemo": "Explore Live Demo Event",
+    "ctaStart": "Start Free Organizer Trial",
+    "ctaDemo": "Explore Live Demo",
+    "categoryLabel": "Explore Tailored Forms for Every Event Category:",
+    "testFormLive": "Test This Form Live",
+    "categoryDimensions": "Category-Tailored Dimensions",
+    "multilingualFeedback": "Preserved Multilingual Feedback",
+    "aiInsightLabel": "Synthesized AI Actionable Insight",
+    "aiCategoryIntelligence": "Category-Specific Intelligence",
+    "workflowHeading": "How InsightLoop Empowers Organizers",
+    "workflowSubheading": "A frictionless feedback loop designed for high volume in-person and hybrid events.",
+    "workflowBadge": "Streamlined 5-Step Process",
+    "featuresHeading": "Engineered for High-Stakes Events",
+    "featuresBadge": "Enterprise Grade Architecture",
+    "featuresSubheading": "Combines sovereign Indian language processing with RAG vector retrieval and task tracking.",
+    "ctaBadge": "Ready for Evaluators & Event Hosts",
+    "ctaHeading": "Experience InsightLoop Across Marathons, Concerts & Conferences Now",
+    "ctaDesc": "Log in with our seeded organizer credentials or scan live event QR codes from any smartphone.",
+    "openHostDashboard": "Open Host Dashboard",
+    "browseEvents": "Browse All Universal Events",
+    "statsEvents": "Events Hosted",
+    "statsResponses": "Responses Analyzed",
+    "statsSatisfaction": "Avg. Satisfaction Score",
+    "statsLanguages": "Indian Languages Supported",
+    "demo": {
+      "marathon": {
+        "title": "Marathons & Road Races",
+        "subtitle": "5K, 10K, Half & Full Marathons",
+        "d1": "Route marking & barricading",
+        "d2": "Hydration & electrolyte stations",
+        "d3": "Bib timing chip accuracy",
+        "d4": "Finisher medal & medical aid",
+        "author": "Half Marathon Finisher (Marathi)",
+        "insight": "AI flagged hydration depletion at 15km checkpoint. Recommended mobile replenishment van."
+      },
+      "concert": {
+        "title": "Concerts & Music Festivals",
+        "subtitle": "Live Bands, EDM, DJ Nights & Pro-Nites",
+        "d1": "Acoustic sound & bass resonance",
+        "d2": "Visual lighting & laser show",
+        "d3": "Entry queue & barricade flow",
+        "d4": "Artist stage engagement",
+        "author": "Arena Attendee (Hindi)",
+        "insight": "AI detected entry bottleneck at Gate 2. Recommended RFID express lanes."
+      },
+      "sports": {
+        "title": "Sports Tournaments & Leagues",
+        "subtitle": "Cricket, Football, Badminton & Athletics",
+        "d1": "Turf & playing ground condition",
+        "d2": "Refereeing impartiality",
+        "d3": "Match fixture punctuality",
+        "d4": "Paramedic & medical aid",
+        "author": "Cricket Captain (English)",
+        "insight": "AI suggested 25-minute buffer intervals between consecutive knockout fixtures."
+      },
+      "workshop": {
+        "title": "Workshops & Bootcamps",
+        "subtitle": "Coding, AI/ML, Cloud & Design",
+        "d1": "Hands-on practical exercises",
+        "d2": "Instructor clarity & pace",
+        "d3": "Pre-shared code repositories",
+        "d4": "Q&A responsiveness",
+        "author": "Developer Attendee (Marathi)",
+        "insight": "AI recommended pre-distributing starter repositories 24h prior to sessions."
+      },
+      "conference": {
+        "title": "Conferences & Summits",
+        "subtitle": "Tech, Business, Medical & Academic",
+        "d1": "Keynote depth & insights",
+        "d2": "Networking opportunities",
+        "d3": "AV projection calibration",
+        "d4": "Panel discussion quality",
+        "author": "Executive Delegate (English)",
+        "insight": "AI highlighted demand for dedicated peer networking lounge."
+      },
+      "college": {
+        "title": "College & Tech Fests",
+        "subtitle": "Hackathons, Tech Fests & Cultural Meets",
+        "d1": "WiFi & power infrastructure",
+        "d2": "Mentorship & judging transparency",
+        "d3": "Problem statement caliber",
+        "d4": "Midnight hospitality",
+        "author": "Student Developer (English)",
+        "insight": "AI converted auditorium microphone calibration into an assigned team task."
+      }
+    },
+    "steps": {
+      "s1": {
+        "title": "Select Category & Build Form",
+        "desc": "Pick your event category (Marathon, Concert, Sports, Workshop, College) and let AI generate or customize questions with trilingual prompts (EN, HI, MR)."
+      },
+      "s2": {
+        "title": "Instant QR Flyer & Link",
+        "desc": "Generate printable QR posters for route water stations, concert barricades, session halls, or digital slides. No attendee signup needed."
+      },
+      "s3": {
+        "title": "Bhashini Voice & Text Input",
+        "desc": "Participants scan and give feedback in English, Hindi, or Marathi via speech audio or text with real-time speech recognition (ASR)."
+      },
+      "s4": {
+        "title": "AI Intelligence & Themes",
+        "desc": "Synthesize sentiment polarity, extract category-specific themes, detect recurring operational bottlenecks, and cluster complaint categories."
+      },
+      "s5": {
+        "title": "RAG Knowledge Assistant",
+        "desc": "Query historical event data in plain English with evidence citations. Convert recommendations into tracked improvement tasks."
+      }
+    },
+    "cards": {
+      "f1": {
+        "title": "Universal Multilingual Voice & Text",
+        "desc": "Attendees speak in Marathi, Hindi, or English. Audio is transcribed with Bhashini ASR, preserved in the original dialect, and translated for organizers.",
+        "tag": "Bhashini ASR & NMT"
+      },
+      "f2": {
+        "title": "Category-Tailored Form Engine",
+        "desc": "Pre-calibrated evaluation dimensions for 10+ event types: route safety for marathons, sound for concerts, trainer clarity for workshops, and refereeing for sports.",
+        "tag": "10+ Event Categories"
+      },
+      "f3": {
+        "title": "RAG-Powered AI Knowledge Base",
+        "desc": "Ask your organization’s feedback data: \"Did water station complaints decrease?\", \"Compare sound reviews between last two festivals.\"",
+        "tag": "Evidence Citations"
+      },
+      "f4": {
+        "title": "Continuous Improvement Tracker",
+        "desc": "Convert AI recommendations directly into assignable team tasks to verify whether past issues are systematically resolved in future editions.",
+        "tag": "Closed Loop Action"
+      },
+      "f5": {
+        "title": "Cross-Event Benchmarking",
+        "desc": "Side-by-side comparison of 2 or 3 events with radar charts, satisfaction indices, NPS shifts, and recurring issue resolution tracking.",
+        "tag": "Analytics & Trends"
+      },
+      "f6": {
+        "title": "Executive PDF & Excel Reports",
+        "desc": "Generate professional 1-click PDF executive summaries and multi-tab Excel workbooks preserving original and translated feedback columns.",
+        "tag": "Downloadable Reports"
+      }
+    }
+  },
+  "features": {
+    "eyebrow": "Platform Capabilities",
+    "heading": "Engineered for Complete Event Intelligence",
+    "subheading": "InsightLoop couples Indian language processing with vector retrieval and automated post-event resolution tracking.",
+    "f1Title": "Bhashini Multilingual Speech & Text",
+    "f1Desc": "Break language barriers at collegiate and national conferences. Participants can submit audio or text in English, Hindi, or Marathi. Speech is transcribed using Bhashini ASR, allowing attendees to review and refine their transcriptions in real-time.",
+    "f1Badge": "Preserves original dialect & translated text",
+    "f1InputLabel": "Input (Marathi Speech Audio):",
+    "f1OutputLabel": "Bhashini Translation Output:",
+    "f2Title": "RAG-Powered AI Knowledge Assistant",
+    "f2Desc": "Organizers can hold interactive conversations with their event historical data. Using vector semantic retrieval scoped with organization isolation, the AI assistant answers complex queries.",
+    "f2Badge": "Evidence-backed answers with direct participant citations",
+    "f2QueryLabel": "Organizer Query:",
+    "f2ResponseLabel": "AI Synthesized Response:",
+    "f3Title": "Side-by-Side Event Benchmarking",
+    "f3Desc": "Stop looking at feedback in isolation. Compare consecutive workshops, hackathons, and symposiums side-by-side. Track whether satisfaction ratings increased and whether recurring complaints were resolved.",
+    "f3Badge": "Radar charts, sentiment distribution deltas, and task verification",
+    "benchmarkTitle": "Hackathon 2025 vs. Hackathon 2026",
+    "benchmarkDelta": "+18% Satisfaction Delta",
+    "benchmarkAvgRating": "Average Rating:",
+    "benchmarkAudio": "Recurring Audio Complaints:",
+    "benchmarkResponse": "Response Rate:",
+    "benchmarkAudioValue": "{{from}} complaints ➔ {{to}} complaints"
+  },
+  "howItWorks": {
+    "eyebrow": "Architecture & Flow",
+    "heading": "How InsightLoop Operates",
+    "subheading": "A transparent, robust architecture designed to turn unstructured attendee reactions into verified institutional improvements.",
+    "createFirst": "Create Your First Event",
+    "step": "STEP",
+    "step1": {
+      "title": "Host Creates Event & Configures Form",
+      "desc": "An organizer registers their college, club, or enterprise account and defines event sessions. Using the Dynamic Form Builder or 1-click AI form generation, they select rating scales, NPS, multiple-choice questions, and enable voice feedback."
+    },
+    "step2": {
+      "title": "Instant QR Code & Link Generation",
+      "desc": "InsightLoop generates a high-resolution QR code and printable feedback badge flyer. Organizers project the QR on stage screens or print it on attendee badges for seamless mobile scanning."
+    },
+    "step3": {
+      "title": "Multilingual Participant Submission",
+      "desc": "Attendees scan the QR code and are directed to the mobile-optimized form without being forced to create an account. They choose English, Hindi, or Marathi, submit text or record audio, review transcriptions, and submit anonymously or identified."
+    },
+    "step4": {
+      "title": "Bhashini Pipeline & AI Intelligence",
+      "desc": "Multilingual text and speech are processed via Bhashini translation (NMT) and speech-to-text (ASR). Our AI service runs sentiment analysis, extracts recurring complaints, clusters topics, and creates actionable recommendations with evidence."
+    },
+    "step5": {
+      "title": "Continuous Tracking & Benchmark Reporting",
+      "desc": "Organizers review interactive Recharts dashboards, query the RAG AI Assistant for natural language answers, convert recommendations into team tasks, and export executive PDF or Excel reports."
+    }
+  },
+  "footer": {
+    "tagline": "Universal multilingual event feedback & intelligence platform. Powering colleges, companies, hackathons, and conferences with real-time AI sentiment analysis, Bhashini translation, and evidence-backed recommendations.",
+    "bhashiniNote": "Bhashini National Language Mission & AI Service Integrated",
+    "platform": "Platform",
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "publicFeedback": "Public Feedback Form",
+    "organizerLogin": "Organizer Login",
+    "privacy": "Privacy & Isolation",
+    "privacyAnonymous": "Anonymous Feedback Protection",
+    "privacyMultiTenant": "Multi-tenant Organization Isolation",
+    "privacyDual": "Dual Language Storage (Original & Translated)",
+    "privacyAudit": "Audit Trail & RBAC Control",
+    "copyright": "InsightLoop. Production Ready Universal Event Intelligence Platform.",
+    "builtWith": "Built with precision for Academic Evaluation & Enterprise Deployment"
+  }
+}

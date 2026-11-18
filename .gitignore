@@ -14,10 +14,16 @@ build/
 
 # Local database & logs
 data/
+.mongo-data/
+.logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Self-signed dev certificate for the HTTPS frontend (port 5174)
+frontend/certs/
+frontend/node_modules/.vite-https/
 
 # OS & Editor
 .DS_Store

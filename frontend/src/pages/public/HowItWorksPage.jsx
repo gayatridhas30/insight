@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Navbar } from '../../components/layout/Navbar';
 import { Footer } from '../../components/layout/Footer';
 import {
@@ -13,35 +14,37 @@ import {
 } from 'lucide-react';
 
 export const HowItWorksPage = () => {
+  const { t } = useTranslation();
+
   const steps = [
     {
       num: '01',
-      title: 'Host Creates Event & Configures Form',
-      desc: 'An organizer registers their college, club, or enterprise account and defines event sessions. Using the Dynamic Form Builder or 1-click AI form generation, they select rating scales, NPS, multiple-choice questions, and enable voice feedback.',
+      title: t('howItWorks.step1.title'),
+      desc: t('howItWorks.step1.desc'),
       icon: CalendarPlus,
     },
     {
       num: '02',
-      title: 'Instant QR Code & Link Generation',
-      desc: 'InsightLoop generates a high-resolution QR code and printable feedback badge flyer. Organizers project the QR on stage screens or print it on attendee badges for seamless mobile scanning.',
+      title: t('howItWorks.step2.title'),
+      desc: t('howItWorks.step2.desc'),
       icon: QrCode,
     },
     {
       num: '03',
-      title: 'Multilingual Participant Submission',
-      desc: 'Attendees scan the QR code and are directed to the mobile-optimized form without being forced to create an account. They choose English, Hindi, or Marathi, submit text or record audio, review transcriptions, and submit anonymously or identified.',
+      title: t('howItWorks.step3.title'),
+      desc: t('howItWorks.step3.desc'),
       icon: Smartphone,
     },
     {
       num: '04',
-      title: 'Bhashini Pipeline & AI Intelligence',
-      desc: 'Multilingual text and speech are processed via Bhashini translation (NMT) and speech-to-text (ASR). Our AI service runs sentiment analysis, extracts recurring complaints, clusters topics, and creates actionable recommendations with evidence.',
+      title: t('howItWorks.step4.title'),
+      desc: t('howItWorks.step4.desc'),
       icon: Cpu,
     },
     {
       num: '05',
-      title: 'Continuous Tracking & Benchmark Reporting',
-      desc: 'Organizers review interactive Recharts dashboards, query the RAG AI Assistant for natural language answers, convert recommendations into team tasks, and export executive PDF or Excel reports.',
+      title: t('howItWorks.step5.title'),
+      desc: t('howItWorks.step5.desc'),
       icon: CheckCircle2,
     },
   ];
@@ -53,12 +56,12 @@ export const HowItWorksPage = () => {
       <main className="flex-1 py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <span className="text-xs uppercase font-bold tracking-widest text-coral">Architecture & Flow</span>
+            <span className="text-xs uppercase font-bold tracking-widest text-coral">{t('howItWorks.eyebrow')}</span>
             <h1 className="text-4xl sm:text-5xl font-heading font-extrabold text-navy">
-              How InsightLoop Operates
+              {t('howItWorks.heading')}
             </h1>
             <p className="text-base text-charcoal/70">
-              A transparent, robust architecture designed to turn unstructured attendee reactions into verified institutional improvements.
+              {t('howItWorks.subheading')}
             </p>
           </div>
 
@@ -75,7 +78,7 @@ export const HowItWorksPage = () => {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-extrabold text-coral font-heading">STEP {s.num}</span>
+                      <span className="text-sm font-extrabold text-coral font-heading">{t('howItWorks.step')} {s.num}</span>
                       <h3 className="text-xl font-heading font-bold text-navy">{s.title}</h3>
                     </div>
                     <p className="text-sm text-charcoal/70 leading-relaxed">{s.desc}</p>
@@ -90,7 +93,7 @@ export const HowItWorksPage = () => {
               to="/register"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-coral hover:bg-coral-hover text-white text-base font-bold shadow-coral-glow transition-all"
             >
-              <span>Create Your First Event</span>
+              <span>{t('howItWorks.createFirst')}</span>
               <ArrowRight size={18} />
             </Link>
           </div>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search, Shield, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { adminService } from '../../api/services';
 
 export const UserManagementPage = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -32,7 +34,7 @@ export const UserManagementPage = () => {
       await adminService.toggleUserStatus(userId);
       fetchUsers();
     } catch (err) {
-      alert('Failed to update user status');
+      alert(t('admin.users.statusUpdateFailed'));
     }
   };
 
@@ -40,10 +42,10 @@ export const UserManagementPage = () => {
     <div className="space-y-6 animate-fadeIn">
       <div>
         <h1 className="text-2xl font-heading font-extrabold text-navy">
-          User Management Directory
+          {t('admin.users.title')}
         </h1>
         <p className="text-xs text-charcoal/60 mt-0.5">
-          Manage platform accounts, role assignments, and suspension status
+          {t('admin.users.subtitle')}
         </p>
       </div>
 
@@ -60,7 +62,7 @@ export const UserManagementPage = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or email..."
+            placeholder={t('admin.users.searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
           />
         </form>
@@ -70,29 +72,29 @@ export const UserManagementPage = () => {
           onChange={(e) => setRoleFilter(e.target.value)}
           className="px-3 py-2 text-xs font-semibold rounded-xl border border-charcoal/15 bg-ivory-50 text-charcoal"
         >
-          <option value="">All Roles</option>
-          <option value="admin">Administrator</option>
-          <option value="host">Host / Organizer</option>
-          <option value="participant">Participant</option>
+          <option value="">{t('admin.users.allRoles')}</option>
+          <option value="admin">{t('admin.users.roleOptions.admin')}</option>
+          <option value="host">{t('admin.users.roleOptions.host')}</option>
+          <option value="participant">{t('admin.users.roleOptions.participant')}</option>
         </select>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center h-48 text-sm font-semibold text-navy">
           <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-          <span>Loading user accounts...</span>
+          <span>{t('admin.users.loading')}</span>
         </div>
       ) : (
         <div className="bg-white rounded-3xl border border-charcoal/10 shadow-subtle overflow-hidden">
           <table className="w-full text-left text-xs">
             <thead className="bg-ivory border-b border-charcoal/10 text-charcoal/70 uppercase tracking-wider font-bold">
               <tr>
-                <th className="py-3.5 px-4">User</th>
-                <th className="py-3.5 px-4">Email</th>
-                <th className="py-3.5 px-4">Role</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4">Registered Date</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+                <th className="py-3.5 px-4">{t('admin.users.headers.user')}</th>
+                <th className="py-3.5 px-4">{t('admin.users.headers.email')}</th>
+                <th className="py-3.5 px-4">{t('admin.users.headers.role')}</th>
+                <th className="py-3.5 px-4">{t('admin.users.headers.status')}</th>
+                <th className="py-3.5 px-4">{t('admin.users.headers.registeredDate')}</th>
+                <th className="py-3.5 px-4 text-right">{t('admin.users.headers.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-charcoal/5">
@@ -108,7 +110,7 @@ export const UserManagementPage = () => {
                           : 'bg-coral/10 text-coral'
                       }`}
                     >
-                      {u.role}
+                      {t(`admin.users.roles.${u.role}`, { defaultValue: u.role || '' })}
                     </span>
                   </td>
                   <td className="py-3.5 px-4">
@@ -118,7 +120,9 @@ export const UserManagementPage = () => {
                       }`}
                     >
                       {u.isActive ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
-                      <span>{u.isActive ? 'Active' : 'Suspended'}</span>
+                      <span>
+                        {u.isActive ? t('admin.users.statuses.active') : t('admin.users.statuses.suspended')}
+                      </span>
                     </span>
                   </td>
                   <td className="py-3.5 px-4 text-charcoal/50">
@@ -130,7 +134,7 @@ export const UserManagementPage = () => {
                       onClick={() => handleToggleStatus(u._id)}
                       className="px-2.5 py-1 rounded-lg border border-charcoal/15 font-bold hover:bg-navy hover:text-white transition-colors"
                     >
-                      {u.isActive ? 'Suspend' : 'Activate'}
+                      {u.isActive ? t('admin.users.suspend') : t('admin.users.activate')}
                     </button>
                   </td>
                 </tr>

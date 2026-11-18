@@ -17,8 +17,10 @@ import {
 import { eventService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
 import { EVENT_CATEGORIES } from '../../config/eventCategories';
+import { useTranslation } from 'react-i18next';
 
 export const CreateEventPage = () => {
+  const { t } = useTranslation();
   const { activeOrganization } = useAuth();
   const navigate = useNavigate();
 
@@ -60,7 +62,7 @@ export const CreateEventPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!activeOrganization) {
-      setError('Please select or create an organization first.');
+      setError('eventCreate.selectOrgFirst');
       return;
     }
 
@@ -70,7 +72,7 @@ export const CreateEventPage = () => {
     try {
       const tags = formData.tagsString
         .split(',')
-        .map((t) => t.trim())
+        .map((tag) => tag.trim())
         .filter(Boolean);
 
       const effectiveSubcategory =
@@ -98,7 +100,7 @@ export const CreateEventPage = () => {
         navigate(`/events/${createdEventId}/builder`);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create event.');
+      setError(err.response?.data?.message || 'eventCreate.createFailed');
     } finally {
       setLoading(false);
     }
@@ -112,24 +114,24 @@ export const CreateEventPage = () => {
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal/60 hover:text-navy transition-colors"
       >
         <ArrowLeft size={14} />
-        <span>Back to Events Directory</span>
+        <span>{t('eventCreate.backToEvents')}</span>
       </Link>
 
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-charcoal/10 shadow-card space-y-6">
         <div>
-          <span className="text-xs uppercase font-bold tracking-wider text-coral">Universal Event Setup</span>
+          <span className="text-xs uppercase font-bold tracking-wider text-coral">{t('eventCreate.setupEyebrow')}</span>
           <h1 className="text-2xl font-heading font-extrabold text-navy mt-1">
-            Create a New Universal Feedback Event
+            {t('eventCreate.heading')}
           </h1>
           <p className="text-xs text-charcoal/60 mt-1">
-            Choose your category and subcategory. InsightLoop will initialize category-tailored questions with multilingual prompts (English, Hindi, Marathi).
+            {t('eventCreate.subtitle')}
           </p>
         </div>
 
         {error && (
           <div className="p-4 rounded-xl bg-coral/10 border border-coral/30 text-coral text-xs font-semibold flex items-center gap-2">
             <AlertCircle size={16} className="shrink-0" />
-            <span>{error}</span>
+            <span>{error.startsWith('eventCreate.') ? t(error) : error}</span>
           </div>
         )}
 
@@ -137,7 +139,7 @@ export const CreateEventPage = () => {
           {/* Title */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-              Event Title *
+              {t('eventCreate.titleLabel')}
             </label>
             <input
               type="text"
@@ -145,7 +147,7 @@ export const CreateEventPage = () => {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="e.g. Pune City Marathon 2026, Sunburn Pro-Nite, or AI Hands-on Workshop"
+              placeholder={t('eventCreate.titlePlaceholder')}
               className="w-full px-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
             />
           </div>
@@ -154,7 +156,7 @@ export const CreateEventPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Main Category *
+                {t('eventCreate.categoryLabel')}
               </label>
               <select
                 name="category"
@@ -172,7 +174,7 @@ export const CreateEventPage = () => {
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Subcategory *
+                {t('eventCreate.subcategoryLabel')}
               </label>
               <select
                 name="subcategory"
@@ -185,7 +187,7 @@ export const CreateEventPage = () => {
                     {sub}
                   </option>
                 ))}
-                <option value="Custom">+ Custom Subcategory...</option>
+                <option value="Custom">{t('eventCreate.customSubcategoryOption')}</option>
               </select>
             </div>
           </div>
@@ -194,7 +196,7 @@ export const CreateEventPage = () => {
           {formData.subcategory === 'Custom' && (
             <div className="animate-fadeIn">
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Enter Custom Subcategory
+                {t('eventCreate.customSubcategoryLabel')}
               </label>
               <input
                 type="text"
@@ -202,7 +204,7 @@ export const CreateEventPage = () => {
                 name="customSubcategory"
                 value={formData.customSubcategory}
                 onChange={handleChange}
-                placeholder="e.g. Ultra Trail 50K or Retro Vinyl Night"
+                placeholder={t('eventCreate.customSubcategoryPlaceholder')}
                 className="w-full px-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
               />
             </div>
@@ -213,13 +215,13 @@ export const CreateEventPage = () => {
             <Sparkles size={18} className="text-coral shrink-0 mt-0.5" />
             <div className="space-y-1 text-xs">
               <p className="font-bold text-navy">
-                Dynamic Question Templates for {selectedCategoryConfig.name}
+                {t('eventCreate.templateTitle', { category: selectedCategoryConfig.name })}
               </p>
               <p className="text-charcoal/70 leading-relaxed">
                 {selectedCategoryConfig.description}
                 <br />
                 <span className="text-charcoal/80 font-medium">
-                  Questions covering star ratings, NPS, specific operational choices, and voice-enabled open feedback will be generated automatically. You can edit or reorder them in the Form Builder.
+                  {t('eventCreate.templateBody')}
                 </span>
               </p>
             </div>
@@ -229,7 +231,7 @@ export const CreateEventPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Venue Type
+                {t('eventCreate.venueTypeLabel')}
               </label>
               <select
                 name="venueType"
@@ -237,15 +239,15 @@ export const CreateEventPage = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
               >
-                <option value="in-person">In-Person (Outdoor / Arena / Auditorium)</option>
-                <option value="virtual">Virtual / Online Stream</option>
-                <option value="hybrid">Hybrid</option>
+                <option value="in-person">{t('eventCreate.venueType.inPerson')}</option>
+                <option value="virtual">{t('eventCreate.venueType.virtual')}</option>
+                <option value="hybrid">{t('eventCreate.venueType.hybrid')}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Location / Route Details
+                {t('eventCreate.locationLabel')}
               </label>
               <div className="relative">
                 <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
@@ -254,7 +256,7 @@ export const CreateEventPage = () => {
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  placeholder="e.g. Shree Shiv Chhatrapati Sports Complex, Pune"
+                  placeholder={t('eventCreate.locationPlaceholder')}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50"
                 />
               </div>
@@ -264,14 +266,14 @@ export const CreateEventPage = () => {
           {/* Description */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-              Event Description & Objectives
+              {t('eventCreate.descriptionLabel')}
             </label>
             <textarea
               rows={3}
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Brief description of the event agenda, attendee expectations, and schedule..."
+              placeholder={t('eventCreate.descriptionPlaceholder')}
               className="w-full p-3 rounded-xl border border-charcoal/15 text-sm focus:outline-none focus:border-coral bg-ivory-50 resize-none"
             />
           </div>
@@ -280,7 +282,7 @@ export const CreateEventPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Start Date & Time
+                {t('eventCreate.startDateLabel')}
               </label>
               <input
                 type="datetime-local"
@@ -293,7 +295,7 @@ export const CreateEventPage = () => {
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                End Date & Time
+                {t('eventCreate.endDateLabel')}
               </label>
               <input
                 type="datetime-local"
@@ -309,7 +311,7 @@ export const CreateEventPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Target Response Goal
+                {t('eventCreate.targetLabel')}
               </label>
               <div className="relative">
                 <Users size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
@@ -327,7 +329,7 @@ export const CreateEventPage = () => {
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                Search Tags (comma separated)
+                {t('eventCreate.tagsLabel')}
               </label>
               <div className="relative">
                 <Tag size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
@@ -336,7 +338,7 @@ export const CreateEventPage = () => {
                   name="tagsString"
                   value={formData.tagsString}
                   onChange={handleChange}
-                  placeholder="e.g. Marathon, HalfMarathon, 21K, Fitness"
+                  placeholder={t('eventCreate.tagsPlaceholder')}
                   className="w-full pl-10 pr-4 py-2 rounded-xl border border-charcoal/15 text-xs focus:outline-none focus:border-coral bg-ivory-50"
                 />
               </div>
@@ -349,7 +351,7 @@ export const CreateEventPage = () => {
               to="/events"
               className="px-5 py-2.5 rounded-xl border border-charcoal/15 text-charcoal/70 hover:text-navy text-xs font-bold transition-colors"
             >
-              Cancel
+              {t('eventCreate.cancel')}
             </Link>
             <button
               type="submit"
@@ -359,12 +361,12 @@ export const CreateEventPage = () => {
               {loading ? (
                 <>
                   <span className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                  <span>Creating Event & Initializing Questions...</span>
+                  <span>{t('eventCreate.creating')}</span>
                 </>
               ) : (
                 <>
                   <PlusCircle size={16} />
-                  <span>Create Event & Continue to Form Builder</span>
+                  <span>{t('eventCreate.submit')}</span>
                 </>
               )}
             </button>

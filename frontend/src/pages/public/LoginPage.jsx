@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, LogIn, Lock, Mail, AlertCircle, Shield, UserCheck, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Navbar } from '../../components/layout/Navbar';
 import { Footer } from '../../components/layout/Footer';
 
 export const LoginPage = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const errorText = error ? (error.key ? t(error.key, error.params) : error.message) : '';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(null);
     setLoading(true);
 
     try {
@@ -27,7 +31,11 @@ export const LoginPage = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password.');
+      if (err.response?.data?.message) {
+        setError({ message: err.response.data.message });
+      } else {
+        setError({ key: 'auth.login.invalidCredentials' });
+      }
     } finally {
       setLoading(false);
     }
@@ -43,7 +51,11 @@ export const LoginPage = () => {
         navigate('/dashboard');
       }
     }).catch((err) => {
-      setError(err.response?.data?.message || 'Failed to login with demo account.');
+      if (err.response?.data?.message) {
+        setError({ message: err.response.data.message });
+      } else {
+        setError({ key: 'auth.login.demoFailed' });
+      }
     });
   };
 
@@ -58,10 +70,10 @@ export const LoginPage = () => {
               <Sparkles size={24} />
             </div>
             <h2 className="text-3xl font-heading font-extrabold text-navy">
-              Sign In to InsightLoop
+              {t('auth.login.title')}
             </h2>
             <p className="text-xs text-charcoal/60">
-              Access your organizer dashboard, analytics, and AI assistant
+              {t('auth.login.subtitle')}
             </p>
           </div>
 
@@ -70,9 +82,9 @@ export const LoginPage = () => {
             <div className="flex items-center justify-between text-xs font-bold text-navy">
               <span className="flex items-center gap-1.5 text-coral">
                 <Sparkles size={14} />
-                <span>1-Click Demo Evaluation</span>
+                <span>{t('auth.login.demoPanelTitle')}</span>
               </span>
-              <span className="text-[10px] uppercase font-semibold text-charcoal/50">Instant Access</span>
+              <span className="text-[10px] uppercase font-semibold text-charcoal/50">{t('auth.login.instantAccess')}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -82,7 +94,7 @@ export const LoginPage = () => {
               >
                 <div className="flex items-center gap-1 font-bold text-navy">
                   <UserCheck size={13} className="text-coral" />
-                  <span>Host / Organizer</span>
+                  <span>{t('auth.login.hostRole')}</span>
                 </div>
                 <span className="text-[10px] text-charcoal/60">Yash Dhawale</span>
               </button>
@@ -94,7 +106,7 @@ export const LoginPage = () => {
               >
                 <div className="flex items-center gap-1 font-bold text-navy">
                   <Shield size={13} className="text-lavender-dark" />
-                  <span>Platform Admin</span>
+                  <span>{t('auth.login.adminRole')}</span>
                 </div>
                 <span className="text-[10px] text-charcoal/60">Chaitali</span>
               </button>
@@ -103,17 +115,17 @@ export const LoginPage = () => {
 
           {/* Main Login Form */}
           <div className="bg-white rounded-3xl p-8 border border-charcoal/10 shadow-card">
-            {error && (
+            {errorText && (
               <div className="mb-6 p-4 rounded-xl bg-coral/10 border border-coral/30 text-coral text-xs font-semibold flex items-center gap-2">
                 <AlertCircle size={16} className="shrink-0" />
-                <span>{error}</span>
+                <span>{errorText}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1.5">
-                  Email Address
+                  {t('auth.login.emailLabel')}
                 </label>
                 <div className="relative">
                   <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
@@ -130,7 +142,7 @@ export const LoginPage = () => {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1.5">
-                  Password
+                  {t('auth.login.passwordLabel')}
                 </label>
                 <div className="relative">
                   <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40" />
@@ -151,11 +163,11 @@ export const LoginPage = () => {
                 className="w-full py-3.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-sm font-bold shadow-coral-glow transition-all flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
               >
                 {loading ? (
-                  <span>Authenticating...</span>
+                  <span>{t('auth.login.authenticating')}</span>
                 ) : (
                   <>
                     <LogIn size={16} />
-                    <span>Sign In</span>
+                    <span>{t('auth.login.signIn')}</span>
                   </>
                 )}
               </button>
@@ -163,9 +175,9 @@ export const LoginPage = () => {
 
             <div className="mt-6 pt-6 border-t border-charcoal/10 text-center">
               <p className="text-xs text-charcoal/60">
-                Don't have an organization account yet?{' '}
+                {t('auth.login.noAccount')}{' '}
                 <Link to="/register" className="font-bold text-coral hover:underline">
-                  Register here
+                  {t('auth.login.registerHere')}
                 </Link>
               </p>
             </div>

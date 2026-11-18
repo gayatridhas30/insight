@@ -31,8 +31,10 @@ import {
 import { eventService, improvementTaskService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
 import { getCategoryBadge } from '../../config/eventCategories';
+import { useTranslation } from 'react-i18next';
 
 export const HostDashboard = () => {
+  const { t } = useTranslation();
   const { user, activeOrganization } = useAuth();
   const [events, setEvents] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -65,16 +67,16 @@ export const HostDashboard = () => {
   const pendingTasksCount = tasks.length;
 
   const sentimentData = [
-    { name: 'Positive', value: 65, color: '#10B981' }, // Vibrant Emerald
-    { name: 'Neutral', value: 25, color: '#6366F1' },  // Tech Indigo
-    { name: 'Negative', value: 10, color: '#F43F5E' }, // Rose Red
+    { name: t('dashboard.positive'), value: 65, color: '#10B981' }, // Vibrant Emerald
+    { name: t('dashboard.neutral'), value: 25, color: '#6366F1' },  // Tech Indigo
+    { name: t('dashboard.negative'), value: 10, color: '#F43F5E' }, // Rose Red
   ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64 text-sm font-semibold text-navy">
         <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-        <span>Loading organizer dashboard...</span>
+        <span>{t('dashboard.loading')}</span>
       </div>
     );
   }
@@ -85,10 +87,10 @@ export const HostDashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-navy">
-            Welcome back, {user?.name?.split(' ')[0] || 'Organizer'}!
+            {t('dashboard.welcome')}, {user?.name?.split(' ')[0] || t('dashboard.organizerFallback')}!
           </h1>
           <p className="text-xs sm:text-sm text-charcoal/60 mt-1">
-            {activeOrganization?.name || 'InsightLoop Event Intelligence'} — Universal Feedback Hub
+            {activeOrganization?.name || 'InsightLoop Event Intelligence'} — {t('dashboard.universalFeedbackHub')}
           </p>
         </div>
 
@@ -98,14 +100,14 @@ export const HostDashboard = () => {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95"
           >
             <PlusCircle size={16} />
-            <span>Create New Event</span>
+            <span>{t('dashboard.createEvent')}</span>
           </Link>
           <Link
             to="/ai-assistant"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-navy hover:bg-navy-700 text-white text-xs font-bold transition-all"
           >
             <Bot size={16} className="text-coral" />
-            <span>RAG AI Assistant</span>
+            <span>{t('dashboard.ragAiAssistant')}</span>
           </Link>
         </div>
       </div>
@@ -114,9 +116,9 @@ export const HostDashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-bold text-charcoal/60">Managed Events</span>
+            <span className="text-xs font-bold text-charcoal/60">{t('dashboard.managedEvents')}</span>
             <p className="text-3xl font-heading font-extrabold text-navy">{totalEvents}</p>
-            <span className="text-[10px] text-sage-dark font-bold">Universal active events</span>
+            <span className="text-[10px] text-sage-dark font-bold">{t('dashboard.managedEventsSub')}</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-ivory flex items-center justify-center text-navy shadow-sm">
             <Calendar size={22} className="text-coral" />
@@ -125,9 +127,9 @@ export const HostDashboard = () => {
 
         <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-bold text-charcoal/60">Total Responses</span>
+            <span className="text-xs font-bold text-charcoal/60">{t('dashboard.totalResponses')}</span>
             <p className="text-3xl font-heading font-extrabold text-navy">{totalResponses}</p>
-            <span className="text-[10px] text-sage-dark font-bold">Across all categories</span>
+            <span className="text-[10px] text-sage-dark font-bold">{t('dashboard.responsesSub')}</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-ivory flex items-center justify-center text-navy shadow-sm">
             <MessageSquare size={22} className="text-sage-dark" />
@@ -136,9 +138,9 @@ export const HostDashboard = () => {
 
         <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-bold text-charcoal/60">Overall Sentiment</span>
+            <span className="text-xs font-bold text-charcoal/60">{t('dashboard.overallSentiment')}</span>
             <p className="text-3xl font-heading font-extrabold text-sage-dark">+0.47</p>
-            <span className="text-[10px] text-charcoal/50">88% Positive Promoters</span>
+            <span className="text-[10px] text-charcoal/50">{t('dashboard.sentimentSub')}</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-ivory flex items-center justify-center text-navy shadow-sm">
             <TrendingUp size={22} className="text-coral" />
@@ -147,9 +149,9 @@ export const HostDashboard = () => {
 
         <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-bold text-charcoal/60">Pending Improvements</span>
+            <span className="text-xs font-bold text-charcoal/60">{t('dashboard.pendingImprovements')}</span>
             <p className="text-3xl font-heading font-extrabold text-coral">{pendingTasksCount}</p>
-            <span className="text-[10px] text-charcoal/50">Actionable tasks flagged</span>
+            <span className="text-[10px] text-charcoal/50">{t('dashboard.pendingImprovementsSub')}</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-ivory flex items-center justify-center text-navy shadow-sm">
             <CheckSquare size={22} className="text-coral" />
@@ -163,11 +165,11 @@ export const HostDashboard = () => {
         <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-7 border border-charcoal/10 shadow-subtle space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-heading font-bold text-navy">Recent Events & Responses</h3>
-              <p className="text-xs text-charcoal/60">Real-time category-wise feedback status</p>
+              <h3 className="text-lg font-heading font-bold text-navy">{t('dashboard.recentEventsResponses')}</h3>
+              <p className="text-xs text-charcoal/60">{t('dashboard.recentEventsSub')}</p>
             </div>
             <Link to="/events" className="text-xs font-bold text-coral hover:underline flex items-center gap-1">
-              <span>View All</span>
+              <span>{t('dashboard.viewAll')}</span>
               <ChevronRight size={14} />
             </Link>
           </div>
@@ -191,7 +193,7 @@ export const HostDashboard = () => {
                             : 'bg-lavender/50 text-navy'
                         }`}
                       >
-                        {evt.status}
+                        {t(`dashboard.status.${evt.status}`, evt.status)}
                       </span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${catBadge.bg} ${catBadge.text}`}>
                         {catBadge.label}
@@ -206,7 +208,7 @@ export const HostDashboard = () => {
                       <Link to={`/events/${evt.id || evt._id}`}>{evt.title}</Link>
                     </h4>
                     <p className="text-xs text-charcoal/50">
-                      {evt.location || 'Online'}
+                      {evt.location || t('dashboard.online')}
                     </p>
                   </div>
 
@@ -227,7 +229,7 @@ export const HostDashboard = () => {
                       <Link
                         to={`/events/${evt.id || evt._id}/qr`}
                         className="p-2 rounded-xl bg-ivory text-charcoal/70 hover:text-coral hover:bg-coral/10 transition-colors"
-                        title="View QR Code"
+                        title={t('dashboard.viewQrCode')}
                       >
                         <QrCode size={16} />
                       </Link>
@@ -235,7 +237,7 @@ export const HostDashboard = () => {
                         to={`/feedback/${evt.code}`}
                         target="_blank"
                         className="p-2 rounded-xl bg-ivory text-charcoal/70 hover:text-navy hover:bg-navy/10 transition-colors"
-                        title="Public Link"
+                        title={t('dashboard.publicLink')}
                       >
                         <ExternalLink size={16} />
                       </Link>
@@ -250,8 +252,8 @@ export const HostDashboard = () => {
         {/* Sentiment Distribution Pie Chart */}
         <div className="bg-white rounded-3xl p-6 sm:p-7 border border-charcoal/10 shadow-subtle flex flex-col justify-between space-y-4">
           <div>
-            <h3 className="text-lg font-heading font-bold text-navy">Sentiment Distribution</h3>
-            <p className="text-xs text-charcoal/60">Aggregated polarity across responses</p>
+            <h3 className="text-lg font-heading font-bold text-navy">{t('dashboard.sentimentDistribution')}</h3>
+            <p className="text-xs text-charcoal/60">{t('dashboard.sentimentDistributionSub')}</p>
           </div>
 
           <div className="h-48 w-full flex items-center justify-center">
@@ -277,15 +279,15 @@ export const HostDashboard = () => {
 
           <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-charcoal/10">
             <div>
-              <span className="block text-[11px] font-bold text-sage-dark">Positive</span>
+              <span className="block text-[11px] font-bold text-sage-dark">{t('dashboard.positive')}</span>
               <span className="text-base font-extrabold text-navy">65%</span>
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-lavender-dark">Neutral</span>
+              <span className="block text-[11px] font-bold text-lavender-dark">{t('dashboard.neutral')}</span>
               <span className="text-base font-extrabold text-navy">25%</span>
             </div>
             <div>
-              <span className="block text-[11px] font-bold text-coral">Negative</span>
+              <span className="block text-[11px] font-bold text-coral">{t('dashboard.negative')}</span>
               <span className="text-base font-extrabold text-navy">10%</span>
             </div>
           </div>

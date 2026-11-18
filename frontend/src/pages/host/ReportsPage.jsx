@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FileSpreadsheet,
   FileText,
@@ -11,6 +12,7 @@ import {
 import { eventService, reportService } from '../../api/services';
 
 export const ReportsPage = () => {
+  const { t } = useTranslation();
   const [events, setEvents] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -54,7 +56,7 @@ export const ReportsPage = () => {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert('Failed to generate PDF report: ' + (err.response?.data?.message || err.message));
+      alert(t('reports.pdfFailed', { message: err.response?.data?.message || err.message }));
     } finally {
       setDownloadingPdf(false);
     }
@@ -77,7 +79,7 @@ export const ReportsPage = () => {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert('Failed to generate Excel report: ' + (err.response?.data?.message || err.message));
+      alert(t('reports.excelFailed', { message: err.response?.data?.message || err.message }));
     } finally {
       setDownloadingExcel(false);
     }
@@ -87,7 +89,7 @@ export const ReportsPage = () => {
     return (
       <div className="flex items-center justify-center h-64 text-sm font-semibold text-navy">
         <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-        <span>Loading report exporter...</span>
+        <span>{t('reports.loading')}</span>
       </div>
     );
   }
@@ -99,17 +101,17 @@ export const ReportsPage = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-heading font-extrabold text-navy">
-          Executive Reports & Raw Data Export
+          {t('reports.title')}
         </h1>
         <p className="text-xs text-charcoal/60 mt-0.5">
-          Generate publication-ready PDF intelligence summaries and Excel analysis sheets
+          {t('reports.subtitle')}
         </p>
       </div>
 
       {/* Select Event */}
       <div className="bg-white rounded-3xl p-6 border border-charcoal/10 shadow-subtle space-y-3">
         <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70">
-          Select Target Event for Reporting:
+          {t('reports.selectEvent')}
         </label>
         <select
           value={selectedEventId}
@@ -118,7 +120,7 @@ export const ReportsPage = () => {
         >
           {events.map((evt) => (
             <option key={evt._id || evt.id} value={evt._id || evt.id}>
-              {evt.title} ({evt.code}) • {evt.category} • {evt.responsesCount || 0} Responses
+              {evt.title} ({evt.code}) • {evt.category} • {t('reports.responsesCount', { count: evt.responsesCount || 0 })}
             </option>
           ))}
         </select>
@@ -132,9 +134,9 @@ export const ReportsPage = () => {
             <div className="w-12 h-12 rounded-2xl bg-coral/10 text-coral flex items-center justify-center">
               <FileText size={24} />
             </div>
-            <h3 className="text-lg font-heading font-bold text-navy">Executive Intelligence PDF</h3>
+            <h3 className="text-lg font-heading font-bold text-navy">{t('reports.pdfTitle')}</h3>
             <p className="text-xs text-charcoal/70 leading-relaxed">
-              Complete stakeholder-ready PDF report including response rate summary, sentiment distribution breakdown, top positive highlights, recurring friction points, and actionable AI recommendations.
+              {t('reports.pdfDesc')}
             </p>
           </div>
 
@@ -149,7 +151,7 @@ export const ReportsPage = () => {
             ) : (
               <Download size={15} />
             )}
-            <span>{downloadingPdf ? 'Generating PDF...' : 'Download PDF Report'}</span>
+            <span>{downloadingPdf ? t('reports.generatingPdf') : t('reports.downloadPdf')}</span>
           </button>
         </div>
 
@@ -159,9 +161,9 @@ export const ReportsPage = () => {
             <div className="w-12 h-12 rounded-2xl bg-sage/20 text-sage-dark flex items-center justify-center">
               <FileSpreadsheet size={24} />
             </div>
-            <h3 className="text-lg font-heading font-bold text-navy">Structured Excel Workbook (.xlsx)</h3>
+            <h3 className="text-lg font-heading font-bold text-navy">{t('reports.excelTitle')}</h3>
             <p className="text-xs text-charcoal/70 leading-relaxed">
-              Multi-tab spreadsheet featuring Event Overview, Participant Response table preserving both original language and Bhashini English translations, rating values, and AI recommendation roadmap.
+              {t('reports.excelDesc')}
             </p>
           </div>
 
@@ -176,7 +178,7 @@ export const ReportsPage = () => {
             ) : (
               <Download size={15} />
             )}
-            <span>{downloadingExcel ? 'Exporting Spreadsheet...' : 'Download Excel (.xlsx)'}</span>
+            <span>{downloadingExcel ? t('reports.exportingExcel') : t('reports.downloadExcel')}</span>
           </button>
         </div>
       </div>

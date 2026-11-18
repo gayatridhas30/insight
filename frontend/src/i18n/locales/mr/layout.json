@@ -1,0 +1,34 @@
+{
+  "sidebar": {
+    "mainNavigation": "मुख्य नेव्हिगेशन",
+    "hostConsole": "होस्ट कन्सोल",
+    "organization": "संस्था",
+    "platformAdmin": "प्लॅटफॉर्म प्रशासक",
+    "userFallback": "वापरकर्ता",
+    "dashboard": "डॅशबोर्ड",
+    "events": "इव्हेंट्स",
+    "createEvent": "इव्हेंट तयार करा",
+    "eventComparison": "इव्हेंट तुलना",
+    "aiIntelligence": "AI इंटेलिजन्स",
+    "ragAssistant": "RAG असिस्टंट",
+    "improvementTracker": "सुधारणा ट्रॅकर",
+    "reportsExport": "अहवाल आणि निर्यात",
+    "profileSettings": "प्रोफाइल सेटिंग्ज"
+  },
+  "navbar": {
+    "liveDemo": "लाईव्ह फीडबॅक डेमो",
+    "eventIntelligence": "इव्हेंट इंटेलिजन्स",
+    "yourOrganizations": "तुमच्या संस्था",
+    "organization": "संस्था",
+    "adminTooltip": "अ‍ॅडमिन प्लॅटफॉर्म कन्सोल"
+  },
+  "adminLayout": {
+    "platformOverview": "प्लॅटफॉर्म आढावा",
+    "userDirectory": "वापरकर्ता निर्देशिका",
+    "organizations": "संस्था",
+    "allEvents": "सर्व इव्हेंट्स",
+    "auditLogs": "ऑडिट लॉग",
+    "backToHostPortal": "होस्ट पोर्टलवर परत जा",
+    "platformGovernance": "प्लॅटफॉर्म शासन"
+  }
+}

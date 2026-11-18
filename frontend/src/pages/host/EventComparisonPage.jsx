@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   GitCompare,
   BarChart3,
@@ -23,6 +24,7 @@ import { eventService } from '../../api/services';
 import { getCategoryBadge } from '../../config/eventCategories';
 
 export const EventComparisonPage = () => {
+  const { t } = useTranslation();
   const [events, setEvents] = useState([]);
   const [selectedEventIds, setSelectedEventIds] = useState([]);
   const [comparison, setComparison] = useState(null);
@@ -65,7 +67,7 @@ export const EventComparisonPage = () => {
         setComparison(res.data.comparison);
       }
     } catch (err) {
-      alert('Failed to compare events: ' + err.message);
+      alert(t('comparison.compareFailed', { message: err.message }));
     } finally {
       setComparing(false);
     }
@@ -94,16 +96,20 @@ export const EventComparisonPage = () => {
     return (
       <div className="flex items-center justify-center h-64 text-sm font-semibold text-navy">
         <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-        <span>Loading event comparison engine...</span>
+        <span>{t('comparison.loading')}</span>
       </div>
     );
   }
 
+  const chartRating = t('comparison.chartRating');
+  const chartSentiment = t('comparison.chartSentiment');
+  const chartResponseRate = t('comparison.chartResponseRate');
+
   const chartData = comparison?.map((item) => ({
     name: item.event.code,
-    Rating: item.metrics.averageRating,
-    'Sentiment Index': (item.metrics.sentimentScore + 1) * 2.5, // Scaled 0 to 5 for visual comparison
-    'Response Rate %': item.metrics.responseRate,
+    [chartRating]: item.metrics.averageRating,
+    [chartSentiment]: (item.metrics.sentimentScore + 1) * 2.5, // Scaled 0 to 5 for visual comparison
+    [chartResponseRate]: item.metrics.responseRate,
   })) || [];
 
   return (
@@ -112,20 +118,20 @@ export const EventComparisonPage = () => {
       <div>
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-heading font-extrabold text-navy">
-            Cross-Event Benchmarking & Comparison
+            {t('comparison.title')}
           </h1>
           <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-coral/10 text-coral">
-            Historical Intelligence
+            {t('comparison.badge')}
           </span>
         </div>
         <p className="text-xs text-charcoal/60 mt-1">
-          Select 2 or 3 events across any category to compare participant satisfaction, sentiment shifts, and recurring bottlenecks
+          {t('comparison.subtitle')}
         </p>
       </div>
 
       {/* Event Selection Pills */}
       <div className="bg-white rounded-3xl p-5 border border-charcoal/10 shadow-subtle space-y-3">
-        <span className="text-xs font-bold text-navy block">Select Events to Compare (2 - 3):</span>
+        <span className="text-xs font-bold text-navy block">{t('comparison.selectEvents')}</span>
         <div className="flex flex-wrap gap-2.5">
           {events.map((evt) => {
             const eId = evt._id || evt.id;
@@ -182,25 +188,25 @@ export const EventComparisonPage = () => {
 
                   <div className="divide-y divide-charcoal/5 text-xs pt-2">
                     <div className="py-2 flex justify-between">
-                      <span className="text-charcoal/60">Average Rating:</span>
+                      <span className="text-charcoal/60">{t('comparison.avgRating')}</span>
                       <span className="font-bold text-navy">{item.metrics.averageRating} / 5.0 ★</span>
                     </div>
                     <div className="py-2 flex justify-between">
-                      <span className="text-charcoal/60">Sentiment Index:</span>
+                      <span className="text-charcoal/60">{t('comparison.sentimentIndex')}</span>
                       <span className="font-bold text-sage-dark">
                         {item.metrics.sentimentScore >= 0 ? '+' : ''}{item.metrics.sentimentScore}
                       </span>
                     </div>
                     <div className="py-2 flex justify-between">
-                      <span className="text-charcoal/60">Response Rate:</span>
+                      <span className="text-charcoal/60">{t('comparison.responseRate')}</span>
                       <span className="font-bold text-navy">{item.metrics.responseRate}%</span>
                     </div>
                     <div className="py-2 flex justify-between">
-                      <span className="text-charcoal/60">Recurring Issues Flagged:</span>
+                      <span className="text-charcoal/60">{t('comparison.recurringFlagged')}</span>
                       <span className="font-bold text-coral">{item.recurringIssuesCount}</span>
                     </div>
                     <div className="py-2 flex justify-between">
-                      <span className="text-charcoal/60">Positive Highlights:</span>
+                      <span className="text-charcoal/60">{t('comparison.positiveHighlights')}</span>
                       <span className="font-bold text-sage-dark">{item.positiveHighlightsCount}</span>
                     </div>
                   </div>
@@ -211,7 +217,7 @@ export const EventComparisonPage = () => {
 
           {/* Comparative Chart */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-charcoal/10 shadow-subtle space-y-4">
-            <h3 className="text-base font-heading font-bold text-navy">Comparative Performance Metrics</h3>
+            <h3 className="text-base font-heading font-bold text-navy">{t('comparison.chartTitle')}</h3>
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
@@ -219,8 +225,8 @@ export const EventComparisonPage = () => {
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="Rating" fill="#4F46E5" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="Sentiment Index" fill="#10B981" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey={chartRating} fill="#4F46E5" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey={chartSentiment} fill="#10B981" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

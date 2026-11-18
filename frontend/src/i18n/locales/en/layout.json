@@ -1,0 +1,34 @@
+{
+  "sidebar": {
+    "mainNavigation": "Main Navigation",
+    "hostConsole": "Host Console",
+    "organization": "Organization",
+    "platformAdmin": "Platform Admin",
+    "userFallback": "User",
+    "dashboard": "Dashboard",
+    "events": "Events",
+    "createEvent": "Create Event",
+    "eventComparison": "Compare Events",
+    "aiIntelligence": "AI Intelligence",
+    "ragAssistant": "RAG Assistant",
+    "improvementTracker": "Improvement Tracker",
+    "reportsExport": "Reports & Export",
+    "profileSettings": "Profile Settings"
+  },
+  "navbar": {
+    "liveDemo": "Live Feedback Demo",
+    "eventIntelligence": "Event Intelligence",
+    "yourOrganizations": "Your Organizations",
+    "organization": "Organization",
+    "adminTooltip": "Admin Platform Console"
+  },
+  "adminLayout": {
+    "platformOverview": "Platform Overview",
+    "userDirectory": "User Directory",
+    "organizations": "Organizations",
+    "allEvents": "All Events",
+    "auditLogs": "Audit Logs",
+    "backToHostPortal": "Back to Host Portal",
+    "platformGovernance": "Platform Governance"
+  }
+}

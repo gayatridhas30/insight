@@ -5,6 +5,22 @@ class BhashiniService {
     this.userId = process.env.BHASHINI_USER_ID;
     this.apiKey = process.env.BHASHINI_API_KEY;
     this.pipelineEndpoint = process.env.BHASHINI_PIPELINE_ENDPOINT || 'https://dhruva-api.bhashini.gov.in/services/inference/pipeline';
+    // DHRUVA inference calls authenticate with a dedicated key sent raw in the
+    // Authorization header (no "Bearer" prefix). Older accounts use one key for
+    // everything, so BHASHINI_API_KEY stays as the fallback.
+    this.inferenceKey = process.env.BHASHINI_INFERENCE_API_KEY || this.apiKey;
+    // Optional: pin a specific model. When empty the pipeline picks a default.
+    this.asrServiceId = process.env.BHASHINI_ASR_SERVICE_ID || '';
+    this.nmtServiceId = process.env.BHASHINI_NMT_SERVICE_ID || '';
+  }
+
+  _headers() {
+    return {
+      'Content-Type': 'application/json',
+      Authorization: this.inferenceKey,
+      userID: this.userId,
+      ulcaApiKey: this.apiKey,
+    };
   }
 
   isConfigured() {
@@ -67,11 +83,7 @@ class BhashiniService {
             },
           },
           {
-            headers: {
-              'Content-Type': 'application/json',
-              'userID': this.userId,
-              'ulcaApiKey': this.apiKey,
-            },
+            headers: this._headers(),
             timeout: 10000,
           }
         );
@@ -111,34 +123,23 @@ class BhashiniService {
       throw new Error('Audio data is required for transcription');
     }
 
+    let lastError = '';
+
     if (this.isConfigured()) {
       try {
+        const asrConfig = {
+          language: { sourceLanguage: language },
+          audioFormat,
+        };
+        if (this.asrServiceId) asrConfig.serviceId = this.asrServiceId;
+
         const response = await axios.post(
           this.pipelineEndpoint,
           {
-            pipelineTasks: [
-              {
-                taskType: 'asr',
-                config: {
-                  language: {
-                    sourceLanguage: language,
-                  },
-                  audioFormat,
-                },
-              },
-            ],
-            inputData: {
-              audio: [{ audioContent: base64Audio }],
-            },
+            pipelineTasks: [{ taskType: 'asr', config: asrConfig }],
+            inputData: { audio: [{ audioContent: base64Audio }] },
           },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'userID': this.userId,
-              'ulcaApiKey': this.apiKey,
-            },
-            timeout: 15000,
-          }
+          { headers: this._headers(), timeout: 30000 }
         );
 
         const transcription = response.data?.pipelineResponse?.[0]?.output?.[0]?.source;
@@ -150,24 +151,25 @@ class BhashiniService {
             isBhashiniLive: true,
           };
         }
+        lastError = 'Bhashini returned an empty transcript for this audio.';
       } catch (err) {
-        console.warn(`[BhashiniService] Live Bhashini ASR failed: ${err.message}.`);
+        lastError = err.response?.status
+          ? `Bhashini ASR HTTP ${err.response.status}: ${err.response.statusText || err.message}`
+          : `Bhashini ASR unreachable: ${err.message}`;
+        console.warn(`[BhashiniService] ${lastError}`);
       }
+    } else {
+      lastError = 'BHASHINI_USER_ID / BHASHINI_API_KEY are empty in backend/.env.';
     }
 
-    // Fallback notice
+    // Never invent a transcript - fabricated feedback is worse than no feedback.
+    // The client shows "could not transcribe" and keeps the audio for retry.
     return {
-      transcription:
-        language === 'hi'
-          ? 'सत्र बहुत अच्छा और जानकारीपूर्ण था।'
-          : language === 'mr'
-          ? 'सत्र अतिशय माहितीपूर्ण आणि उपयुक्त होते.'
-          : 'The event was well organized and very informative.',
+      transcription: '',
       language,
       provider: 'local-fallback',
       isBhashiniLive: false,
-      notice:
-        'Bhashini API credentials not configured in environment. Operating in graceful fallback mode.',
+      notice: lastError,
     };
   }
 

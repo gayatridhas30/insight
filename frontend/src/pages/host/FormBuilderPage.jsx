@@ -22,8 +22,10 @@ import {
 import { formService, eventService } from '../../api/services';
 import { StarRating } from '../../components/feedback/StarRating';
 import { NPSRating } from '../../components/feedback/NPSRating';
+import { useTranslation } from 'react-i18next';
 
 export const FormBuilderPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [event, setEvent] = useState(null);
   const [form, setForm] = useState(null);
@@ -142,7 +144,7 @@ export const FormBuilderPage = () => {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      alert('Failed to save questions: ' + (err.response?.data?.message || err.message));
+      alert(t('formBuilder.saveFailed', { message: err.response?.data?.message || err.message }));
     } finally {
       setSaving(false);
     }
@@ -163,7 +165,7 @@ export const FormBuilderPage = () => {
         setTimeout(() => setSaveSuccess(false), 4000);
       }
     } catch (err) {
-      alert('AI Form generation notice: ' + (err.response?.data?.message || err.message));
+      alert(t('formBuilder.aiGenerateFailed', { message: err.response?.data?.message || err.message }));
     } finally {
       setAiGenerating(false);
     }
@@ -173,7 +175,7 @@ export const FormBuilderPage = () => {
     return (
       <div className="flex items-center justify-center h-64 text-sm font-semibold text-navy">
         <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-        <span>Loading dynamic form builder...</span>
+        <span>{t('formBuilder.loading')}</span>
       </div>
     );
   }
@@ -188,10 +190,10 @@ export const FormBuilderPage = () => {
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal/60 hover:text-navy transition-colors mb-1"
           >
             <ArrowLeft size={14} />
-            <span>Back to Event Details</span>
+            <span>{t('formBuilder.backToEvent')}</span>
           </Link>
           <h1 className="text-2xl font-heading font-extrabold text-navy">
-            Feedback Form Builder
+            {t('formBuilder.title')}
           </h1>
           <p className="text-xs text-charcoal/60">
             {event?.title} ({event?.code})
@@ -207,7 +209,7 @@ export const FormBuilderPage = () => {
                 activeTab === 'builder' ? 'bg-navy text-white' : 'text-charcoal/70 hover:text-navy'
               }`}
             >
-              Builder
+              {t('formBuilder.tabs.builder')}
             </button>
             <button
               onClick={() => setActiveTab('preview')}
@@ -216,7 +218,7 @@ export const FormBuilderPage = () => {
               }`}
             >
               <Eye size={13} />
-              <span>Preview</span>
+              <span>{t('formBuilder.tabs.preview')}</span>
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -225,7 +227,7 @@ export const FormBuilderPage = () => {
               }`}
             >
               <Settings size={13} />
-              <span>Settings</span>
+              <span>{t('formBuilder.tabs.settings')}</span>
             </button>
           </div>
 
@@ -235,7 +237,7 @@ export const FormBuilderPage = () => {
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95 disabled:opacity-50"
           >
             {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-            <span>{saving ? 'Saving...' : 'Save Form'}</span>
+            <span>{saving ? t('formBuilder.saving') : t('formBuilder.saveForm')}</span>
           </button>
         </div>
       </div>
@@ -243,7 +245,7 @@ export const FormBuilderPage = () => {
       {saveSuccess && (
         <div className="p-3.5 rounded-2xl bg-sage/20 border border-sage-dark/30 text-sage-dark text-xs font-bold flex items-center gap-2 animate-fadeIn">
           <CheckCircle2 size={16} />
-          <span>Form questions and configurations saved successfully!</span>
+          <span>{t('formBuilder.saveSuccess')}</span>
         </div>
       )}
 
@@ -253,11 +255,11 @@ export const FormBuilderPage = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-coral text-xs font-bold uppercase tracking-wider">
               <Sparkles size={14} />
-              <span>AI-Assisted Form Generation</span>
+              <span>{t('formBuilder.aiGenerate.eyebrow')}</span>
             </div>
-            <h3 className="text-base font-bold text-white">Auto-generate category questions</h3>
+            <h3 className="text-base font-bold text-white">{t('formBuilder.aiGenerate.heading')}</h3>
             <p className="text-xs text-white/70 max-w-xl">
-              InsightLoop analyzes your event title ("{event?.title}") and category ({event?.category}) to tailor star ratings, NPS, and trilingual questions.
+              {t('formBuilder.aiGenerate.description', { title: event?.title, category: event?.category })}
             </p>
           </div>
 
@@ -268,7 +270,7 @@ export const FormBuilderPage = () => {
             className="px-5 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95 shrink-0 flex items-center gap-2"
           >
             {aiGenerating ? <RefreshCw size={14} className="animate-spin" /> : <Sparkles size={14} />}
-            <span>{aiGenerating ? 'Synthesizing...' : 'Generate with AI'}</span>
+            <span>{aiGenerating ? t('formBuilder.aiGenerate.generating') : t('formBuilder.aiGenerate.button')}</span>
           </button>
         </div>
       )}
@@ -293,13 +295,13 @@ export const FormBuilderPage = () => {
                       onChange={(e) => updateQuestionField(idx, 'type', e.target.value)}
                       className="px-3 py-1 rounded-lg border border-charcoal/15 bg-ivory text-xs font-bold text-navy"
                     >
-                      <option value="star_rating">Star Rating (1-5)</option>
-                      <option value="nps">NPS Scale (0-10)</option>
-                      <option value="single_choice">Single Choice Radio</option>
-                      <option value="multi_choice">Multiple Choice Checkboxes</option>
-                      <option value="yes_no">Yes / No</option>
-                      <option value="short_text">Short Text</option>
-                      <option value="long_text">Long Text / Voice Feedback</option>
+                      <option value="star_rating">{t('formBuilder.types.starRating')}</option>
+                      <option value="nps">{t('formBuilder.types.nps')}</option>
+                      <option value="single_choice">{t('formBuilder.types.singleChoice')}</option>
+                      <option value="multi_choice">{t('formBuilder.types.multiChoice')}</option>
+                      <option value="yes_no">{t('formBuilder.types.yesNo')}</option>
+                      <option value="short_text">{t('formBuilder.types.shortText')}</option>
+                      <option value="long_text">{t('formBuilder.types.longText')}</option>
                     </select>
 
                     <label className="flex items-center gap-1.5 text-xs text-charcoal/70 cursor-pointer pl-2">
@@ -309,7 +311,7 @@ export const FormBuilderPage = () => {
                         onChange={(e) => updateQuestionField(idx, 'isRequired', e.target.checked)}
                         className="rounded text-coral focus:ring-coral"
                       />
-                      <span>Required</span>
+                      <span>{t('formBuilder.required')}</span>
                     </label>
                   </div>
 
@@ -319,7 +321,7 @@ export const FormBuilderPage = () => {
                       disabled={idx === 0}
                       onClick={() => moveQuestion(idx, -1)}
                       className="p-1.5 rounded-lg border border-charcoal/10 text-charcoal/50 hover:text-navy disabled:opacity-30"
-                      title="Move Up"
+                      title={t('formBuilder.moveUp')}
                     >
                       <ArrowUp size={14} />
                     </button>
@@ -328,7 +330,7 @@ export const FormBuilderPage = () => {
                       disabled={idx === questions.length - 1}
                       onClick={() => moveQuestion(idx, 1)}
                       className="p-1.5 rounded-lg border border-charcoal/10 text-charcoal/50 hover:text-navy disabled:opacity-30"
-                      title="Move Down"
+                      title={t('formBuilder.moveDown')}
                     >
                       <ArrowDown size={14} />
                     </button>
@@ -336,7 +338,7 @@ export const FormBuilderPage = () => {
                       type="button"
                       onClick={() => removeQuestion(idx)}
                       className="p-1.5 rounded-lg border border-charcoal/10 text-charcoal/50 hover:text-coral hover:border-coral transition-colors ml-2"
-                      title="Delete Question"
+                      title={t('formBuilder.deleteQuestion')}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -347,20 +349,20 @@ export const FormBuilderPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-[11px] font-bold text-charcoal/60 uppercase mb-1">
-                      English Prompt *
+                      {t('formBuilder.promptEn')}
                     </label>
                     <input
                       type="text"
                       value={q.prompt?.en || ''}
                       onChange={(e) => updateQuestionPrompt(idx, 'en', e.target.value)}
-                      placeholder="e.g. Rate your overall experience"
+                      placeholder={t('formBuilder.promptEnPlaceholder')}
                       className="w-full px-3 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
                     />
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-bold text-charcoal/60 uppercase mb-1">
-                      Hindi (हिन्दी) Prompt
+                      {t('formBuilder.promptHi')}
                     </label>
                     <input
                       type="text"
@@ -373,7 +375,7 @@ export const FormBuilderPage = () => {
 
                   <div>
                     <label className="block text-[11px] font-bold text-charcoal/60 uppercase mb-1">
-                      Marathi (मराठी) Prompt
+                      {t('formBuilder.promptMr')}
                     </label>
                     <input
                       type="text"
@@ -388,7 +390,7 @@ export const FormBuilderPage = () => {
                 {/* Options Editor (if choice question) */}
                 {(q.type === 'single_choice' || q.type === 'multi_choice') && (
                   <div className="pt-2 space-y-2">
-                    <span className="text-xs font-bold text-navy block">Options:</span>
+                    <span className="text-xs font-bold text-navy block">{t('formBuilder.optionsLabel')}</span>
                     {q.options?.map((opt, oIdx) => (
                       <div key={opt.id || oIdx} className="flex items-center gap-2">
                         <input
@@ -399,7 +401,7 @@ export const FormBuilderPage = () => {
                             updated[idx].options[oIdx].label.en = e.target.value;
                             setQuestions(updated);
                           }}
-                          placeholder={`Option ${oIdx + 1} text`}
+                          placeholder={t('formBuilder.optionPlaceholder', { count: oIdx + 1 })}
                           className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-charcoal/15 bg-ivory-50"
                         />
                         <button
@@ -417,7 +419,7 @@ export const FormBuilderPage = () => {
                       className="text-xs font-bold text-coral hover:underline inline-flex items-center gap-1"
                     >
                       <Plus size={12} />
-                      <span>Add Option</span>
+                      <span>{t('formBuilder.addOption')}</span>
                     </button>
                   </div>
                 )}
@@ -427,42 +429,42 @@ export const FormBuilderPage = () => {
 
           {/* Add Question Quick Buttons */}
           <div className="bg-white rounded-3xl p-5 border border-charcoal/10 shadow-subtle flex flex-wrap items-center justify-between gap-3">
-            <span className="text-xs font-bold text-navy">Add Question Component:</span>
+            <span className="text-xs font-bold text-navy">{t('formBuilder.addComponentLabel')}</span>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => addQuestion('star_rating')}
                 className="px-3 py-1.5 rounded-xl bg-ivory hover:bg-coral hover:text-white text-xs font-bold text-charcoal transition-all"
               >
-                + Star Rating
+                + {t('formBuilder.addButtons.starRating')}
               </button>
               <button
                 type="button"
                 onClick={() => addQuestion('nps')}
                 className="px-3 py-1.5 rounded-xl bg-ivory hover:bg-coral hover:text-white text-xs font-bold text-charcoal transition-all"
               >
-                + NPS (0-10)
+                + {t('formBuilder.addButtons.nps')}
               </button>
               <button
                 type="button"
                 onClick={() => addQuestion('single_choice')}
                 className="px-3 py-1.5 rounded-xl bg-ivory hover:bg-coral hover:text-white text-xs font-bold text-charcoal transition-all"
               >
-                + Single Choice
+                + {t('formBuilder.addButtons.singleChoice')}
               </button>
               <button
                 type="button"
                 onClick={() => addQuestion('multi_choice')}
                 className="px-3 py-1.5 rounded-xl bg-ivory hover:bg-coral hover:text-white text-xs font-bold text-charcoal transition-all"
               >
-                + Multi Choice
+                + {t('formBuilder.addButtons.multiChoice')}
               </button>
               <button
                 type="button"
                 onClick={() => addQuestion('long_text')}
                 className="px-3 py-1.5 rounded-xl bg-ivory hover:bg-coral hover:text-white text-xs font-bold text-charcoal transition-all"
               >
-                + Voice / Long Text
+                + {t('formBuilder.addButtons.voiceLongText')}
               </button>
             </div>
           </div>
@@ -473,8 +475,8 @@ export const FormBuilderPage = () => {
       {activeTab === 'preview' && (
         <div className="bg-white rounded-3xl p-8 border border-charcoal/10 shadow-card max-w-2xl mx-auto space-y-6">
           <div className="text-center pb-4 border-b border-charcoal/10">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-coral">Participant Preview</span>
-            <h2 className="text-xl font-heading font-extrabold text-navy mt-1">{form?.title || 'Event Feedback'}</h2>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-coral">{t('formBuilder.preview.eyebrow')}</span>
+            <h2 className="text-xl font-heading font-extrabold text-navy mt-1">{form?.title || t('formBuilder.preview.defaultTitle')}</h2>
             <p className="text-xs text-charcoal/60 mt-0.5">{form?.description}</p>
           </div>
 
@@ -484,7 +486,7 @@ export const FormBuilderPage = () => {
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-coral">Q{idx + 1}</span>
                   <span className="text-sm font-bold text-navy">{q.prompt?.en}</span>
-                  {q.isRequired && <span className="text-[10px] text-coral font-bold">*Required</span>}
+                  {q.isRequired && <span className="text-[10px] text-coral font-bold">{t('formBuilder.preview.required')}</span>}
                 </div>
 
                 {q.type === 'star_rating' && <StarRating value={4} disabled={true} />}
@@ -493,7 +495,7 @@ export const FormBuilderPage = () => {
                   <textarea
                     rows={2}
                     disabled
-                    placeholder="Participant can type or record voice feedback in English, Hindi, or Marathi"
+                    placeholder={t('formBuilder.preview.voicePlaceholder')}
                     className="w-full text-xs p-3 rounded-xl border border-charcoal/15 bg-white resize-none"
                   />
                 )}
@@ -515,13 +517,13 @@ export const FormBuilderPage = () => {
       {/* SETTINGS TAB */}
       {activeTab === 'settings' && form && (
         <div className="bg-white rounded-3xl p-8 border border-charcoal/10 shadow-card space-y-6 max-w-2xl mx-auto">
-          <h3 className="text-lg font-heading font-bold text-navy">Form Configuration & Restrictions</h3>
+          <h3 className="text-lg font-heading font-bold text-navy">{t('formBuilder.settings.title')}</h3>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 rounded-2xl bg-ivory border border-charcoal/10">
               <div>
-                <span className="text-xs font-bold text-navy block">Anonymous Feedback</span>
-                <span className="text-[11px] text-charcoal/60">Allow participants to submit without providing their name or email</span>
+                <span className="text-xs font-bold text-navy block">{t('formBuilder.settings.anonymousTitle')}</span>
+                <span className="text-[11px] text-charcoal/60">{t('formBuilder.settings.anonymousDesc')}</span>
               </div>
               <input
                 type="checkbox"
@@ -533,8 +535,8 @@ export const FormBuilderPage = () => {
 
             <div className="flex items-center justify-between p-4 rounded-2xl bg-ivory border border-charcoal/10">
               <div>
-                <span className="text-xs font-bold text-navy block">Bhashini Voice Feedback</span>
-                <span className="text-[11px] text-charcoal/60">Enable audio recording and real-time Speech-to-Text ASR</span>
+                <span className="text-xs font-bold text-navy block">{t('formBuilder.settings.voiceTitle')}</span>
+                <span className="text-[11px] text-charcoal/60">{t('formBuilder.settings.voiceDesc')}</span>
               </div>
               <input
                 type="checkbox"
@@ -546,8 +548,8 @@ export const FormBuilderPage = () => {
 
             <div className="flex items-center justify-between p-4 rounded-2xl bg-ivory border border-charcoal/10">
               <div>
-                <span className="text-xs font-bold text-navy block">Prevent Duplicate Submissions</span>
-                <span className="text-[11px] text-charcoal/60">Limit one response per device/browser fingerprint</span>
+                <span className="text-xs font-bold text-navy block">{t('formBuilder.settings.duplicateTitle')}</span>
+                <span className="text-[11px] text-charcoal/60">{t('formBuilder.settings.duplicateDesc')}</span>
               </div>
               <input
                 type="checkbox"

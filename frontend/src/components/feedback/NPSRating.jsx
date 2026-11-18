@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const NPSRating = ({ value, onChange, disabled = false }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-2">
       <div className="grid grid-cols-11 gap-1 sm:gap-2">
@@ -34,8 +36,8 @@ export const NPSRating = ({ value, onChange, disabled = false }) => {
         })}
       </div>
       <div className="flex justify-between text-xs text-charcoal/60 px-1 font-medium">
-        <span>0 — Not at all likely</span>
-        <span>10 — Extremely likely</span>
+        <span>{t('ratings.npsNotLikely')}</span>
+        <span>{t('ratings.npsExtremelyLikely')}</span>
       </div>
     </div>
   );

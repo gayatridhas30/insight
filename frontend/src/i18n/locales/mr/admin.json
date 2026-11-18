@@ -1,0 +1,128 @@
+{
+  "admin": {
+    "dashboard": {
+      "loading": "प्लॅटफॉर्म प्रशासन कन्सोल लोड होत आहे...",
+      "title": "प्लॅटफॉर्म प्रशासन आणि आरोग्य",
+      "subtitle": "सार्वत्रिक मेट्रिक्स, सुरक्षा शासन आणि मल्टी-टेनंट ऑडिट निरीक्षण",
+      "registeredUsers": "नोंदणीकृत वापरकर्ते",
+      "hostsAdmins": "होस्ट आणि प्रशासक",
+      "organizations": "संघटना",
+      "collegesClubs": "कॉलेज, क्लब, एनजीओ",
+      "totalEvents": "एकूण इव्हेंट",
+      "platformWide": "संपूर्ण प्लॅटफॉर्मवर",
+      "feedbackCollected": "गोळा केलेला फीडबॅक",
+      "multilingual": "बहुभाषिक मजकूर आणि आवाज",
+      "languageBreakdown": "भाषेनुसार डेटा विभाजन",
+      "languages": {
+        "english": "English",
+        "hindi": "हिन्दी (Hindi)",
+        "marathi": "मराठी (Marathi)"
+      },
+      "sentimentTitle": "जागतिक भावना पोलॅरिटी",
+      "sentiment": {
+        "positive": "सकारात्मक",
+        "neutral": "तटस्थ",
+        "negative": "नकारात्मक"
+      },
+      "recentActivity": "अलीकडील प्रणाली ऑडिट मार्ग",
+      "activityLine": "वापरकर्ता: {{user}} ({{email}}) • संसाधन: {{resource}}",
+      "systemFallback": "प्रणाली",
+      "naFallback": "उपलब्ध नाही"
+    },
+    "audit": {
+      "title": "प्रणाली सुरक्षा आणि ऑडिट मार्ग",
+      "subtitle": "प्रशासकीय क्रिया, लॉगिन आणि इंटेलिजन्स क्वेरीचे छेडछाड ओळखणारे लॉग",
+      "allActions": "सर्व क्रिया",
+      "recordedEntries": "{{count}} नोंदवलेल्या नोंदी",
+      "loading": "ऑडिट लॉग नोंदी लोड होत आहेत...",
+      "headers": {
+        "action": "क्रिया",
+        "resource": "संसाधन",
+        "actor": "कर्ता",
+        "organization": "संघटना",
+        "ipAddress": "IP पत्ता",
+        "timestamp": "टाइमस्टँप"
+      },
+      "systemAnonymous": "प्रणाली / अनाम",
+      "global": "जागतिक"
+    },
+    "events": {
+      "title": "प्लॅटफॉर्मव्यापी इव्हेंट फीड",
+      "subtitle": "InsightLoop वर आयोजित केलेल्या सर्व हॅकॅथॉन, वर्कशॉप आणि सिम्पोजियमचे रीयल-टाइम निरीक्षण",
+      "searchPlaceholder": "प्लॅटफॉर्मभर इव्हेंट शोधा...",
+      "eventsLogged": "{{count}} इव्हेंट नोंदवले",
+      "loading": "प्लॅटफॉर्म इव्हेंट लोड होत आहेत...",
+      "headers": {
+        "eventCode": "इव्हेंट कोड",
+        "title": "शीर्षक",
+        "organization": "संघटना",
+        "category": "श्रेणी",
+        "status": "स्थिती",
+        "createdDate": "निर्मिती दिनांक"
+      },
+      "orgFallback": "संघटना",
+      "statuses": {
+        "draft": "मसुदा",
+        "published": "प्रकाशित",
+        "ongoing": "सुरू आहे",
+        "completed": "पूर्ण",
+        "archived": "संग्रहित"
+      }
+    },
+    "orgs": {
+      "title": "संघटना निर्देशिका",
+      "subtitle": "InsightLoop जोडलेली कॉलेज, शैक्षणिक क्लब, उद्यम आणि समुदाय",
+      "searchPlaceholder": "संघटना किंवा स्लग शोधा...",
+      "total": "एकूण {{count}} संघटना",
+      "loading": "संघटना लोड होत आहेत...",
+      "headers": {
+        "organization": "संघटना",
+        "slug": "स्लग ओळख",
+        "category": "श्रेणी",
+        "primaryContact": "प्राथमिक संपर्क",
+        "createdDate": "निर्मिती दिनांक"
+      },
+      "categories": {
+        "college": "कॉलेज",
+        "club": "क्लब",
+        "company": "कंपनी",
+        "ngo": "एनजीओ",
+        "other": "इतर"
+      },
+      "owner": "मालक",
+      "na": "उपलब्ध नाही"
+    },
+    "users": {
+      "title": "वापरकर्ता व्यवस्थापन निर्देशिका",
+      "subtitle": "प्लॅटफॉर्म खाती, भूमिका नेमणूक आणि निलंबन स्थिती व्यवस्थापित करा",
+      "searchPlaceholder": "नाव किंवा ईमेलद्वारे शोधा...",
+      "allRoles": "सर्व भूमिका",
+      "roleOptions": {
+        "admin": "प्रशासक",
+        "host": "होस्ट / आयोजक",
+        "participant": "सहभागी"
+      },
+      "loading": "वापरकर्ता खाती लोड होत आहेत...",
+      "headers": {
+        "user": "वापरकर्ता",
+        "email": "ईमेल",
+        "role": "भूमिका",
+        "status": "स्थिती",
+        "registeredDate": "नोंदणी दिनांक",
+        "actions": "क्रिया"
+      },
+      "roles": {
+        "admin": "प्रशासक",
+        "host": "होस्ट",
+        "participant": "सहभागी"
+      },
+      "statuses": {
+        "active": "सक्रिय",
+        "suspended": "निलंबित"
+      },
+      "suspend": "निलंबित करा",
+      "activate": "सक्रिय करा",
+      "statusUpdateFailed": "वापरकर्ता स्थिती अद्ययावत करण्यात अयशस्वी"
+    }
+  }
+}

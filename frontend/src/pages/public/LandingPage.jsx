@@ -46,76 +46,106 @@ export const LandingPage = () => {
 
   const categoryDemos = {
     Marathon: {
-      title: 'Marathons & Road Races',
+      title: t('landing.demo.marathon.title'),
       code: 'RUN-2026',
-      subtitle: '5K, 10K, Half & Full Marathons',
+      subtitle: t('landing.demo.marathon.subtitle'),
       icon: Activity,
       color: 'from-emerald-500 to-teal-700',
       tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      sampleDimensions: ['Route marking & barricading', 'Hydration & electrolyte stations', 'Bib timing chip accuracy', 'Finisher medal & medical aid'],
+      sampleDimensions: [
+        t('landing.demo.marathon.d1'),
+        t('landing.demo.marathon.d2'),
+        t('landing.demo.marathon.d3'),
+        t('landing.demo.marathon.d4'),
+      ],
       sampleQuote: '"धावण्याचा मार्ग आणि पाण्याची सोय उत्तम होती. १५ किमी नंतर थोडे इलेक्ट्रोलाइट्स वाढवावेत."',
-      quoteAuthor: 'Half Marathon Finisher (Marathi)',
-      aiInsight: 'AI flagged hydration depletion at 15km checkpoint. Recommended mobile replenishment van.',
+      quoteAuthor: t('landing.demo.marathon.author'),
+      aiInsight: t('landing.demo.marathon.insight'),
     },
     Concert: {
-      title: 'Concerts & Music Festivals',
+      title: t('landing.demo.concert.title'),
       code: 'LIVE-2026',
-      subtitle: 'Live Bands, EDM, DJ Nights & Pro-Nites',
+      subtitle: t('landing.demo.concert.subtitle'),
       icon: Music,
       color: 'from-purple-500 to-indigo-700',
       tagColor: 'bg-purple-50 text-purple-700 border-purple-200',
-      sampleDimensions: ['Acoustic sound & bass resonance', 'Visual lighting & laser show', 'Entry queue & barricade flow', 'Artist stage engagement'],
+      sampleDimensions: [
+        t('landing.demo.concert.d1'),
+        t('landing.demo.concert.d2'),
+        t('landing.demo.concert.d3'),
+        t('landing.demo.concert.d4'),
+      ],
       sampleQuote: '"ध्वनि की गुणवत्ता बहुत शानदार थी, स्टेज और विजुअल अद्भुत थे। वॉशरूम बढ़ाएं।"',
-      quoteAuthor: 'Arena Attendee (Hindi)',
-      aiInsight: 'AI detected entry bottleneck at Gate 2. Recommended RFID express lanes.',
+      quoteAuthor: t('landing.demo.concert.author'),
+      aiInsight: t('landing.demo.concert.insight'),
     },
     Sports: {
-      title: 'Sports Tournaments & Leagues',
+      title: t('landing.demo.sports.title'),
       code: 'PLAY-2026',
-      subtitle: 'Cricket, Football, Badminton & Athletics',
+      subtitle: t('landing.demo.sports.subtitle'),
       icon: Trophy,
       color: 'from-amber-500 to-orange-700',
       tagColor: 'bg-amber-50 text-amber-700 border-amber-200',
-      sampleDimensions: ['Turf & playing ground condition', 'Refereeing impartiality', 'Match fixture punctuality', 'Paramedic & ice station'],
+      sampleDimensions: [
+        t('landing.demo.sports.d1'),
+        t('landing.demo.sports.d2'),
+        t('landing.demo.sports.d3'),
+        t('landing.demo.sports.d4'),
+      ],
       sampleQuote: '"Pitch condition was excellent! Match schedules had minor delay in the afternoon."',
-      quoteAuthor: 'Cricket Captain (English)',
-      aiInsight: 'AI suggested 25-minute buffer intervals between consecutive knockout fixtures.',
+      quoteAuthor: t('landing.demo.sports.author'),
+      aiInsight: t('landing.demo.sports.insight'),
     },
     Workshop: {
-      title: 'Workshops & Bootcamps',
+      title: t('landing.demo.workshop.title'),
       code: 'WORK-2026',
-      subtitle: 'Coding, AI/ML, Cloud & Design',
+      subtitle: t('landing.demo.workshop.subtitle'),
       icon: Laptop,
       color: 'from-blue-500 to-indigo-700',
       tagColor: 'bg-blue-50 text-blue-700 border-blue-200',
-      sampleDimensions: ['Hands-on practical exercises', 'Instructor clarity & pace', 'Pre-shared code repositories', 'Q&A responsiveness'],
+      sampleDimensions: [
+        t('landing.demo.workshop.d1'),
+        t('landing.demo.workshop.d2'),
+        t('landing.demo.workshop.d3'),
+        t('landing.demo.workshop.d4'),
+      ],
       sampleQuote: '"प्रात्यक्षिक सराव खूप चांगला झाला, खूप काही नवीन शिकायला मिळाले."',
-      quoteAuthor: 'Developer Attendee (Marathi)',
-      aiInsight: 'AI recommended pre-distributing starter repositories 24h prior to sessions.',
+      quoteAuthor: t('landing.demo.workshop.author'),
+      aiInsight: t('landing.demo.workshop.insight'),
     },
     Conference: {
-      title: 'Conferences & Summits',
+      title: t('landing.demo.conference.title'),
       code: 'LEAD-2026',
-      subtitle: 'Tech, Business, Medical & Academic',
+      subtitle: t('landing.demo.conference.subtitle'),
       icon: Presentation,
       color: 'from-cyan-500 to-blue-700',
       tagColor: 'bg-cyan-50 text-cyan-700 border-cyan-200',
-      sampleDimensions: ['Keynote depth & insights', 'Networking opportunities', 'AV projection calibration', 'Panel discussion quality'],
+      sampleDimensions: [
+        t('landing.demo.conference.d1'),
+        t('landing.demo.conference.d2'),
+        t('landing.demo.conference.d3'),
+        t('landing.demo.conference.d4'),
+      ],
       sampleQuote: '"Exceptional keynote panels! Would appreciate more structured networking sessions."',
-      quoteAuthor: 'Executive Delegate (English)',
-      aiInsight: 'AI highlighted demand for dedicated peer networking lounge.',
+      quoteAuthor: t('landing.demo.conference.author'),
+      aiInsight: t('landing.demo.conference.insight'),
     },
     College: {
-      title: 'College & Tech Fests',
+      title: t('landing.demo.college.title'),
       code: 'HACK-2026',
-      subtitle: 'Hackathons, Tech Fests & Cultural Meets',
+      subtitle: t('landing.demo.college.subtitle'),
       icon: GraduationCap,
       color: 'from-orange-500 to-rose-700',
       tagColor: 'bg-orange-50 text-orange-700 border-orange-200',
-      sampleDimensions: ['WiFi & power infrastructure', 'Mentorship & judging transparency', 'Problem statement caliber', 'Midnight hospitality'],
+      sampleDimensions: [
+        t('landing.demo.college.d1'),
+        t('landing.demo.college.d2'),
+        t('landing.demo.college.d3'),
+        t('landing.demo.college.d4'),
+      ],
       sampleQuote: '"Outstanding mentorship from industry mentors! WiFi dipped briefly in Lab 4."',
-      quoteAuthor: 'Student Developer (English)',
-      aiInsight: 'AI converted auditorium microphone calibration into an assigned team task.',
+      quoteAuthor: t('landing.demo.college.author'),
+      aiInsight: t('landing.demo.college.insight'),
     },
   };
 
@@ -124,72 +154,72 @@ export const LandingPage = () => {
   const workflowSteps = [
     {
       step: '01',
-      title: 'Select Category & Build Form',
-      desc: 'Pick your event category (Marathon, Concert, Sports, Workshop, College) and let AI generate or customize questions with trilingual prompts (EN, HI, MR).',
+      title: t('landing.steps.s1.title'),
+      desc: t('landing.steps.s1.desc'),
       icon: Layers,
     },
     {
       step: '02',
-      title: 'Instant QR Flyer & Link',
-      desc: 'Generate printable QR posters for route water stations, concert barricades, session halls, or digital slides. No attendee signup needed.',
+      title: t('landing.steps.s2.title'),
+      desc: t('landing.steps.s2.desc'),
       icon: QrCode,
     },
     {
       step: '03',
-      title: 'Bhashini Voice & Text Input',
-      desc: 'Participants scan and give feedback in English, Hindi, or Marathi via speech audio or text with real-time speech recognition (ASR).',
+      title: t('landing.steps.s3.title'),
+      desc: t('landing.steps.s3.desc'),
       icon: Mic,
     },
     {
       step: '04',
-      title: 'AI Intelligence & Themes',
-      desc: 'Synthesize sentiment polarity, extract category-specific themes, detect recurring operational bottlenecks, and cluster complaint categories.',
+      title: t('landing.steps.s4.title'),
+      desc: t('landing.steps.s4.desc'),
       icon: BrainCircuit,
     },
     {
       step: '05',
-      title: 'RAG Knowledge Assistant',
-      desc: 'Query historical event data in plain English with evidence citations. Convert recommendations into tracked improvement tasks.',
+      title: t('landing.steps.s5.title'),
+      desc: t('landing.steps.s5.desc'),
       icon: CheckCircle2,
     },
   ];
 
   const features = [
     {
-      title: 'Universal Multilingual Voice & Text',
-      desc: 'Attendees speak in Marathi, Hindi, or English. Audio is transcribed with Bhashini ASR, preserved in the original dialect, and translated for organizers.',
+      title: t('landing.cards.f1.title'),
+      desc: t('landing.cards.f1.desc'),
       icon: Languages,
-      tag: 'Bhashini ASR & NMT',
+      tag: t('landing.cards.f1.tag'),
     },
     {
-      title: 'Category-Tailored Form Engine',
-      desc: 'Pre-calibrated evaluation dimensions for 10+ event types: route safety for marathons, sound for concerts, trainer clarity for workshops, and refereeing for sports.',
+      title: t('landing.cards.f2.title'),
+      desc: t('landing.cards.f2.desc'),
       icon: Zap,
-      tag: '10+ Event Categories',
+      tag: t('landing.cards.f2.tag'),
     },
     {
-      title: 'RAG-Powered AI Knowledge Base',
-      desc: 'Ask your organization’s feedback data: "Did water station complaints decrease?", "Compare sound reviews between last two festivals."',
+      title: t('landing.cards.f3.title'),
+      desc: t('landing.cards.f3.desc'),
       icon: BrainCircuit,
-      tag: 'Evidence Citations',
+      tag: t('landing.cards.f3.tag'),
     },
     {
-      title: 'Continuous Improvement Tracker',
-      desc: 'Convert AI recommendations directly into assignable team tasks to verify whether past issues are systematically resolved in future editions.',
+      title: t('landing.cards.f4.title'),
+      desc: t('landing.cards.f4.desc'),
       icon: CheckCircle2,
-      tag: 'Closed Loop Action',
+      tag: t('landing.cards.f4.tag'),
     },
     {
-      title: 'Cross-Event Benchmarking',
-      desc: 'Side-by-side comparison of 2 or 3 events with radar charts, satisfaction indices, NPS shifts, and recurring issue resolution tracking.',
+      title: t('landing.cards.f5.title'),
+      desc: t('landing.cards.f5.desc'),
       icon: BarChart3,
-      tag: 'Analytics & Trends',
+      tag: t('landing.cards.f5.tag'),
     },
     {
-      title: 'Executive PDF & Excel Reports',
-      desc: 'Generate professional 1-click PDF executive summaries and multi-tab Excel workbooks preserving original and translated feedback columns.',
+      title: t('landing.cards.f6.title'),
+      desc: t('landing.cards.f6.desc'),
       icon: FileCheck,
-      tag: 'Downloadable Reports',
+      tag: t('landing.cards.f6.tag'),
     },
   ];
 
@@ -207,24 +237,17 @@ export const LandingPage = () => {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-charcoal/10 shadow-sm backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-sage animate-ping" />
             <span className="text-xs font-bold uppercase tracking-wider text-charcoal/70">
-              Universal AI Event Feedback & Intelligence Platform
+              {t('landing.platformPill')}
             </span>
           </div>
 
           {/* Main Headline */}
           <div className="max-w-4xl mx-auto space-y-4">
             <h1 className="text-4xl sm:text-6xl font-heading font-extrabold text-navy tracking-tight leading-[1.12]">
-              Turn Live Attendee Feedback into{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-coral via-coral/90 to-amber-600">
-                Actionable Intelligence
-              </span>
+              {t('landing.headline')}
             </h1>
             <p className="text-base sm:text-xl text-charcoal/75 max-w-2xl mx-auto font-sans leading-relaxed">
-              From <strong className="text-navy font-semibold">Marathons</strong> and{' '}
-              <strong className="text-navy font-semibold">Concerts</strong> to{' '}
-              <strong className="text-navy font-semibold">Sports Tournaments</strong>,{' '}
-              <strong className="text-navy font-semibold">Workshops</strong>, and{' '}
-              <strong className="text-navy font-semibold">College Fests</strong>. Capture multilingual voice & text, detect bottlenecks, and close the improvement loop.
+              {t('landing.subheadline')}
             </p>
           </div>
 
@@ -239,7 +262,7 @@ export const LandingPage = () => {
               </div>
               <input
                 type="text"
-                placeholder="Enter Event Code (e.g. RUN-2026, HACK-2026, LIVE-2026)"
+                placeholder={t('landing.searchPlaceholder')}
                 value={eventCodeInput}
                 onChange={(e) => setEventCodeInput(e.target.value)}
                 className="w-full bg-transparent px-2 py-2 text-sm sm:text-base font-semibold text-navy placeholder:text-charcoal/40 focus:outline-none uppercase"
@@ -248,7 +271,7 @@ export const LandingPage = () => {
                 type="submit"
                 className="px-5 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs sm:text-sm font-bold shadow-coral-glow transition-all shrink-0 flex items-center gap-1.5"
               >
-                <span>Give Feedback</span>
+                <span>{t('landing.giveFeedback')}</span>
                 <ArrowRight size={16} />
               </button>
             </form>
@@ -259,14 +282,14 @@ export const LandingPage = () => {
                 className="px-6 py-3 rounded-2xl bg-navy text-white text-sm font-bold shadow-hover hover:bg-navy-900 transition-all flex items-center gap-2"
               >
                 <Sparkles size={16} className="text-coral" />
-                <span>Create Organizer Account</span>
+                <span>{t('landing.createAccount')}</span>
               </Link>
               <Link
                 to="/feedback/HACK-2026"
                 className="px-6 py-3 rounded-2xl bg-white border border-charcoal/15 text-navy text-sm font-bold shadow-sm hover:border-coral transition-all flex items-center gap-2"
               >
                 <QrCode size={16} className="text-charcoal/60" />
-                <span>Explore Live Demo Event</span>
+                <span>{t('landing.exploreDemo')}</span>
               </Link>
             </div>
           </div>
@@ -274,7 +297,7 @@ export const LandingPage = () => {
           {/* Quick Universal Category Pills */}
           <div className="pt-8">
             <p className="text-xs font-bold uppercase tracking-wider text-charcoal/50 mb-3">
-              Explore Tailored Forms for Every Event Category:
+              {t('landing.categoryLabel')}
             </p>
             <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
               {Object.keys(categoryDemos).map((key) => {
@@ -327,7 +350,7 @@ export const LandingPage = () => {
               to={`/feedback/${activeDemo.code}`}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-coral/10 hover:bg-coral text-coral hover:text-white text-xs font-bold transition-all"
             >
-              <span>Test This Form Live</span>
+              <span>{t('landing.testFormLive')}</span>
               <ExternalLink size={14} />
             </Link>
           </div>
@@ -336,7 +359,7 @@ export const LandingPage = () => {
             {/* Dimensions */}
             <div className="space-y-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-charcoal/50">
-                Category-Tailored Dimensions
+                {t('landing.categoryDimensions')}
               </span>
               <ul className="space-y-2">
                 {activeDemo.sampleDimensions.map((dim, idx) => (
@@ -351,7 +374,7 @@ export const LandingPage = () => {
             {/* Multilingual Voice/Text Quote */}
             <div className="space-y-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-charcoal/50">
-                Preserved Multilingual Feedback
+                {t('landing.multilingualFeedback')}
               </span>
               <div className="p-3.5 rounded-2xl bg-ivory-100 border border-charcoal/5 text-xs italic text-charcoal/80 space-y-2">
                 <p>{activeDemo.sampleQuote}</p>
@@ -364,12 +387,12 @@ export const LandingPage = () => {
             {/* Synthesized AI Insight */}
             <div className="space-y-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-coral">
-                Synthesized AI Actionable Insight
+                {t('landing.aiInsightLabel')}
               </span>
               <div className="p-3.5 rounded-2xl bg-coral/5 border border-coral/20 text-xs text-charcoal/90 space-y-2">
                 <div className="flex items-center gap-1.5 text-coral font-bold text-[11px]">
                   <BrainCircuit size={14} />
-                  <span>Category-Specific Intelligence</span>
+                  <span>{t('landing.aiCategoryIntelligence')}</span>
                 </div>
                 <p className="leading-relaxed">{activeDemo.aiInsight}</p>
               </div>
@@ -383,13 +406,13 @@ export const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-xs uppercase font-bold tracking-wider text-coral">
-              Streamlined 5-Step Process
+              {t('landing.workflowBadge')}
             </span>
             <h2 className="text-3xl font-heading font-extrabold text-navy">
-              How InsightLoop Empowers Organizers
+              {t('landing.workflowHeading')}
             </h2>
             <p className="text-xs sm:text-sm text-charcoal/70">
-              A frictionless feedback loop designed for high volume in-person and hybrid events.
+              {t('landing.workflowSubheading')}
             </p>
           </div>
 
@@ -426,13 +449,13 @@ export const LandingPage = () => {
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs uppercase font-bold tracking-wider text-coral">
-            Enterprise Grade Architecture
+            {t('landing.featuresBadge')}
           </span>
           <h2 className="text-3xl font-heading font-extrabold text-navy">
-            Engineered for High-Stakes Events
+            {t('landing.featuresHeading')}
           </h2>
           <p className="text-xs sm:text-sm text-charcoal/70">
-            Combines sovereign Indian language processing with RAG vector retrieval and task tracking.
+            {t('landing.featuresSubheading')}
           </p>
         </div>
 
@@ -473,26 +496,26 @@ export const LandingPage = () => {
 
           <div className="max-w-2xl space-y-6 relative z-10">
             <span className="text-xs uppercase font-bold tracking-widest text-coral">
-              Ready for Evaluators & Event Hosts
+              {t('landing.ctaBadge')}
             </span>
             <h2 className="text-2xl sm:text-4xl font-heading font-extrabold tracking-tight leading-tight">
-              Experience InsightLoop Across Marathons, Concerts & Conferences Now
+              {t('landing.ctaHeading')}
             </h2>
             <p className="text-xs sm:text-sm text-ivory-200 leading-relaxed">
-              Log in with our seeded organizer credentials (<code>organizer@vitpune.edu</code> / <code>Password123!</code>) or scan live event QR codes from any smartphone.
+              {t('landing.ctaDesc')}
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
                 to="/login"
                 className="px-6 py-3 rounded-2xl bg-coral hover:bg-coral-hover text-white text-xs sm:text-sm font-bold shadow-coral-glow transition-all"
               >
-                Open Host Dashboard
+                {t('landing.openHostDashboard')}
               </Link>
               <Link
                 to="/events"
                 className="px-6 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-bold border border-white/20 transition-all"
               >
-                Browse All Universal Events
+                {t('landing.browseEvents')}
               </Link>
             </div>
           </div>

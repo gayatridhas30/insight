@@ -16,9 +16,11 @@ import {
   Sparkles,
   GitCompare,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 export const Sidebar = () => {
+  const { t } = useTranslation();
   const { user, isAdmin, activeOrganization, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -28,16 +30,16 @@ export const Sidebar = () => {
   };
 
   const navItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Events', path: '/events', icon: Calendar },
-    { label: 'Create Event', path: '/events/create', icon: PlusCircle },
-    { label: 'Event Comparison', path: '/events/compare', icon: GitCompare },
-    { label: 'AI Intelligence', path: '/ai-insights', icon: BarChart3 },
-    { label: 'RAG Assistant', path: '/ai-assistant', icon: Bot, badge: 'AI' },
-    { label: 'Improvement Tracker', path: '/tasks', icon: CheckSquare },
-    { label: 'Reports & Export', path: '/reports', icon: FileSpreadsheet },
-    { label: 'Organization', path: '/organization/settings', icon: Building2 },
-    { label: 'Profile & Settings', path: '/profile', icon: User },
+    { labelKey: 'sidebar.dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { labelKey: 'sidebar.events', path: '/events', icon: Calendar },
+    { labelKey: 'sidebar.createEvent', path: '/events/create', icon: PlusCircle },
+    { labelKey: 'sidebar.eventComparison', path: '/events/compare', icon: GitCompare },
+    { labelKey: 'sidebar.aiIntelligence', path: '/ai-insights', icon: BarChart3 },
+    { labelKey: 'sidebar.ragAssistant', path: '/ai-assistant', icon: Bot, badge: 'AI' },
+    { labelKey: 'sidebar.improvementTracker', path: '/tasks', icon: CheckSquare },
+    { labelKey: 'sidebar.reportsExport', path: '/reports', icon: FileSpreadsheet },
+    { labelKey: 'sidebar.organization', path: '/organization/settings', icon: Building2 },
+    { labelKey: 'sidebar.profileSettings', path: '/profile', icon: User },
   ];
 
   return (
@@ -50,10 +52,10 @@ export const Sidebar = () => {
           </div>
           <div className="overflow-hidden">
             <h4 className="text-xs font-bold text-white truncate">
-              {activeOrganization?.name || 'Organization'}
+              {activeOrganization?.name || t('sidebar.organization')}
             </h4>
             <span className="text-[10px] uppercase font-semibold tracking-wider text-sage">
-              {activeOrganization?.category || 'Host Console'}
+              {activeOrganization?.category || t('sidebar.hostConsole')}
             </span>
           </div>
         </div>
@@ -61,7 +63,7 @@ export const Sidebar = () => {
         {/* Navigation Section */}
         <div className="space-y-1">
           <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-white/40">
-            Main Navigation
+            {t('sidebar.mainNavigation')}
           </div>
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -80,7 +82,7 @@ export const Sidebar = () => {
               >
                 <div className="flex items-center gap-3">
                   <Icon size={16} />
-                  <span>{item.label}</span>
+                  <span>{t(item.labelKey)}</span>
                 </div>
                 {item.badge && (
                   <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-lavender text-navy">
@@ -96,7 +98,7 @@ export const Sidebar = () => {
         {isAdmin && (
           <div className="mt-6 pt-4 border-t border-white/10 space-y-1">
             <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-lavender">
-              Platform Admin
+              {t('sidebar.platformAdmin')}
             </div>
             <NavLink
               to="/admin"
@@ -109,7 +111,7 @@ export const Sidebar = () => {
               }
             >
               <Shield size={16} className="text-lavender" />
-              <span>Admin Console</span>
+              <span>{t('nav.admin')}</span>
             </NavLink>
           </div>
         )}
@@ -123,14 +125,14 @@ export const Sidebar = () => {
               {user?.name ? user.name[0].toUpperCase() : 'U'}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-bold text-white truncate">{user?.name || 'User'}</p>
+              <p className="text-xs font-bold text-white truncate">{user?.name || t('sidebar.userFallback')}</p>
               <p className="text-[10px] text-white/50 truncate">{user?.email || ''}</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
             className="p-1.5 rounded-lg text-white/60 hover:text-coral hover:bg-white/5 transition-colors"
-            title="Sign Out"
+            title={t('nav.logout')}
           >
             <LogOut size={16} />
           </button>

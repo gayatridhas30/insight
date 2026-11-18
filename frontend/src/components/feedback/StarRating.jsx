@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const StarRating = ({ value = 0, onChange, max = 5, disabled = false, size = 28 }) => {
+  const { t } = useTranslation();
   const [hoverValue, setHoverValue] = useState(0);
 
-  const labels = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+  const labelKeys = ['ratings.poor', 'ratings.fair', 'ratings.good', 'ratings.veryGood', 'ratings.excellent'];
+  const activeValue = hoverValue || value;
+  const labelKey = labelKeys[activeValue - 1];
 
   return (
     <div className="flex flex-col items-start gap-1.5">
@@ -24,7 +28,7 @@ export const StarRating = ({ value = 0, onChange, max = 5, disabled = false, siz
               className={`p-1.5 rounded-lg transition-transform focus:outline-none ${
                 disabled ? 'cursor-default' : 'cursor-pointer hover:scale-110 active:scale-95'
               }`}
-              aria-label={`${starValue} Star`}
+              aria-label={t('ratings.starAria', { n: starValue })}
             >
               <Star
                 size={size}
@@ -38,9 +42,9 @@ export const StarRating = ({ value = 0, onChange, max = 5, disabled = false, siz
           );
         })}
       </div>
-      {(hoverValue || value) > 0 && (
+      {activeValue > 0 && (
         <span className="text-xs font-semibold text-charcoal/70 tracking-wide">
-          {labels[(hoverValue || value) - 1] || `${hoverValue || value} Stars`}
+          {labelKey ? t(labelKey) : t('ratings.starsCount', { n: activeValue })}
         </span>
       )}
     </div>

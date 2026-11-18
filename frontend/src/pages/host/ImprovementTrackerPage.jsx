@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CheckSquare,
   Plus,
@@ -16,6 +17,7 @@ import { improvementTaskService, eventService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
 
 export const ImprovementTrackerPage = () => {
+  const { t } = useTranslation();
   const { activeOrganization } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [events, setEvents] = useState([]);
@@ -63,17 +65,17 @@ export const ImprovementTrackerPage = () => {
       await improvementTaskService.updateTask(taskId, { status: newStatus });
       fetchTasksAndEvents();
     } catch (err) {
-      alert('Failed to update task status');
+      alert(t('tracker.updateStatusFailed'));
     }
   };
 
   const handleDeleteTask = async (taskId) => {
-    if (window.confirm('Delete this improvement task?')) {
+    if (window.confirm(t('tracker.deleteConfirm'))) {
       try {
         await improvementTaskService.deleteTask(taskId);
         fetchTasksAndEvents();
       } catch (err) {
-        alert('Failed to delete task');
+        alert(t('tracker.deleteFailed'));
       }
     }
   };
@@ -81,7 +83,7 @@ export const ImprovementTrackerPage = () => {
   const handleCreateTask = async (e) => {
     e.preventDefault();
     if (!taskForm.relatedEventId) {
-      alert('Please select a related event.');
+      alert(t('tracker.selectEventRequired'));
       return;
     }
 
@@ -102,7 +104,7 @@ export const ImprovementTrackerPage = () => {
       });
       fetchTasksAndEvents();
     } catch (err) {
-      alert('Failed to create task: ' + err.message);
+      alert(t('tracker.createFailed', { message: err.message }));
     }
   };
 
@@ -110,17 +112,17 @@ export const ImprovementTrackerPage = () => {
     return (
       <div className="flex items-center justify-center h-64 text-sm font-semibold text-navy">
         <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-        <span>Loading improvement tracker...</span>
+        <span>{t('tracker.loading')}</span>
       </div>
     );
   }
 
   const statuses = [
-    { id: 'all', label: 'All Tasks' },
-    { id: 'todo', label: 'To Do' },
-    { id: 'in_progress', label: 'In Progress' },
-    { id: 'completed', label: 'Completed' },
-    { id: 'verified', label: 'Verified in Future Event' },
+    { id: 'all', labelKey: 'tracker.statuses.all' },
+    { id: 'todo', labelKey: 'tracker.statuses.todo' },
+    { id: 'in_progress', labelKey: 'tracker.statuses.inProgress' },
+    { id: 'completed', labelKey: 'tracker.statuses.completed' },
+    { id: 'verified', labelKey: 'tracker.statuses.verified' },
   ];
 
   return (
@@ -129,10 +131,10 @@ export const ImprovementTrackerPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-heading font-extrabold text-navy">
-            Improvement Task Tracker
+            {t('tracker.title')}
           </h1>
           <p className="text-xs text-charcoal/60 mt-0.5">
-            Convert participant friction points into team accountability and track verified progress
+            {t('tracker.subtitle')}
           </p>
         </div>
 
@@ -141,7 +143,7 @@ export const ImprovementTrackerPage = () => {
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all active:scale-95 shrink-0"
         >
           <Plus size={16} />
-          <span>New Improvement Task</span>
+          <span>{t('tracker.newTask')}</span>
         </button>
       </div>
 
@@ -157,7 +159,7 @@ export const ImprovementTrackerPage = () => {
                 : 'bg-white border border-charcoal/10 text-charcoal/70 hover:text-navy'
             }`}
           >
-            {s.label}
+            {t(s.labelKey)}
           </button>
         ))}
       </div>
@@ -166,9 +168,9 @@ export const ImprovementTrackerPage = () => {
       {tasks.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-charcoal/10 space-y-3">
           <CheckCircle2 size={36} className="text-sage-dark mx-auto" />
-          <h3 className="text-base font-bold text-navy">No tasks found</h3>
+          <h3 className="text-base font-bold text-navy">{t('tracker.emptyTitle')}</h3>
           <p className="text-xs text-charcoal/60 max-w-sm mx-auto">
-            You can convert AI recommendations into tasks from any event's AI Insights page.
+            {t('tracker.emptyDesc')}
           </p>
         </div>
       ) : (
@@ -181,7 +183,7 @@ export const ImprovementTrackerPage = () => {
               <div className="space-y-2 max-w-2xl">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-[10px] uppercase font-bold tracking-wider font-mono px-2 py-0.5 rounded bg-coral/10 text-coral">
-                    {task.relatedEventId?.code || 'EVENT'}
+                    {task.relatedEventId?.code || t('tracker.eventFallback')}
                   </span>
                   <span
                     className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
@@ -192,7 +194,9 @@ export const ImprovementTrackerPage = () => {
                         : 'bg-lavender/50 text-navy'
                     }`}
                   >
-                    {task.priority} Priority
+                    {t('tracker.priorityLabel', {
+                      priority: t(`tracker.priorities.${task.priority}`, { defaultValue: task.priority }),
+                    })}
                   </span>
                   <span className="text-xs text-charcoal/50">
                     {task.relatedEventId?.title}
@@ -201,7 +205,7 @@ export const ImprovementTrackerPage = () => {
 
                 <h3 className="text-sm sm:text-base font-bold text-navy">{task.issue}</h3>
                 <p className="text-xs text-charcoal/70">
-                  <span className="font-bold text-navy">Action:</span> {task.recommendedAction}
+                  <span className="font-bold text-navy">{t('tracker.actionLabel')}</span> {task.recommendedAction}
                 </p>
 
                 {task.notes && (
@@ -222,17 +226,17 @@ export const ImprovementTrackerPage = () => {
                       : 'bg-ivory border-charcoal/15 text-charcoal'
                   }`}
                 >
-                  <option value="todo">To Do</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="verified">Verified in Future Event</option>
+                  <option value="todo">{t('tracker.statuses.todo')}</option>
+                  <option value="in_progress">{t('tracker.statuses.inProgress')}</option>
+                  <option value="completed">{t('tracker.statuses.completed')}</option>
+                  <option value="verified">{t('tracker.statuses.verified')}</option>
                 </select>
 
                 <button
                   type="button"
                   onClick={() => handleDeleteTask(task._id)}
                   className="p-2 text-charcoal/40 hover:text-coral transition-colors"
-                  title="Delete Task"
+                  title={t('tracker.deleteTask')}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -246,12 +250,12 @@ export const ImprovementTrackerPage = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-navy/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-card border border-charcoal/10 space-y-4 animate-scaleUp">
-            <h3 className="text-lg font-heading font-bold text-navy">Create Improvement Task</h3>
+            <h3 className="text-lg font-heading font-bold text-navy">{t('tracker.modalTitle')}</h3>
 
             <form onSubmit={handleCreateTask} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                  Related Event *
+                  {t('tracker.relatedEvent')}
                 </label>
                 <select
                   required
@@ -259,7 +263,7 @@ export const ImprovementTrackerPage = () => {
                   onChange={(e) => setTaskForm({ ...taskForm, relatedEventId: e.target.value })}
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
                 >
-                  <option value="">Select Event...</option>
+                  <option value="">{t('tracker.selectEvent')}</option>
                   {events.map((e) => (
                     <option key={e._id || e.id} value={e._id || e.id}>
                       {e.title} ({e.code})
@@ -270,28 +274,28 @@ export const ImprovementTrackerPage = () => {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                  Issue / Friction Point *
+                  {t('tracker.issueLabel')}
                 </label>
                 <input
                   type="text"
                   required
                   value={taskForm.issue}
                   onChange={(e) => setTaskForm({ ...taskForm, issue: e.target.value })}
-                  placeholder="e.g. WiFi slowdown in Lab 4 at peak hours"
+                  placeholder={t('tracker.issuePlaceholder')}
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                  Recommended Action *
+                  {t('tracker.recommendedAction')}
                 </label>
                 <textarea
                   rows={2}
                   required
                   value={taskForm.recommendedAction}
                   onChange={(e) => setTaskForm({ ...taskForm, recommendedAction: e.target.value })}
-                  placeholder="Allocate dedicated 5GHz network access point"
+                  placeholder={t('tracker.actionPlaceholder')}
                   className="w-full p-2.5 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral resize-none"
                 />
               </div>
@@ -299,33 +303,33 @@ export const ImprovementTrackerPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                    Priority
+                    {t('tracker.formPriority')}
                   </label>
                   <select
                     value={taskForm.priority}
                     onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
                     className="w-full px-3 py-1.5 text-xs rounded-xl border border-charcoal/15 bg-ivory-50"
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
+                    <option value="low">{t('tracker.priorities.low')}</option>
+                    <option value="medium">{t('tracker.priorities.medium')}</option>
+                    <option value="high">{t('tracker.priorities.high')}</option>
+                    <option value="urgent">{t('tracker.priorities.urgent')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/70 mb-1">
-                    Status
+                    {t('tracker.formStatus')}
                   </label>
                   <select
                     value={taskForm.status}
                     onChange={(e) => setTaskForm({ ...taskForm, status: e.target.value })}
                     className="w-full px-3 py-1.5 text-xs rounded-xl border border-charcoal/15 bg-ivory-50"
                   >
-                    <option value="todo">To Do</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="verified">Verified in Future Event</option>
+                    <option value="todo">{t('tracker.statuses.todo')}</option>
+                    <option value="in_progress">{t('tracker.statuses.inProgress')}</option>
+                    <option value="completed">{t('tracker.statuses.completed')}</option>
+                    <option value="verified">{t('tracker.statuses.verified')}</option>
                   </select>
                 </div>
               </div>
@@ -336,13 +340,13 @@ export const ImprovementTrackerPage = () => {
                   onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 rounded-xl text-xs font-bold text-charcoal border border-charcoal/15"
                 >
-                  Cancel
+                  {t('tracker.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-coral text-white text-xs font-bold shadow-coral-glow"
                 >
-                  Create Task
+                  {t('tracker.createTask')}
                 </button>
               </div>
             </form>

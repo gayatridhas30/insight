@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Search, RefreshCw, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { adminService } from '../../api/services';
 
 export const EventMonitoringPage = () => {
+  const { t } = useTranslation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -29,10 +31,10 @@ export const EventMonitoringPage = () => {
     <div className="space-y-6 animate-fadeIn">
       <div>
         <h1 className="text-2xl font-heading font-extrabold text-navy">
-          Platform-Wide Event Feed
+          {t('admin.events.title')}
         </h1>
         <p className="text-xs text-charcoal/60 mt-0.5">
-          Real-time oversight of all hackathons, workshops, and symposiums hosted on InsightLoop
+          {t('admin.events.subtitle')}
         </p>
       </div>
 
@@ -49,32 +51,32 @@ export const EventMonitoringPage = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search events across platform..."
+            placeholder={t('admin.events.searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-charcoal/15 bg-ivory-50 focus:outline-none focus:border-coral"
           />
         </form>
 
         <span className="text-xs text-charcoal/60 font-medium">
-          {events.length} Events Logged
+          {t('admin.events.eventsLogged', { count: events.length })}
         </span>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center h-48 text-sm font-semibold text-navy">
           <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-          <span>Loading platform events...</span>
+          <span>{t('admin.events.loading')}</span>
         </div>
       ) : (
         <div className="bg-white rounded-3xl border border-charcoal/10 shadow-subtle overflow-hidden">
           <table className="w-full text-left text-xs">
             <thead className="bg-ivory border-b border-charcoal/10 text-charcoal/70 uppercase tracking-wider font-bold">
               <tr>
-                <th className="py-3.5 px-4">Event Code</th>
-                <th className="py-3.5 px-4">Title</th>
-                <th className="py-3.5 px-4">Organization</th>
-                <th className="py-3.5 px-4">Category</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4">Created Date</th>
+                <th className="py-3.5 px-4">{t('admin.events.headers.eventCode')}</th>
+                <th className="py-3.5 px-4">{t('admin.events.headers.title')}</th>
+                <th className="py-3.5 px-4">{t('admin.events.headers.organization')}</th>
+                <th className="py-3.5 px-4">{t('admin.events.headers.category')}</th>
+                <th className="py-3.5 px-4">{t('admin.events.headers.status')}</th>
+                <th className="py-3.5 px-4">{t('admin.events.headers.createdDate')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-charcoal/5">
@@ -83,7 +85,7 @@ export const EventMonitoringPage = () => {
                   <td className="py-3.5 px-4 font-mono font-bold text-coral">{evt.code}</td>
                   <td className="py-3.5 px-4 font-bold text-navy">{evt.title}</td>
                   <td className="py-3.5 px-4 font-medium text-charcoal/80">
-                    {evt.organizationId?.name || 'Organization'}
+                    {evt.organizationId?.name || t('admin.events.orgFallback')}
                   </td>
                   <td className="py-3.5 px-4">{evt.category}</td>
                   <td className="py-3.5 px-4">
@@ -96,7 +98,7 @@ export const EventMonitoringPage = () => {
                           : 'bg-lavender/50 text-navy'
                       }`}
                     >
-                      {evt.status}
+                      {t(`admin.events.statuses.${evt.status}`, { defaultValue: evt.status || '' })}
                     </span>
                   </td>
                   <td className="py-3.5 px-4 text-charcoal/50">

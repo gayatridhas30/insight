@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   MessageSquare,
   Search,
@@ -18,6 +19,7 @@ import {
 import { feedbackService, eventService } from '../../api/services';
 
 export const FeedbackResponsesPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [event, setEvent] = useState(null);
   const [responses, setResponses] = useState([]);
@@ -56,7 +58,7 @@ export const FeedbackResponsesPage = () => {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sage/30 text-sage-dark">
           <Smile size={12} />
-          <span>Positive</span>
+          <span>{t('responses.sentiments.positive')}</span>
         </span>
       );
     }
@@ -64,14 +66,14 @@ export const FeedbackResponsesPage = () => {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-coral/20 text-coral">
           <Frown size={12} />
-          <span>Negative</span>
+          <span>{t('responses.sentiments.negative')}</span>
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-lavender/50 text-navy">
         <Meh size={12} />
-        <span>Neutral</span>
+        <span>{t('responses.sentiments.neutral')}</span>
       </span>
     );
   };
@@ -86,13 +88,13 @@ export const FeedbackResponsesPage = () => {
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal/60 hover:text-navy transition-colors mb-1"
           >
             <ArrowLeft size={14} />
-            <span>Back to Event Details</span>
+            <span>{t('responses.backToEvent')}</span>
           </Link>
           <h1 className="text-2xl font-heading font-extrabold text-navy">
-            Feedback Responses
+            {t('responses.title')}
           </h1>
           <p className="text-xs text-charcoal/60">
-            {event?.title} ({responses.length} responses recorded)
+            {event?.title} ({t('responses.responsesRecorded', { count: responses.length })})
           </p>
         </div>
 
@@ -101,7 +103,7 @@ export const FeedbackResponsesPage = () => {
             to={`/events/${id}/ai`}
             className="px-4 py-2 rounded-xl bg-coral hover:bg-coral-hover text-white text-xs font-bold shadow-coral-glow transition-all"
           >
-            View AI Insights
+            {t('responses.viewAI')}
           </Link>
         </div>
       </div>
@@ -114,10 +116,10 @@ export const FeedbackResponsesPage = () => {
             onChange={(e) => setSentimentFilter(e.target.value)}
             className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-charcoal/15 bg-ivory-50 text-charcoal"
           >
-            <option value="">All Sentiments</option>
-            <option value="positive">Positive Only</option>
-            <option value="neutral">Neutral Only</option>
-            <option value="negative">Negative Only</option>
+            <option value="">{t('responses.allSentiments')}</option>
+            <option value="positive">{t('responses.positiveOnly')}</option>
+            <option value="neutral">{t('responses.neutralOnly')}</option>
+            <option value="negative">{t('responses.negativeOnly')}</option>
           </select>
 
           <select
@@ -125,15 +127,15 @@ export const FeedbackResponsesPage = () => {
             onChange={(e) => setLanguageFilter(e.target.value)}
             className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-charcoal/15 bg-ivory-50 text-charcoal"
           >
-            <option value="">All Languages</option>
-            <option value="en">English</option>
-            <option value="hi">Hindi (हिन्दी)</option>
-            <option value="mr">Marathi (मराठी)</option>
+            <option value="">{t('responses.allLanguages')}</option>
+            <option value="en">{t('responses.langEnglish')}</option>
+            <option value="hi">{t('responses.langHindi')}</option>
+            <option value="mr">{t('responses.langMarathi')}</option>
           </select>
         </div>
 
         <span className="text-xs text-charcoal/60 font-medium">
-          Showing {responses.length} entries
+          {t('responses.showingEntries', { count: responses.length })}
         </span>
       </div>
 
@@ -141,13 +143,13 @@ export const FeedbackResponsesPage = () => {
       {loading ? (
         <div className="flex items-center justify-center h-48 text-sm font-semibold text-navy">
           <RefreshCw size={20} className="animate-spin text-coral mr-2" />
-          <span>Loading responses...</span>
+          <span>{t('responses.loading')}</span>
         </div>
       ) : responses.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-charcoal/10 space-y-3">
           <MessageSquare size={36} className="text-coral mx-auto" />
-          <h3 className="text-base font-bold text-navy">No responses match the criteria</h3>
-          <p className="text-xs text-charcoal/60">Try clearing filters or distribute your QR code to collect feedback.</p>
+          <h3 className="text-base font-bold text-navy">{t('responses.emptyTitle')}</h3>
+          <p className="text-xs text-charcoal/60">{t('responses.emptyDesc')}</p>
         </div>
       ) : (
         <div className="bg-white rounded-3xl border border-charcoal/10 shadow-subtle overflow-hidden">
@@ -155,12 +157,12 @@ export const FeedbackResponsesPage = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-ivory border-b border-charcoal/10 text-charcoal/70 uppercase tracking-wider font-bold">
                 <tr>
-                  <th className="py-3.5 px-4">Participant</th>
-                  <th className="py-3.5 px-4">Language</th>
-                  <th className="py-3.5 px-4">Rating / NPS</th>
-                  <th className="py-3.5 px-4">Sentiment</th>
-                  <th className="py-3.5 px-4">Feedback Snippet</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4">{t('responses.thParticipant')}</th>
+                  <th className="py-3.5 px-4">{t('responses.thLanguage')}</th>
+                  <th className="py-3.5 px-4">{t('responses.thRating')}</th>
+                  <th className="py-3.5 px-4">{t('responses.thSentiment')}</th>
+                  <th className="py-3.5 px-4">{t('responses.thSnippet')}</th>
+                  <th className="py-3.5 px-4 text-right">{t('responses.thActions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-charcoal/5">
@@ -174,7 +176,7 @@ export const FeedbackResponsesPage = () => {
                       <td className="py-3.5 px-4 font-semibold text-navy">
                         <div className="flex items-center gap-1.5">
                           <User size={14} className="text-charcoal/40" />
-                          <span>{r.isAnonymous ? 'Anonymous' : r.participantName || 'Attendee'}</span>
+                          <span>{r.isAnonymous ? t('responses.anonymous') : r.participantName || t('responses.attendee')}</span>
                         </div>
                       </td>
 
@@ -186,7 +188,7 @@ export const FeedbackResponsesPage = () => {
                       </td>
 
                       <td className="py-3.5 px-4 font-bold text-navy">
-                        {rateAns?.ratingValue !== undefined ? `${rateAns.ratingValue} / 5` : 'N/A'}
+                        {rateAns?.ratingValue !== undefined ? `${rateAns.ratingValue} / 5` : t('responses.notAvailable')}
                       </td>
 
                       <td className="py-3.5 px-4">
@@ -197,10 +199,10 @@ export const FeedbackResponsesPage = () => {
                         {hasVoice && (
                           <span className="inline-flex items-center gap-0.5 text-[10px] text-coral font-bold mr-1">
                             <Volume2 size={11} />
-                            <span>Voice:</span>
+                            <span>{t('responses.voiceLabel')}</span>
                           </span>
                         )}
-                        <span>{txtAns?.textResponseTranslated || txtAns?.textResponseOriginal || 'No text answer'}</span>
+                        <span>{txtAns?.textResponseTranslated || txtAns?.textResponseOriginal || t('responses.noTextAnswer')}</span>
                       </td>
 
                       <td className="py-3.5 px-4 text-right">
@@ -209,7 +211,7 @@ export const FeedbackResponsesPage = () => {
                           onClick={() => setSelectedResponse(r)}
                           className="px-2.5 py-1 rounded-lg bg-ivory hover:bg-navy hover:text-white text-navy font-bold text-[11px] transition-colors"
                         >
-                          Inspect
+                          {t('responses.inspect')}
                         </button>
                       </td>
                     </tr>
@@ -228,10 +230,10 @@ export const FeedbackResponsesPage = () => {
             <div className="flex items-center justify-between pb-3 border-b border-charcoal/10">
               <div>
                 <span className="text-[10px] uppercase font-bold text-coral tracking-wider font-mono">
-                  Feedback Submission Detail
+                  {t('responses.modalKicker')}
                 </span>
                 <h3 className="text-lg font-heading font-bold text-navy mt-0.5">
-                  {selectedResponse.isAnonymous ? 'Anonymous Participant' : selectedResponse.participantName}
+                  {selectedResponse.isAnonymous ? t('responses.anonymousParticipant') : selectedResponse.participantName}
                 </h3>
               </div>
               <button
@@ -244,19 +246,21 @@ export const FeedbackResponsesPage = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-ivory rounded-2xl p-4 border border-charcoal/10">
               <div>
-                <span className="text-charcoal/50 block">Language</span>
+                <span className="text-charcoal/50 block">{t('responses.labelLanguage')}</span>
                 <span className="font-bold uppercase text-navy">{selectedResponse.submissionLanguage}</span>
               </div>
               <div>
-                <span className="text-charcoal/50 block">Sentiment</span>
-                <span className="font-bold capitalize text-coral">{selectedResponse.sentimentLabel}</span>
+                <span className="text-charcoal/50 block">{t('responses.labelSentiment')}</span>
+                <span className="font-bold capitalize text-coral">
+                  {t(`responses.sentiments.${selectedResponse.sentimentLabel}`, { defaultValue: selectedResponse.sentimentLabel })}
+                </span>
               </div>
               <div>
-                <span className="text-charcoal/50 block">Score</span>
+                <span className="text-charcoal/50 block">{t('responses.labelScore')}</span>
                 <span className="font-bold text-navy">{selectedResponse.sentimentScore}</span>
               </div>
               <div>
-                <span className="text-charcoal/50 block">Date</span>
+                <span className="text-charcoal/50 block">{t('responses.labelDate')}</span>
                 <span className="font-bold text-navy">
                   {new Date(selectedResponse.createdAt).toLocaleDateString()}
                 </span>
@@ -265,22 +269,22 @@ export const FeedbackResponsesPage = () => {
 
             {/* Answer items */}
             <div className="space-y-4">
-              <h4 className="text-xs uppercase font-bold tracking-wider text-navy">Submitted Answers</h4>
+              <h4 className="text-xs uppercase font-bold tracking-wider text-navy">{t('responses.submittedAnswers')}</h4>
               {selectedResponse.answers?.map((ans, idx) => (
                 <div key={idx} className="p-4 rounded-2xl bg-ivory-50 border border-charcoal/10 space-y-2 text-xs">
                   <span className="font-bold text-navy block">
-                    Q{idx + 1}: {ans.questionPrompt}
+                    {t('responses.question', { num: idx + 1, question: ans.questionPrompt })}
                   </span>
 
                   {ans.ratingValue !== undefined && (
                     <div className="text-coral font-bold">
-                      Rating: {ans.ratingValue} / 5
+                      {t('responses.ratingLabel', { rating: ans.ratingValue })}
                     </div>
                   )}
 
                   {ans.selectedOptions?.length > 0 && (
                     <div className="text-charcoal/80">
-                      Selected: {ans.selectedOptions.join(', ')}
+                      {t('responses.selectedLabel', { options: ans.selectedOptions.join(', ') })}
                     </div>
                   )}
 
@@ -289,20 +293,20 @@ export const FeedbackResponsesPage = () => {
                     <div className="space-y-2 pt-2 border-t border-charcoal/10">
                       <div>
                         <span className="text-[10px] font-bold uppercase text-charcoal/50">
-                          Original Text ({selectedResponse.submissionLanguage.toUpperCase()}):
+                          {t('responses.originalText', { lang: selectedResponse.submissionLanguage.toUpperCase() })}
                         </span>
                         <p className="p-2.5 bg-white rounded-xl border border-charcoal/10 text-charcoal mt-1">
-                          {ans.textResponseOriginal || 'N/A'}
+                          {ans.textResponseOriginal || t('responses.notAvailable')}
                         </p>
                       </div>
 
                       {selectedResponse.submissionLanguage !== 'en' && (
                         <div>
                           <span className="text-[10px] font-bold uppercase text-coral">
-                            Bhashini English Translation:
+                            {t('responses.bhashiniTranslation')}
                           </span>
                           <p className="p-2.5 bg-coral/5 rounded-xl border border-coral/20 text-navy mt-1">
-                            {ans.textResponseTranslated || 'N/A'}
+                            {ans.textResponseTranslated || t('responses.notAvailable')}
                           </p>
                         </div>
                       )}
@@ -318,7 +322,7 @@ export const FeedbackResponsesPage = () => {
                 onClick={() => setSelectedResponse(null)}
                 className="px-5 py-2 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navy-700 transition-colors"
               >
-                Close Inspector
+                {t('responses.closeInspector')}
               </button>
             </div>
           </div>

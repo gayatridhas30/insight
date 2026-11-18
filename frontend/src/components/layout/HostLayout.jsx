@@ -1,9 +1,12 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 
 export const HostLayout = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-ivory flex">
       {/* Fixed Host Sidebar */}

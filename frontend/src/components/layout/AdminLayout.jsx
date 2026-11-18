@@ -1,9 +1,11 @@
 import React from 'react';
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import { Shield, Users, Building2, Calendar, FileText, ArrowLeft, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 export const AdminLayout = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -13,11 +15,11 @@ export const AdminLayout = () => {
   };
 
   const adminNav = [
-    { label: 'Platform Overview', path: '/admin', icon: Shield, end: true },
-    { label: 'User Directory', path: '/admin/users', icon: Users },
-    { label: 'Organizations', path: '/admin/organizations', icon: Building2 },
-    { label: 'All Events', path: '/admin/events', icon: Calendar },
-    { label: 'Audit Logs', path: '/admin/audit-logs', icon: FileText },
+    { labelKey: 'adminLayout.platformOverview', path: '/admin', icon: Shield, end: true },
+    { labelKey: 'adminLayout.userDirectory', path: '/admin/users', icon: Users },
+    { labelKey: 'adminLayout.organizations', path: '/admin/organizations', icon: Building2 },
+    { labelKey: 'adminLayout.allEvents', path: '/admin/events', icon: Calendar },
+    { labelKey: 'adminLayout.auditLogs', path: '/admin/audit-logs', icon: FileText },
   ];
 
   return (
@@ -31,8 +33,8 @@ export const AdminLayout = () => {
                 <Shield size={18} />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">Admin Console</h4>
-                <p className="text-[10px] text-white/50">Platform Governance</p>
+                <h4 className="text-xs font-bold text-white">{t('nav.admin')}</h4>
+                <p className="text-[10px] text-white/50">{t('adminLayout.platformGovernance')}</p>
               </div>
             </div>
           </div>
@@ -54,7 +56,7 @@ export const AdminLayout = () => {
                   }
                 >
                   <Icon size={16} />
-                  <span>{item.label}</span>
+                  <span>{t(item.labelKey)}</span>
                 </NavLink>
               );
             })}
@@ -66,14 +68,14 @@ export const AdminLayout = () => {
               className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-white/70 hover:text-white hover:bg-white/5 transition-colors"
             >
               <ArrowLeft size={14} />
-              <span>Back to Host Portal</span>
+              <span>{t('adminLayout.backToHostPortal')}</span>
             </Link>
           </div>
         </div>
 
         <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
           <span>{user?.name}</span>
-          <button onClick={handleLogout} className="hover:text-coral transition-colors" title="Sign Out">
+          <button onClick={handleLogout} className="hover:text-coral transition-colors" title={t('nav.logout')}>
             <LogOut size={16} />
           </button>
         </div>

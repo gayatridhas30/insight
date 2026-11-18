@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bot,
   Send,
@@ -14,25 +15,35 @@ import { aiIntelligenceService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
 
 export const AIAssistantPage = () => {
+  const { t } = useTranslation();
   const { activeOrganization } = useAuth();
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: `Hello! I am your InsightLoop RAG AI Intelligence Assistant for ${activeOrganization?.name || 'your organization'}. Ask me questions about attendee satisfaction, recurring problems, speaker engagement, marathon hydration, concert audio quality, or comparisons across past events.`,
+      textKey: 'aiAssistant.welcome',
+      orgName: activeOrganization?.name,
       supportingEvidence: [],
-      timestamp: 'Just now',
+      timestampKey: 'aiAssistant.justNow',
     },
   ]);
   const [loading, setLoading] = useState(false);
 
-  const suggestedQueries = [
-    'What were the biggest issues reported in the marathon?',
-    'How was sound quality and crowd management at the concert?',
-    'What did participants appreciate most across workshops?',
-    'Have hydration or audio complaints increased?',
-    'What key improvements should we prioritize next time?',
+  const suggestedQueryKeys = [
+    'aiAssistant.suggestionIssues',
+    'aiAssistant.suggestionSound',
+    'aiAssistant.suggestionWorkshops',
+    'aiAssistant.suggestionTrends',
+    'aiAssistant.suggestionPriorities',
   ];
+
+  const getMessageText = (m) => {
+    if (!m.textKey) return m.text;
+    return t(m.textKey, {
+      org: m.orgName || activeOrganization?.name || t('aiAssistant.yourOrganization'),
+      defaultValue: m.text,
+    });
+  };
 
   const handleSend = async (queryText) => {
     const q = queryText || query;
@@ -73,7 +84,7 @@ export const AIAssistantPage = () => {
         ...prev,
         {
           sender: 'assistant',
-          text: 'I ran into an issue retrieving the vector feedback context. Please ensure feedback responses have been submitted.',
+          textKey: 'aiAssistant.errorResponse',
           supportingEvidence: [],
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
@@ -90,37 +101,37 @@ export const AIAssistantPage = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-heading font-extrabold text-navy">
-              RAG AI Feedback Assistant
+              {t('aiAssistant.title')}
             </h1>
             <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-coral/10 text-coral">
-              Vector Intelligence
+              {t('aiAssistant.vectorBadge')}
             </span>
           </div>
           <p className="text-xs text-charcoal/60">
-            Ask natural language questions backed by real participant citations across any event category
+            {t('aiAssistant.subtitle')}
           </p>
         </div>
 
         <div className="flex items-center gap-1.5 text-xs text-sage-dark font-medium bg-sage/10 px-3 py-1 rounded-xl">
           <ShieldCheck size={14} />
-          <span>Organization Data Isolated</span>
+          <span>{t('aiAssistant.isolated')}</span>
         </div>
       </div>
 
       {/* Suggested Query Chips */}
       <div className="space-y-1.5 shrink-0">
         <span className="text-[11px] font-bold text-charcoal/50 uppercase tracking-wider">
-          Suggested Questions:
+          {t('aiAssistant.suggestedQuestions')}
         </span>
         <div className="flex flex-wrap gap-1.5">
-          {suggestedQueries.map((sq, idx) => (
+          {suggestedQueryKeys.map((sq, idx) => (
             <button
               key={idx}
               type="button"
-              onClick={() => handleSend(sq)}
+              onClick={() => handleSend(t(sq))}
               className="text-xs px-3 py-1.5 rounded-xl bg-white border border-charcoal/10 hover:border-coral hover:text-coral text-charcoal/80 transition-all font-medium shadow-xs"
             >
-              {sq}
+              {t(sq)}
             </button>
           ))}
         </div>
@@ -148,13 +159,13 @@ export const AIAssistantPage = () => {
                   : 'bg-white text-charcoal border-charcoal/10 shadow-subtle rounded-tl-none'
               }`}
             >
-              <p className="leading-relaxed whitespace-pre-wrap">{m.text}</p>
+              <p className="leading-relaxed whitespace-pre-wrap">{getMessageText(m)}</p>
 
               {/* Supporting Evidence Drawer */}
               {m.supportingEvidence && m.supportingEvidence.length > 0 && (
                 <div className="pt-3 border-t border-charcoal/10 space-y-1.5 text-xs">
                   <span className="font-bold text-navy block text-[11px] uppercase tracking-wider">
-                    Supporting Participant Citations:
+                    {t('aiAssistant.supportingCitations')}
                   </span>
                   {m.supportingEvidence.map((ev, evIdx) => (
                     <div
@@ -169,7 +180,7 @@ export const AIAssistantPage = () => {
               )}
 
               <span className={`block text-[10px] ${m.sender === 'user' ? 'text-white/70' : 'text-charcoal/40'} text-right`}>
-                {m.timestamp}
+                {m.timestampKey ? t(m.timestampKey) : m.timestamp}
               </span>
             </div>
           </div>
@@ -178,7 +189,7 @@ export const AIAssistantPage = () => {
         {loading && (
           <div className="flex items-center gap-2 text-xs font-semibold text-coral animate-pulse p-2">
             <RefreshCw size={14} className="animate-spin" />
-            <span>Retrieving historical vector passages & synthesizing answer...</span>
+            <span>{t('aiAssistant.loading')}</span>
           </div>
         )}
       </div>
@@ -195,7 +206,7 @@ export const AIAssistantPage = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask a question about your marathon, concert, workshop, or sports event..."
+          placeholder={t('aiAssistant.placeholder')}
           className="w-full pl-5 pr-14 py-3.5 rounded-2xl border border-charcoal/15 bg-white text-sm focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral/20 shadow-subtle"
         />
         <button
